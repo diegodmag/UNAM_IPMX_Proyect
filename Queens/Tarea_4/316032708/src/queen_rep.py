@@ -23,7 +23,8 @@ class Queen_Solution:
 		# 
 
 	def __str__(self):
-		return "Chromosome : {}".format(str(self.chromosome))+"\n"+"Fitness Value : {}".format(self.fitness)+"\n"+"Best possible fitness: "+str(self.max_conflics)+"\n"+"Board Representation :"+"\n"+str(self.set_board())
+		#return "Chromosome : {}".format(str(self.chromosome))+"\n"+"Fitness Value : {}".format(self.fitness)+"\n"+"Best possible fitness: "+str(self.max_conflics)+"\n"+"Board Representation :"+"\n"+str(self.set_board())
+		return "Chromosome : {}".format(str(self.chromosome))+"\n"+"Fitness Value : {}".format(self.fitness)+"\n"+"Board Representation :"+"\n"+str(self.set_board())
 
 	def set_board(self): 
 		'''
@@ -37,6 +38,10 @@ class Queen_Solution:
 
 		return board
 
+	def aplly_fitness_func(self, func):
+		func()
+
+
 	def evaluate(self): 
 
 		'''
@@ -45,7 +50,7 @@ class Queen_Solution:
 
 		#Conflicts 
 		conflicts=0
-
+	    #Esto es cuadratico
 		for i in range(len(self.chromosome)):
 			for j in range(len(self.chromosome)):
 				if(i!=j):
@@ -53,4 +58,23 @@ class Queen_Solution:
 						conflicts=conflicts+1
 
 		self.fitness = self.max_conflics-conflicts/2
+
+	def evaluate_min(self):
+		'''
+		El valor objetivo de una solución es la cantidad de conflictos, por lo que mientras menos conflictos mejor solución es 
+		'''
+		#Conflicts 
+		conflicts=0
+	    #Esto es cuadratico amortiguado por que cada indice despues del primero disminuye uno
+		for i in range(len(self.chromosome)):
+			for j in range(i+1,len(self.chromosome)):
+				#if(i!=j):
+				if(abs(i-j) == abs(self.chromosome[i]-self.chromosome[j])):
+					conflicts=conflicts+1
+
+		#Se divide entre dos para no considerar los conflictos entre cualesquiera dos reinas mas de una vez
+		#self.fitness = conflicts/2
+		self.fitness = conflicts
+		
+
 

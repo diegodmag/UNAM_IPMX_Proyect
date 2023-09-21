@@ -1,4 +1,3 @@
-
 import math 
 import numpy as np 
 import matplotlib.pyplot as plt
@@ -31,7 +30,7 @@ class GeneticAlg:
 		Probability of select a individual from the population in order to be mutated (.1 , .2)
 	'''
 
-	def __init__(self, n_q, pop_s, p_sel,cross_p, mut_p, t):
+	def __init__(self, n_q, pop_s, p_sel,t_s,cross_p, mut_p, t):
 
 		self.n_queens = n_q 
 		self.pop_size = pop_s
@@ -39,12 +38,18 @@ class GeneticAlg:
 		#self.offspring = np.array([])
 		self.max_time = t  
 		self.sel_proportion = p_sel
+
+		self.tournament_size = t_s 
+
 		self.cross_prob = cross_p
 		self.mut_prob = mut_p
-		self.optimal = (n_q*(n_q-1))/2
+		#self.optimal = (n_q*(n_q-1))/2
+		self.optimal=0
+		#self.optimal = (n_q*(n_q-1))/2
 
 	def get_the_best(self):
-		return sorted(self.current_pop, key = lambda solution : -solution.fitness)[0]		
+		#return sorted(self.current_pop, key = lambda solution : -solution.fitness)[0]
+		return sorted(self.current_pop, key = lambda solution : solution.fitness)[0]		
 
 	def show_pop(self):
 		for ind in self.current_pop:
@@ -62,7 +67,8 @@ class GeneticAlg:
 
 
 		self.current_pop=np.array(init_pop)
-		[ind.evaluate() for ind in self.current_pop]
+		#[ind.evaluate() for ind in self.current_pop]
+		#[ind.evaluate_min() for ind in self.current_pop]
 
 
 	def selection_rl(self):
@@ -75,7 +81,8 @@ class GeneticAlg:
 		'''
 
 		#Evaluate each individual
-		[ind.evaluate() for ind in self.current_pop]
+		#[ind.evaluate() for ind in self.current_pop]
+		#[ind.evaluate_min() for ind in self.current_pop]
 		#The total sum of fitness
 		fit_sum = sum([ind.fitness for ind in self.current_pop])
 		#Generate the probabilities array
@@ -84,18 +91,56 @@ class GeneticAlg:
 		#Selection by roulette
 		return np.array(rnd.choices(self.current_pop, weights=probs, k=int(self.pop_size*self.sel_proportion)))
 
+
+
 	def selection_elitism(self):
 
 		'''
 		Selection by elitism, select the first 1-sel_proportion individuals with the best fitness value 
-
-
 		Returns: 
 		elite : list : Queen_Solution
 			The best individuals of the current population 
 		'''
-		[ind.evaluate() for ind in self.current_pop]
-		return np.array(sorted(self.current_pop, key = lambda solution : -solution.fitness)[:self.pop_size-int(self.pop_size*self.sel_proportion)])		
+		#[ind.evaluate() for ind in self.current_pop]
+		#[ind.evaluate_min() for ind in self.current_pop]
+		#return np.array(sorted(self.current_pop, key = lambda solution : -solution.fitness)[:self.pop_size-int(self.pop_size*self.sel_proportion)])
+		return np.array(sorted(self.current_pop, key = lambda solution : solution.fitness)[:self.pop_size-int(self.pop_size*self.sel_proportion)])		
+
+	def selection_tournament(self):
+		
+		#Cuantas veces vamos a realizar un torneo = k=int(self.pop_size*self.sel_proportion))
+		
+		# 1 : np.random.choice(self.current_pop,self.tournament_size,False) -> Obtenemos 3 soluciones de entre todas las que hay en la poblacion
+		# 2 : self.get_best_among(np.random.choice(self.current_pop,self.tournament_size,False)) -> De esas soluciones obtenemos la que menor fitnees tiene (la mejor)
+		# 3 : [self.get_best_among(np.random.choice(self.current_pop,self.tournament_size,False)) for i in range(int(self.pop_size*self.sel_proportion))] 
+		# 	-> Realizamos paso 1 y 3 una cantidad int(self.pop_size*self.sel_proportion) de veces  
+		# 4 : Hacemos un np.array de esa lista 
+
+		# IMPORTANTE >>> SE PUEDE DAR EL CASO QUE LA K DEL TORNEO SEA 0 o 1 y eso puede provocar porblemas
+		#[ind.evaluate_min() for ind in self.current_pop] <----- Esto no afecta 
+		
+		selection = []
+
+		for i in range(int(self.pop_size*self.sel_proportion)):
+			participants = np.random.choice(self.current_pop,self.tournament_size,False)
+			chosen =self.get_best_among(participants)
+			selection.append(chosen)
+		
+		return np.array(selection)
+		#return np.array([self.get_best_among(np.random.choice(self.current_pop,self.tournament_size,False)) for i in range(int(self.pop_size*self.sel_proportion))])
+	
+
+	def get_best_among(self,pop_sample):
+		'''
+		Obtiene la mejor solucion (con el menor fitness) dado un arreglo de soluciones 	
+		'''
+		#Obtenemos los fitness de todas las soluciones de la muestra de la poblacion y las almacenamos 
+		fitness_arr = np.array([solution.fitness for solution in pop_sample])
+		#Obtenemos el indice del fitness menor 
+		min_index = np.argmin(fitness_arr)
+		#Regresamos ese objeto 
+		return pop_sample[min_index]	
+	
 
 
 	def crossover(self, p_1, p_2):
@@ -185,9 +230,7 @@ class GeneticAlg:
 		'''
 		index_1, index_2 = rnd.sample(range(len(individual.chromosome)), 2)
 		individual.chromosome[index_1], individual.chromosome[index_2] = individual.chromosome[index_2],individual.chromosome[index_1] 
-
-
-
+		
 	def mutation_simple(self):
 		'''
 		Mutation operator, for each individual check if the probability of mutation is less than a random 
@@ -217,23 +260,52 @@ class GeneticAlg:
 		#while (tm.time() - start < self.max_time) and (self.get_the_best().fitness != self.optimal):
 		#while tm.time() < self.max_time or self.get_the_best().fitness != self.optimal:
 		#while(tm.time() < self.max_time):
-		while(self.get_the_best().fitness != self.optimal):
-			#Roullete Selection 
-			roulette_selected = self.selection_rl() 
+		#for i in range(2):
+
+		while True :
+			[ind.evaluate_min() for ind in self.current_pop]
+			if(self.get_the_best().fitness == self.optimal):
+				break
+			else:
+				tournament_selected = self.selection_tournament()
 			#Crossover  
-			roulette_offspring = self.crossover_pop(roulette_selected)
-			#Elitism Selection 
+			#roulette_offspring = self.crossover_pop(roulette_selected)
+			tournament_offspring = self.crossover_pop(tournament_selected)
+			#Elitism Selection  ---> El elitismo debe ser entre padres e hijos 
 			elite = self.selection_elitism() 
 			#Union of the Selected individuals
-			offspring = np.concatenate((roulette_offspring,elite),axis=0) 
+			#offspring = np.concatenate((roulette_offspring,elite),axis=0)
+			offspring = np.concatenate((tournament_offspring,elite),axis=0) 
 			#Generational Replacement 
 			self.current_pop = offspring
 			#Mutate
 			self.mutation_simple()
-			total_iterations = total_iterations+1 
+			total_iterations = total_iterations+1
+				
+
+		# while(self.get_the_best().fitness != self.optimal):
+		# 	#Roullete Selection 
+		# 	#roulette_selected = self.selection_rl(
+		# 	[ind.evaluate_min() for ind in self.current_pop]
+		# 	tournament_selected = self.selection_tournament()
+		# 	#Crossover  
+		# 	#roulette_offspring = self.crossover_pop(roulette_selected)
+		# 	tournament_offspring = self.crossover_pop(tournament_selected)
+		# 	#Elitism Selection  ---> El elitismo debe ser entre padres e hijos 
+		# 	elite = self.selection_elitism() 
+		# 	#Union of the Selected individuals
+		# 	#offspring = np.concatenate((roulette_offspring,elite),axis=0)
+		# 	offspring = np.concatenate((tournament_offspring,elite),axis=0) 
+		# 	#Generational Replacement 
+		# 	self.current_pop = offspring
+		# 	#Mutate
+		# 	self.mutation_simple()
+		# 	total_iterations = total_iterations+1 
 
 
 		end = tm.time()		
+		#Una ultima evaluacion de la ultima generacion 
+		[ind.evaluate_min() for ind in self.current_pop]
 		return (end-start), total_iterations
 
 	def visualize_board(self,arr):
@@ -279,6 +351,81 @@ class GeneticAlg:
 	    plt.show()
 
 
+# def plot_queens(solution):
+#     n = len(solution)
+#     chessboard = np.zeros((n, n), dtype=int)
+
+#     # Llenar el tablero con 1s en las posiciones de las reinas
+#     for row, col in enumerate(solution):
+#         chessboard[row][col] = 1
+
+#     fig, ax = plt.subplots(figsize=(8, 8))
+
+#     # Dibujar el tablero de ajedrez
+#     for i in range(n):
+#         for j in range(n):
+#             color = 'white' if (i + j) % 2 == 0 else 'black'
+#             ax.add_patch(plt.Rectangle((j, i), 1, 1, color=color))
+#             if chessboard[i][j] == 1:
+#                 queen_symbol = u'\u265B'  # Símbolo Unicode para la reina de ajedrez (♛)
+#                 ax.text(j + 0.5, i + 0.5, queen_symbol, fontsize=24, ha='center', va='center', color='red')
+
+#                 # Dibujar líneas diagonales desde la reina
+#                 ax.plot([j, j + 1], [i, i + 1], color='red', linewidth=2)
+#                 ax.plot([j, j + 1], [i + 1, i], color='red', linewidth=2)
+
+#     ax.set_xlim(0, n)
+#     ax.set_ylim(0, n)
+#     ax.set_aspect('equal')
+#     ax.invert_yaxis()
+#     ax.axis('off')
+
+#     plt.show()
+
+#Generado con GPT-3.5
+
+def draw_recursive_diagonals(ax, x, y, direction_x, direction_y, n):
+    if x < 0 or x >= n or y < 0 or y >= n:
+        return
+    ax.plot([x, x + direction_x], [y, y + direction_y], color='red', linewidth=2)
+    draw_recursive_diagonals(ax, x + direction_x, y + direction_y, direction_x, direction_y, n)
+
+def plot_queens(solution):
+    n = len(solution)
+    chessboard = np.zeros((n, n), dtype=int)
+
+    # Llenar el tablero con 1s en las posiciones de las reinas
+    for row, col in enumerate(solution):
+        chessboard[row][col] = 1
+
+    fig, ax = plt.subplots(figsize=(8, 8))
+
+    # Dibujar el tablero de ajedrez
+    for i in range(n):
+        for j in range(n):
+            is_white = (i + j) % 2 == 0
+            color = 'white' if is_white else 'black'
+            ax.add_patch(plt.Rectangle((j, i), 1, 1, color=color))
+            queen_color = 'black' if is_white else 'white'  # Color opuesto al fondo
+            if chessboard[i][j] == 1:
+                queen_symbol = u'\u265B'  # Símbolo Unicode para la reina de ajedrez (♛)
+                ax.text(j + 0.5, i + 0.5, queen_symbol, fontsize=24, ha='center', va='center', color=queen_color)
+
+                # Dibujar líneas diagonales desde la reina hacia las esquinas
+                draw_recursive_diagonals(ax, j, i, 1, 1, n)
+                draw_recursive_diagonals(ax, j, i, -1, -1, n)
+                draw_recursive_diagonals(ax, j, i, 1, -1, n)
+                draw_recursive_diagonals(ax, j, i, -1, 1, n)
+
+    ax.set_xlim(0, n)
+    ax.set_ylim(0, n)
+    ax.set_aspect('equal')
+    ax.invert_yaxis()
+    ax.axis('off')
+
+    plt.show()
+
+
 def boxplot(sample_1):
 		fig, ax = plt.subplots()
 		bp = ax.boxplot([sample_1], showfliers=False)
@@ -312,10 +459,10 @@ def rep_iter(total_rep, genetic_al):
 	avg_fitness = sum(data)/len(data)
 	#print("AVG Tiempo : " + str(avg_time))
 	print("AVG Geeneraciones: "+str(avg_genes))
-	print(data)
+	#print(data)
 	print("AVG Fitness: "+str(avg_fitness))
 	print("Best possible fitness: "+str(genetic_al.get_the_best().max_conflics))
-
+		
 	#boxplot(data)
 
 if __name__ == '__main__':
@@ -324,12 +471,24 @@ if __name__ == '__main__':
 
 	number_q,popultation_size,prob_cross,prob_mut,time = int(sys.argv[1]),int(sys.argv[2]),float(sys.argv[3]),float(sys.argv[4]),int(sys.argv[5])
 
-	ga = GeneticAlg(number_q,popultation_size,.8,prob_cross,prob_mut,time)
+	#El 3 es el tamanio del torneo 
+	ga = GeneticAlg(number_q,popultation_size,.8,3,prob_cross,prob_mut,time)
 	
 	#rep_iter(10,ga)
 	ga.execution()
-	print(ga.get_the_best())	
-	ga.visualize_board(ga.get_the_best().chromosome)
+	print(ga.get_the_best())
+	plot_queens(ga.get_the_best().chromosome)
+	
+	# print("---------------")
+
+	# listaSols = sorted(ga.current_pop, key = lambda solution : solution.fitness)
+	# for sol in listaSols: 
+	# 	print(sol)
+
+
+	#print(ga.get_best_among(ga.current_pop))
+	#print(ga.get_the_best())			
+	#ga.visualize_board(ga.get_the_best().chromosome)
 	
 
 	
