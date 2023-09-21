@@ -203,6 +203,69 @@ class GeneticAlg:
 		else:
 			return copy.deepcopy(p_1), copy.deepcopy(p_2)
 
+	def crossover_pmx(self, p_1, p_2):
+		
+		#Generar los puntos de corte 
+		all_cut_points = np.arange(self.n_queens)
+		cut_points = sorted(np.random.choice(all_cut_points,2,replace=False))
+		#Este se puede dar el caso de solo se intercambien dos elementos 
+		cp_1 , cp_2= cut_points[0],cut_points[1]
+
+		#Obtener las cadenas de las cadenas primitivas 
+
+		
+		#Generar la relacion de mapeo de las cadenas
+		p_1.chromosome[cp_1:cp_2]
+		p_2.chromosome[cp_1:cp_2]
+		#Necesitamos almacenar las parejas
+		mapping_relation =[]
+		for i in range(len(p_2.chromosome[cp_1:cp_2])):	
+			mapping_relation.append([p_1.chromosome[cp_1:cp_2][i],p_2.chromosome[cp_1:cp_2][i]])
+
+		primitive_offspring_1_chromosome = p_1.chromosome.copy()
+		primitive_offspring_2_chromosome = p_2.chromosome.copy()
+		
+
+		primitive_offspring_1_chromosome[cp_1:cp_2] = p_2.chromosome[cp_1:cp_2]
+		primitive_offspring_2_chromosome[cp_1:cp_2] = p_1.chromosome[cp_1:cp_2]
+
+		#Ahora hay que arreglar los chromosomas 
+
+		values_1, count_1 = np.unique(primitive_offspring_1_chromosome,return_counts=True)
+		values_2, count_2 = np.unique(primitive_offspring_2_chromosome,return_counts=True)
+
+		#ocurrences_1 = np.bincount(primitive_offspring_1_chromosome[cp_1:cp_2])
+		#ocurrences_2 = np.bincount(primitive_offspring_2_chromosome[cp_1:cp_2])
+
+
+		#Debug 
+		print("Crhomosomas de los padres")
+		print("Padre 1 : ")
+		print(str(p_1.chromosome))
+		print("Padre 2 :")
+		print(str(p_2.chromosome))
+		print("Puntos de corte  P1 :"+str(cp_1)+" P2 :"+str(cp_2))
+		print("Subcadenas consideradas : ")
+		print("Subchain 1 : ")
+		print(str(p_1.chromosome[cp_1:cp_2]))
+		print("Subchain 2 : ")
+		print(str(p_2.chromosome[cp_1:cp_2]))
+		print("Relacion de intercambio : "+str(mapping_relation))
+		print("Chromosomas primitivos")
+		print("Primitivo 1")
+		print(str(primitive_offspring_1_chromosome))
+		print(values_1)
+		print(count_1)
+		print("Primitivo 2")
+		print(str(primitive_offspring_2_chromosome))
+		
+		
+		#Generar las cadenas primitivas 
+		
+		#Arreglar las cadenas primitivas 
+		
+		pass 
+
 	def crossover_pop(self,population):
 		'''
 
@@ -467,7 +530,12 @@ def rep_iter(total_rep, genetic_al):
 
 if __name__ == '__main__':
 
-	
+	# Parametrizar la k del torneo, default 3 
+	# Parametrizar el operador de cruza (cuando haya mas de uno ) y la probabilidad 
+	# Parametrizar probabilidad de mutacion 
+	# Parametrizar operador de reemplazo RemplazoGeneracional / Elitista mejores entre (hijos+padres)
+
+	# Condicion de termino : Alcanza optimo o maximo de generaciones 
 
 	number_q,popultation_size,prob_cross,prob_mut,time = int(sys.argv[1]),int(sys.argv[2]),float(sys.argv[3]),float(sys.argv[4]),int(sys.argv[5])
 
@@ -476,12 +544,18 @@ if __name__ == '__main__':
 	
 	#rep_iter(10,ga)
 	ga.execution()
-	print(ga.get_the_best())
-	plot_queens(ga.get_the_best().chromosome)
+	#print(ga.get_the_best())
+	#plot_queens(ga.get_the_best().chromosome)
+	
 	
 	# print("---------------")
 
-	# listaSols = sorted(ga.current_pop, key = lambda solution : solution.fitness)
+	listaSols = sorted(ga.current_pop, key = lambda solution : solution.fitness)
+	child1 = listaSols[0]
+	child2 = listaSols[-1]
+	ga.crossover_pmx(child1, child2)
+	
+	
 	# for sol in listaSols: 
 	# 	print(sol)
 
