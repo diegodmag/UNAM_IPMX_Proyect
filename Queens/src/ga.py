@@ -218,9 +218,15 @@ class GeneticAlg:
 		p_1.chromosome[cp_1:cp_2]
 		p_2.chromosome[cp_1:cp_2]
 		#Necesitamos almacenar las parejas
-		mapping_relation =[]
-		for i in range(len(p_2.chromosome[cp_1:cp_2])):	
-			mapping_relation.append([p_1.chromosome[cp_1:cp_2][i],p_2.chromosome[cp_1:cp_2][i]])
+		# mapping_relation =[]
+		# for i in range(len(p_2.chromosome[cp_1:cp_2])):	
+		# 	mapping_relation.append([p_1.chromosome[cp_1:cp_2][i],p_2.chromosome[cp_1:cp_2][i]])
+
+		#Segunda opcion de mapeo 
+		mapping_relation ={}
+		for i in range(len(p_2.chromosome[cp_1:cp_2])):
+			mapping_relation[p_1.chromosome[cp_1:cp_2][i]] = p_2.chromosome[cp_1:cp_2][i] 
+			mapping_relation[p_2.chromosome[cp_1:cp_2][i]] = p_1.chromosome[cp_1:cp_2][i] 	
 
 		primitive_offspring_1_chromosome = p_1.chromosome.copy()
 		primitive_offspring_2_chromosome = p_2.chromosome.copy()
@@ -236,7 +242,26 @@ class GeneticAlg:
 
 		#ocurrences_1 = np.bincount(primitive_offspring_1_chromosome[cp_1:cp_2])
 		#ocurrences_2 = np.bincount(primitive_offspring_2_chromosome[cp_1:cp_2])
+		
+		#Para contar las ocurrencias //De hecho esto podria ser igual con un arreglo 
+		# dic_ocur_1 = {}
+		# dic_ocur_2 = {}
 
+		# # #Lineal 
+		# for i in range(self.n_queens):
+		# 	dic_ocur_1[i] = 0
+		# 	dic_ocur_2[i] = 0
+		# # #Revisamos las ocurrencias de cada elemento
+		# for i in range(self.n_queens):
+		# 	dic_ocur_1[primitive_offspring_1_chromosome[i]] +=1 
+		# 	dic_ocur_2[primitive_offspring_2_chromosome[i]] +=1 
+
+		ocurences_1 = np.array([0 for i in range(self.n_queens)])
+		ocurences_2 = np.array([0 for i in range(self.n_queens)])
+
+		for i in range(self.n_queens):
+			ocurences_1[primitive_offspring_1_chromosome[i]] +=1
+			ocurences_2[primitive_offspring_2_chromosome[i]] +=1 						
 
 		#Debug 
 		print("Crhomosomas de los padres")
@@ -254,12 +279,72 @@ class GeneticAlg:
 		print("Chromosomas primitivos")
 		print("Primitivo 1")
 		print(str(primitive_offspring_1_chromosome))
-		print(values_1)
-		print(count_1)
+		print(ocurences_1)
+		#print(values_1)
+		#print(count_1)
 		print("Primitivo 2")
 		print(str(primitive_offspring_2_chromosome))
+		print(ocurences_2)
 		
-		
+		keys = mapping_relation.keys()
+
+		for i in range(self.n_queens):
+			if(primitive_offspring_1_chromosome[i] in mapping_relation):
+				if(ocurences_1[primitive_offspring_1_chromosome[i]] == 2):
+					print("Caso en el que va a cambiar a un elemento repetido por primera vez")
+					primitive_offspring_1_chromosome[i] = mapping_relation[primitive_offspring_1_chromosome[i]]
+					ocurences_1[primitive_offspring_1_chromosome[i]]=-1
+				elif(ocurences_1[primitive_offspring_1_chromosome[i]]==-1):
+					print("Caso en el que no cambia un elemento que ya fue cambiado")
+					continue
+				else:
+					primitive_offspring_1_chromosome[i] = mapping_relation[primitive_offspring_1_chromosome[i]]
+				
+	
+
+		# for i in range(self.n_queens):
+		# 	pass
+		# 	#ocurences_1[primitive_offspring_1_chromosome[i]] +=1
+		# 	if(ocurences_1[primitive_offspring_1_chromosome[i]] == 2): #Entonces el elemento aparece mas de una vez
+		# 		print(primitive_offspring_1_chromosome[i])
+		# 		ocurences_1[primitive_offspring_1_chromosome[i]]=1
+		# 		primitive_offspring_1_chromosome[i] = mapping_relation[primitive_offspring_1_chromosome[i]]
+				#Ahora sustituimos ese elemento usando la relacion de mapeo
+				# print("Elemento :"+ str(primitive_offspring_1_chromosome[i]))
+				# print("Ocurrencias antes de restar:"+str(ocurences_1[primitive_offspring_1_chromosome[i]]))
+
+				#primitive_offspring_1_chromosome[i] = mapping_relation[primitive_offspring_1_chromosome[i]]
+				#ocurences_1[primitive_offspring_1_chromosome[i]] =ocurences_1[primitive_offspring_1_chromosome[i]]-1
+				# ocurences_1[primitive_offspring_1_chromosome[i]]  =1
+				# print("Ocurrencias despues de restar:"+str(ocurences_1[primitive_offspring_1_chromosome[i]]))
+			# print("Se tiene que cambiar "+ str(primitive_offspring_1_chromosome[i])+" ?")
+			# print("Ocurrencias :"+str(dic_ocur_1[primitive_offspring_1_chromosome[i]]))
+			# print(dic_ocur_1[primitive_offspring_1_chromosome[i]]==2)
+
+
+			# if dic_ocur_1[primitive_offspring_1_chromosome[i]] == 2: #Esto quiere decir que el elemento está duplicado 
+			# 	#Ahora sustituimos ese elemento usando la relacion de mapeo 
+			# 	primitive_offspring_1_chromosome[i] = mapping_relation[primitive_offspring_1_chromosome[i]]
+			# 	print("Antes de restar :"+str(dic_ocur_1[primitive_offspring_1_chromosome[i]]))
+			# 	dic_ocur_1[primitive_offspring_1_chromosome[i]] -=1
+			# 	print("Despues de restar :"+str(dic_ocur_1[primitive_offspring_1_chromosome[i]])) 
+			
+			# if dic_ocur_2[primitive_offspring_2_chromosome[i]] == 2: #Esto quiere decir que el elemento está duplicado 
+			# 	#Ahora sustituimos ese elemento usando la relacion de mapeo 
+			# 	primitive_offspring_2_chromosome[i] = mapping_relation[primitive_offspring_2_chromosome[i]]
+			# 	dic_ocur_2[primitive_offspring_2_chromosome[i]] = dic_ocur_2[primitive_offspring_2_chromosome[i]]-1 
+
+		print("Cadenas arregladas ")
+		print("Final 1")
+		print(str(primitive_offspring_1_chromosome))
+		#print("Final 2")
+		#print(str(primitive_offspring_2_chromosome))
+
+
+
+
+
+
 		#Generar las cadenas primitivas 
 		
 		#Arreglar las cadenas primitivas 
