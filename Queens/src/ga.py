@@ -348,7 +348,118 @@ class GeneticAlg:
 		
 		#Arreglar las cadenas primitivas 
 		
-		 
+	def crossover_ipmx(self, p_1, p_2):
+		'''
+		Implementacion del Improved Partially Mapped Crossover 
+
+		'''
+
+		#Generar los puntos de corte 
+		all_cut_points = np.arange(self.n_queens)
+		cut_points = sorted(np.random.choice(all_cut_points,2,replace=False))
+		#Este se puede dar el caso de solo se intercambien dos elementos 
+		cp_1 , cp_2= cut_points[0],cut_points[1]
+
+		#Generamos dos copias de los cromosomas de los padres 
+		primitive_offspring_1_chromosome = p_1.chromosome.copy()
+		primitive_offspring_2_chromosome = p_2.chromosome.copy()
+		
+		#Intercambiamos información de los padres con la generacion primitiva usando los puntos de corte 
+		primitive_offspring_1_chromosome[cp_1:cp_2] = p_2.chromosome[cp_1:cp_2]
+		primitive_offspring_2_chromosome[cp_1:cp_2] = p_1.chromosome[cp_1:cp_2]
+
+		#Se genera la lista de intercambio ExchangeList -- Equivalente a la mapping relationship del PMX 
+		
+		#DEBUG 
+		print("Crhomosomas de los padres")
+		print("Padre 1 : ")
+		print(str(p_1.chromosome))
+		print("Padre 2 :")
+		print(str(p_2.chromosome))
+		print("Puntos de corte  P1 :"+str(cp_1)+" P2 :"+str(cp_2))
+		print("Subcadenas consideradas : ")
+		print("Subchain 1 : ")
+		print(str(p_1.chromosome[cp_1:cp_2]))
+		print("Subchain 2 : ")
+		print(str(p_2.chromosome[cp_1:cp_2]))	
+
+
+
+		mapping_relation = []
+		for i in range(len(p_2.chromosome[cp_1:cp_2])):
+			mapping_relation.append([p_1.chromosome[cp_1:cp_2][i],p_2.chromosome[cp_1:cp_2][i],1])
+			
+		exchange_list = np.array(mapping_relation)
+		print("Tabla de intercambio")
+		print(exchange_list )
+		#Guide List 
+		guide_list = [0 for i in range(self.n_queens)]
+		
+		# Para llenar la guide list tenemos que considerar como indices los numeros de la primer columna de la exchange_list 
+		# Para llenar los valores de la guide list tenemos 
+
+		#Aqui hay un prolema, la implementacion del paper se basa en que el 0 no esta en la permutacion 
+		#Por lo que consideramos -1 como el 0 
+		for tuple in exchange_list:
+			guide_list[tuple[0]] = tuple[1] 
+		print("Lista de Guia")
+		print(guide_list)
+
+
+		#Generamos las listas L1 y L2 
+		l1 = [0 for i in range(self.n_queens)]
+		l2 = [0 for i in range(self.n_queens)]
+
+		#Ahora vamos a llenar l1 considerando la primer columna de la exchange list y a l2 con las segunda columna
+		for e in exchange_list[:,0]: 
+			l1[e] =1 
+
+		for e in exchange_list[:,1]: 
+			l2[e] =1 
+
+		print("Listas auxiliares")
+		print("L1 :" + str(l1))
+		print("L2 :" + str(l2))
+
+
+
+
+		#Generamos la suma de ambas listas 
+		l1_plus_l2 = [x+y for x,y in zip(l1,l2)]
+
+		print("Suma de las listas")
+		print("L12:" + str(l1_plus_l2))
+
+		#Cada entrada de l1_plus_l2 que sea igual a 2  indica que es un nodo intermedio, en ese caso actualizamos la lista de intercambio
+		#Actualizamos la lista de intercambio
+		for tuple in exchange_list:
+			if l1_plus_l2[tuple[0]] == 2:
+				tuple[2] = 0  
+		print("Tabla de intercambio actualizada")
+		print(exchange_list)
+
+		#Y luego actualizamos la lista guia en base a la nueva lista de intercambio 
+		#Updated Guide List 
+		for tuple in exchange_list:
+			if(tuple[2] == 0):
+				guide_list[tuple[0]] = 0  
+		
+		print("Lista de Guia Actualizada")
+		print(guide_list)
+
+
+		#Debug 
+		
+		
+		#Columna 1 = exchange_list[:0]
+		#Columna 2 = exchange_list[:1]
+		#Columna 3 = exchange_list[:2] #Esta es la que nos dara innformacion sobre si existen o no un camino directo  
+			
+			
+		
+		
+		
+		pass	 
 
 	def crossover_pop(self,population):
 		'''
@@ -566,8 +677,8 @@ if __name__ == '__main__':
 	listaSols = sorted(ga.current_pop, key = lambda solution : solution.fitness)
 	child1 = listaSols[0]
 	child2 = listaSols[-1]
-	ga.crossover_pmx(child1, child2)
-	
+	#ga.crossover_pmx(child1, child2)
+	ga.crossover_ipmx(child1, child2)
 	
 	# for sol in listaSols: 
 	# 	print(sol)
