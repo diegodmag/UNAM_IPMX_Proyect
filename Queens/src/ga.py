@@ -49,6 +49,10 @@ class GeneticAlg:
 
 	def get_the_best(self):
 		#return sorted(self.current_pop, key = lambda solution : -solution.fitness)[0]
+		'''
+		Obtiene el mejor individuo de la población (el de menor fitness)
+		La función sorted los ordena de menor a mayor, por lo que el elemento en la posición 0 es el de menor fitness
+		'''
 		return sorted(self.current_pop, key = lambda solution : solution.fitness)[0]		
 
 	def show_pop(self):
@@ -132,7 +136,7 @@ class GeneticAlg:
 
 	def get_best_among(self,pop_sample):
 		'''
-		Obtiene la mejor solucion (con el menor fitness) dado un arreglo de soluciones 	
+		Obtiene la mejor solucion (minimizaciónSS) dado un arreglo de soluciones 	
 		'''
 		#Obtenemos los fitness de todas las soluciones de la muestra de la poblacion y las almacenamos 
 		fitness_arr = np.array([solution.fitness for solution in pop_sample])
@@ -204,66 +208,61 @@ class GeneticAlg:
 			return copy.deepcopy(p_1), copy.deepcopy(p_2)
 
 	def crossover_pmx(self, p_1, p_2):
-		
+		'''
+
+		'''
 		#Generar los puntos de corte 
 		all_cut_points = np.arange(self.n_queens)
 		cut_points = sorted(np.random.choice(all_cut_points,2,replace=False))
 		#Este se puede dar el caso de solo se intercambien dos elementos 
 		cp_1 , cp_2= cut_points[0],cut_points[1]
 
-		#Obtener las cadenas de las cadenas primitivas 
+
 
 		
 		#Generar la relacion de mapeo de las cadenas
 		p_1.chromosome[cp_1:cp_2]
 		p_2.chromosome[cp_1:cp_2]
-		#Necesitamos almacenar las parejas
-		# mapping_relation =[]
-		# for i in range(len(p_2.chromosome[cp_1:cp_2])):	
-		# 	mapping_relation.append([p_1.chromosome[cp_1:cp_2][i],p_2.chromosome[cp_1:cp_2][i]])
-
-		#Segunda opcion de mapeo 
+		#Necesitamos almacenar los intercambios realizados en una relacion de mapeo 
+		#Para esta primera versión elegimos un diccionario por que el acceso a los elementos es O(1)
+		
 		mapping_relation ={}
 		for i in range(len(p_2.chromosome[cp_1:cp_2])):
 			mapping_relation[p_1.chromosome[cp_1:cp_2][i]] = p_2.chromosome[cp_1:cp_2][i] 
 			mapping_relation[p_2.chromosome[cp_1:cp_2][i]] = p_1.chromosome[cp_1:cp_2][i] 	
 
+		#Generamos dos copias de los cromosomas de los padres 
 		primitive_offspring_1_chromosome = p_1.chromosome.copy()
 		primitive_offspring_2_chromosome = p_2.chromosome.copy()
 		
-
+		#Intercambiamos información de los padres con la generacion primitiva usando los puntos de corte 
 		primitive_offspring_1_chromosome[cp_1:cp_2] = p_2.chromosome[cp_1:cp_2]
 		primitive_offspring_2_chromosome[cp_1:cp_2] = p_1.chromosome[cp_1:cp_2]
 
 		#Ahora hay que arreglar los chromosomas 
 
-		values_1, count_1 = np.unique(primitive_offspring_1_chromosome,return_counts=True)
-		values_2, count_2 = np.unique(primitive_offspring_2_chromosome,return_counts=True)
+		#ESTA IMPLEMENTACION FUE PUESTA EN PAUSA,
+		#values_1, count_1 = np.unique(primitive_offspring_1_chromosome,return_counts=True)
+		#values_2, count_2 = np.unique(primitive_offspring_2_chromosome,return_counts=True)
 
-		#ocurrences_1 = np.bincount(primitive_offspring_1_chromosome[cp_1:cp_2])
-		#ocurrences_2 = np.bincount(primitive_offspring_2_chromosome[cp_1:cp_2])
-		
-		#Para contar las ocurrencias //De hecho esto podria ser igual con un arreglo 
-		# dic_ocur_1 = {}
-		# dic_ocur_2 = {}
+		#Obtenemos las ocurrencias de cada numero en los cromosomas primitivos :
 
-		# # #Lineal 
-		# for i in range(self.n_queens):
-		# 	dic_ocur_1[i] = 0
-		# 	dic_ocur_2[i] = 0
-		# # #Revisamos las ocurrencias de cada elemento
-		# for i in range(self.n_queens):
-		# 	dic_ocur_1[primitive_offspring_1_chromosome[i]] +=1 
-		# 	dic_ocur_2[primitive_offspring_2_chromosome[i]] +=1 
-
+	
 		ocurences_1 = np.array([0 for i in range(self.n_queens)])
 		ocurences_2 = np.array([0 for i in range(self.n_queens)])
 
+		#A cada numero en la permutacion le corresponde un índice en el arreglo de ocurrencias
+		#Cada vez que ocurra el numero "x" el índice x del arreglo de ocurrencias incrementa en 1 
+		#Si un numero aparace 2 veces entonces el ocurrences[x] =2 
 		for i in range(self.n_queens):
 			ocurences_1[primitive_offspring_1_chromosome[i]] +=1
 			ocurences_2[primitive_offspring_2_chromosome[i]] +=1 						
 
-		#Debug 
+		
+		#Sustituir los numeros con ocurrencia 2 usando la relacion de mapeo 
+		# >>>> En proceso
+		keys = mapping_relation.keys()
+
 		print("Crhomosomas de los padres")
 		print("Padre 1 : ")
 		print(str(p_1.chromosome))
@@ -280,13 +279,7 @@ class GeneticAlg:
 		print("Primitivo 1")
 		print(str(primitive_offspring_1_chromosome))
 		print(ocurences_1)
-		#print(values_1)
-		#print(count_1)
-		print("Primitivo 2")
-		print(str(primitive_offspring_2_chromosome))
-		print(ocurences_2)
-		
-		keys = mapping_relation.keys()
+
 
 		for i in range(self.n_queens):
 			if(primitive_offspring_1_chromosome[i] in mapping_relation):
@@ -334,6 +327,15 @@ class GeneticAlg:
 			# 	primitive_offspring_2_chromosome[i] = mapping_relation[primitive_offspring_2_chromosome[i]]
 			# 	dic_ocur_2[primitive_offspring_2_chromosome[i]] = dic_ocur_2[primitive_offspring_2_chromosome[i]]-1 
 
+		#Debug 
+		
+		#print(values_1)
+		#print(count_1)
+		# print("Primitivo 2")
+		# print(str(primitive_offspring_2_chromosome))
+		# print(ocurences_2)
+
+
 		print("Cadenas arregladas ")
 		print("Final 1")
 		print(str(primitive_offspring_1_chromosome))
@@ -342,14 +344,11 @@ class GeneticAlg:
 
 
 
-
-
-
 		#Generar las cadenas primitivas 
 		
 		#Arreglar las cadenas primitivas 
 		
-		pass 
+		 
 
 	def crossover_pop(self,population):
 		'''
@@ -431,6 +430,8 @@ class GeneticAlg:
 			total_iterations = total_iterations+1
 				
 
+		
+
 		# while(self.get_the_best().fitness != self.optimal):
 		# 	#Roullete Selection 
 		# 	#roulette_selected = self.selection_rl(
@@ -456,79 +457,6 @@ class GeneticAlg:
 		[ind.evaluate_min() for ind in self.current_pop]
 		return (end-start), total_iterations
 
-	def visualize_board(self,arr):
-  		# Tamaño del tablero
-	    n = len(arr)
-
-	    # Genera una matriz de ceros de tamaño n x n para representar el tablero
-	    tablero = np.zeros((n, n))
-
-	    # Marca las posiciones de las reinas en el tablero
-	    for i in range(n):
-	        fila = arr[i] - 1  # resta 1 ya que las filas se cuentan desde 1, pero los índices de la lista comienzan desde 0
-	        tablero[fila][i] = 1
-
-	    # Crea una figura y un eje
-	    fig, ax = plt.subplots(figsize=(8, 8))
-
-	    # Define el mapa de colores para el tablero
-	    cmap = plt.get_cmap('binary')
-	    cmap.set_bad(color='brown')
-	    cmap.set_over(color='yellow')
-	    cmap.set_under(color='gray')
-
-	    # Dibuja el tablero de ajedrez
-	    ax.imshow(tablero, cmap=cmap, extent=[-0.5, n-0.5, -0.5, n-0.5])
-
-	    # Dibuja las reinas
-	    for i in range(n):
-	        fila = arr[i] - 1
-	        ax.text(i, fila, '♛', ha='center', va='center', fontsize=30, color='black')
-
-	    # Configura los ejes
-	    ax.set_xticks(np.arange(n))
-	    ax.set_yticks(np.arange(n))
-	    ax.set_xticklabels(np.arange(1, n+1))
-	    ax.set_yticklabels(np.arange(1, n+1)[::-1])
-	    ax.tick_params(length=0)
-	    ax.grid(True)
-	    ax.set_aspect('equal')
-	    ax.set_title('Tablero de Ajedrez con '+str(self.n_queens)+' Reinas', fontsize=20, fontweight='bold')
-
-	    # Muestra la figura
-	    plt.show()
-
-
-# def plot_queens(solution):
-#     n = len(solution)
-#     chessboard = np.zeros((n, n), dtype=int)
-
-#     # Llenar el tablero con 1s en las posiciones de las reinas
-#     for row, col in enumerate(solution):
-#         chessboard[row][col] = 1
-
-#     fig, ax = plt.subplots(figsize=(8, 8))
-
-#     # Dibujar el tablero de ajedrez
-#     for i in range(n):
-#         for j in range(n):
-#             color = 'white' if (i + j) % 2 == 0 else 'black'
-#             ax.add_patch(plt.Rectangle((j, i), 1, 1, color=color))
-#             if chessboard[i][j] == 1:
-#                 queen_symbol = u'\u265B'  # Símbolo Unicode para la reina de ajedrez (♛)
-#                 ax.text(j + 0.5, i + 0.5, queen_symbol, fontsize=24, ha='center', va='center', color='red')
-
-#                 # Dibujar líneas diagonales desde la reina
-#                 ax.plot([j, j + 1], [i, i + 1], color='red', linewidth=2)
-#                 ax.plot([j, j + 1], [i + 1, i], color='red', linewidth=2)
-
-#     ax.set_xlim(0, n)
-#     ax.set_ylim(0, n)
-#     ax.set_aspect('equal')
-#     ax.invert_yaxis()
-#     ax.axis('off')
-
-#     plt.show()
 
 #Generado con GPT-3.5
 
