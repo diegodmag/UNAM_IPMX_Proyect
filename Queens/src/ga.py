@@ -91,14 +91,17 @@ class GeneticAlg:
 		fit_sum = sum([ind.fitness for ind in self.current_pop])
 		#Generate the probabilities array
 		probs = [ind.fitness/fit_sum for ind in self.current_pop]
+		probs = np.array(probs)
+
 
 		#Selection by roulette
-		return np.array(rnd.choices(self.current_pop, weights=probs, k=int(self.pop_size*self.sel_proportion)))
-
+		#Vamos a seleccionar tantos como poblacion haya 
+		#return np.array(rnd.choices(self.current_pop, weights=probs, k=int(self.pop_size*self.sel_proportion)))
+		return np.random.choice(self.current_pop, self.pop_size, p=probs)
 
 
 	def selection_elitism(self):
-
+		#ESTE NO ESTA FUNCIONAL, LA SELECCION NO DEBE CONSIDERAR AL self.sel_proportion
 		'''
 		Selection by elitism, select the first 1-sel_proportion individuals with the best fitness value 
 		Returns: 
@@ -125,8 +128,9 @@ class GeneticAlg:
 		
 		selection = []
 
-		for i in range(int(self.pop_size*self.sel_proportion)):
-			participants = np.random.choice(self.current_pop,self.tournament_size,False)
+		for i in range(self.pop_size):
+			#Esto es sin reemplazo ->participants = np.random.choice(self.current_pop,self.tournament_size,False)
+			participants = np.random.choice(self.current_pop,self.tournament_size)
 			chosen =self.get_best_among(participants)
 			selection.append(chosen)
 		
@@ -145,7 +149,6 @@ class GeneticAlg:
 		#Regresamos ese objeto 
 		return pop_sample[min_index]	
 	
-
 
 	def crossover(self, p_1, p_2):
 		'''
@@ -475,7 +478,18 @@ class GeneticAlg:
 
 		return np.array(offspring)
 
+	def crossover_pop_2(self,popultation):
+		'''
+		Esta tecnica de offpring permite que un individuo se cruce con sigo mismo
+		'''
+		offspring = []
+		for i in range(int(self.pop_size/2)): 
+			parents = np.random.choice(self.current_pop, 2)
+			s_1, s_2 = parents[0],parents[1] 
+			offspring.append(s_1)
+			offspring.append(s_2)
 
+		return np.array(offspring)
 
 	def mutate_individual(self,individual):
 		'''
@@ -499,6 +513,19 @@ class GeneticAlg:
 		for ind in self.current_pop:
 			if(rnd.random() < self.mut_prob):
 				self.mutate_individual(ind)
+
+	def generational_replacement_elitism_mu_plus_lambda(self, offspring):
+		'''
+		offspring : needs to be a np.array 
+		'''
+
+		generarion_pool = np.hstack((self.current_pop,offspring)) 
+		
+		#Ordenamos el conjunto de la anterior poblacion y la nueva generacion y tomamos a los mejores individuos. 
+		return sorted(generarion_pool, key = lambda solution : solution.fitness)[:self.pop_size] 
+
+
+		
 
 	def execution(self):
 		'''
@@ -525,15 +552,17 @@ class GeneticAlg:
 			if(self.get_the_best().fitness == self.optimal):
 				break
 			else:
+				#SELECTION
 				tournament_selected = self.selection_tournament()
 			#Crossover  
 			#roulette_offspring = self.crossover_pop(roulette_selected)
-			tournament_offspring = self.crossover_pop(tournament_selected)
+			tournament_offspring = self.crossover_pop_2(tournament_selected)
 			#Elitism Selection  ---> El elitismo debe ser entre padres e hijos 
-			elite = self.selection_elitism() 
+			#elite = self.selection_elitism() 
 			#Union of the Selected individuals
 			#offspring = np.concatenate((roulette_offspring,elite),axis=0)
-			offspring = np.concatenate((tournament_offspring,elite),axis=0) 
+			#offspring = np.concatenate((tournament_offspring,elite),axis=0) 
+			offspring = self.generational_replacement_elitism_mu_plus_lambda(tournament_offspring)
 			#Generational Replacement 
 			self.current_pop = offspring
 			#Mutate
@@ -578,11 +607,11 @@ def draw_recursive_diagonals(ax, x, y, direction_x, direction_y, n):
     draw_recursive_diagonals(ax, x + direction_x, y + direction_y, direction_x, direction_y, n)
 
 def plot_queens(solution):
-    n = len(solution)
+    n = len(solution.chromosome)
     chessboard = np.zeros((n, n), dtype=int)
 
     # Llenar el tablero con 1s en las posiciones de las reinas
-    for row, col in enumerate(solution):
+    for row, col in enumerate(solution.chromosome):
         chessboard[row][col] = 1
 
     fig, ax = plt.subplots(figsize=(8, 8))
@@ -610,6 +639,7 @@ def plot_queens(solution):
     ax.invert_yaxis()
     ax.axis('off')
 
+	
     plt.show()
 
 
@@ -654,6 +684,8 @@ def rep_iter(total_rep, genetic_al):
 
 if __name__ == '__main__':
 
+	#Tarea 1 : Dejarlo como el algoritmo genetico generico LISTO 
+
 	# Parametrizar la k del torneo, default 3 
 	# Parametrizar el operador de cruza (cuando haya mas de uno ) y la probabilidad 
 	# Parametrizar probabilidad de mutacion 
@@ -667,8 +699,10 @@ if __name__ == '__main__':
 	ga = GeneticAlg(number_q,popultation_size,.8,3,prob_cross,prob_mut,time)
 	
 	#rep_iter(10,ga)
-	ga.execution()
-	#print(ga.get_the_best())
+	time, iters = ga.execution()
+	print("Tiempo de ejecucion "+str(time))
+	print("Iteraciones usadas "+ str(iters))
+	print(ga.get_the_best())
 	#plot_queens(ga.get_the_best().chromosome)
 	
 	
@@ -678,14 +712,14 @@ if __name__ == '__main__':
 	child1 = listaSols[0]
 	child2 = listaSols[-1]
 	#ga.crossover_pmx(child1, child2)
-	ga.crossover_ipmx(child1, child2)
+	#ga.crossover_ipmx(child1, child2)
 	
 	# for sol in listaSols: 
 	# 	print(sol)
 
-
+	#aplot_queens(ga.get_the_best())
 	#print(ga.get_best_among(ga.current_pop))
-	#print(ga.get_the_best())			
+	#print(ga.get_the_best().)			
 	#ga.visualize_board(ga.get_the_best().chromosome)
 	
 
