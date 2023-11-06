@@ -218,9 +218,9 @@ class GeneticAlg:
 		map_rel_L = {}
 		
 		for i in range(len(subs_str_1)):
-			if subs_str_1[i] != subs_str_2[i]: #Esta condicion es para evitar datos tipo x:x
-				map_rel_R[subs_str_1[i]]= subs_str_2[i]
-				map_rel_L[subs_str_2[i]]= subs_str_1[i]
+			#if subs_str_1[i] != subs_str_2[i]: #Esta condicion es para evitar datos tipo x:x, ACTUALIZACION : SE TIENE QUE QUITAR 
+			map_rel_R[subs_str_1[i]]= subs_str_2[i]
+			map_rel_L[subs_str_2[i]]= subs_str_1[i]
 
 		return map_rel_R, map_rel_L
 
@@ -263,164 +263,149 @@ class GeneticAlg:
 				print("El elemento no esta en la relacion de mapeo")
 
 
-	def find_replacement(self,elemnt,mapp_rel, tabu):
-		#La lista tabu es una lista de 0/1 del tamanio de n 
-		# Si 
-		if tabu[mapp_rel[elemnt]] == 1 :
-			print("Este es el reemplazo "+str(elemnt))
-			return elemnt
-		else:
-			tabu[mapp_rel[elemnt]] = 1
-			tabu[elemnt] = 1
-			elemnt = mapp_rel[elemnt]
-			return self.find_replacement(elemnt,mapp_rel,tabu)
+	def fix_chromosome_pmx(self, chromosome, cutting_point_1, cutting_point_2, occurrences_arr,map_rel_R, map_rel_L, tabu_list):
 		
-	def pmx_generate_mapping_relationship(self, subs_str_1,subs_str_2 ):
-		#Sabemos que ambas cadenas tienen la misma longitud
-		if len(subs_str_1) != len(subs_str_2): 
-			raise ValueError("La longitud de las subcadenas es distinta, no se puede realizar la relacion de mapeo")
-		
-		#La relacion de mapeo va a ser una lista de tuplas (x,y) donde tambien existe (y,x)
-		mapping_r = []
-		mapping_ocurrences = [0 for x in range(self.n_queens)]
-		
-		#Aqui hay que tener cuidado, puede ser que la tupla (x,y) y (y,x) ya se encuentre y pueda agregarse de nuevo, por lo que hay que revisar que no esté ya en la relacion de intercambio 
+		for i in range(len(chromosome)):
+			#Buscamos excluir los genes heredados del proceso (aquellos entre los puntos de corte)
+			gen = chromosome[i]
+			if i < cutting_point_1:
+				if(occurrences_arr[gen]==2): #Si el gen esta duplicado
+					replacement = self.find_replacement_pmx(gen,map_rel_R,map_rel_L,tabu_list) #Buscamos el reemplazo del gen
+					chromosome[i] = replacement
 
-		for i in range(len(subs_str_1)): 
-			
-			if(subs_str_1[i]!=subs_str_2[i]):#EXPERIMENTAL -> Aqui estamos discriminando las tuplas [x,x], eso funciona ? 
-				mapping_r.append([subs_str_1[i], subs_str_2[i]])
-				mapping_r.append([subs_str_2[i], subs_str_1[i]])
-				mapping_ocurrences[subs_str_1[i]] = 1
-				mapping_ocurrences[subs_str_2[i]] = 1
-			
-		#Tambien buscamos una forma directa para saber si un elemento esta en la relacion de mapeo
-
-		return np.array(mapping_r), np.array(mapping_ocurrences)
-		
-	def pmx_replacement(self,elemt, mapp_rel, end):
-		#Esta funcion recursiva es lineal ya que no necesita resolver las llamadas anteriores para regresar 
-		#el valor 
-
-		#Se tiene que pasar una copia de la relacion de mapeo
-		if len(mapp_rel) == 0 : 
-			#print(end)
-			return end
-		
-		if mapp_rel[0][0] == elemt:
-			end = mapp_rel[0][1] #El reemplazo es el elemento de la tupla 
-			#Borramos tanto el indice 0 y 1 por que sabemos que el elemento buscado esta en esas tuplas
-			mapp_rel = np.delete(mapp_rel,0,axis=0)
-			mapp_rel = np.delete(mapp_rel,0,axis=0)
-			self.pmx_replacement(end,mapp_rel,end)
-		elif mapp_rel[0][1] == elemt :
-			end = mapp_rel[1][0] #El reemplazo es el elemento de la tupla 
-			#Borramos tanto el indice 0 y 1 por que sabemos que el elemento buscado esta en esas tuplas
-			mapp_rel = np.delete(mapp_rel,0,axis=0)
-			mapp_rel = np.delete(mapp_rel,0,axis=0)
-			self.pmx_replacement(end,mapp_rel,end)
-
-		else: #Son elementos que no nos interesan
-			mapp_rel = np.delete(mapp_rel,0,axis=0)
-			mapp_rel = np.delete(mapp_rel,0,axis=0)
-			self.pmx_replacement(elemt,mapp_rel,end)
-		
-		return end
-
+			if i >= cutting_point_2:
+				if(occurrences_arr[gen]==2): #Si el gen esta duplicado
+					replacement = self.find_replacement_pmx(gen,map_rel_R,map_rel_L,tabu_list) #Buscamos el reemplazo del gen
+					chromosome[i] = replacement
+				
 	def crossover_pmx(self, p_1, p_2):
 		'''
 
 		'''
+		print("Crossover PMX")
+		
 		#Generar los puntos de corte 
 		all_cut_points = np.arange(self.n_queens)
 		cut_points = sorted(np.random.choice(all_cut_points,2,replace=False))
 		#Este se puede dar el caso de solo se intercambien dos elementos 
 		cp_1 , cp_2= cut_points[0],cut_points[1]
 
-
-
-		
 		#Generar la relacion de mapeo de las cadenas
-		p_1.chromosome[cp_1:cp_2]
-		p_2.chromosome[cp_1:cp_2]
-		#Necesitamos almacenar los intercambios realizados en una relacion de mapeo 
-		#Para esta primera versión elegimos un diccionario por que el acceso a los elementos es O(1)
+		#p_1.chromosome[cp_1:cp_2]
+		#p_2.chromosome[cp_1:cp_2]
+
+		print("Cromosoma de padre 1 :"+str(p_1.chromosome))
+		print("Cromosoma de padre 2 :"+str(p_2.chromosome))
+		
+		print("Puntos de corte :"+str(cut_points))
+
+		print("Substring 1 :"+str(p_1.chromosome[cp_1:cp_2]))
+		print("Substring 2 :"+str(p_2.chromosome[cp_1:cp_2]))
+
+		#  relacion de intercambio consiste en dos diccionarios 
+		rel_R, rel_L = self.pmx_mapping_relation_generation(p_1.chromosome[cp_1:cp_2],p_2.chromosome[cp_1:cp_2])
+
+		print("Relacion de intercambio Right:"+str(rel_R))
+		print("Relacion de intercambio Left:"+str(rel_L))
+
+
 		#Generamos dos copias de los cromosomas de los padres 
 		primitive_offspring_1_chromosome = p_1.chromosome.copy()
 		primitive_offspring_2_chromosome = p_2.chromosome.copy()
 		
+		#Generamos arreglos de ocurrencias, los cuales nos serviran para saber cuando un gen esta duplicado
+		ocurr_1 = np.array([0 for i in range(self.n_queens)])
+		ocurr_2 = np.array([0 for i in range(self.n_queens)])
+
 		#Intercambiamos información de los padres con la generacion primitiva usando los puntos de corte 
 		primitive_offspring_1_chromosome[cp_1:cp_2] = p_2.chromosome[cp_1:cp_2]
 		primitive_offspring_2_chromosome[cp_1:cp_2] = p_1.chromosome[cp_1:cp_2]
 		
+		print("Generacion primitiva 1 :"+str(primitive_offspring_1_chromosome))
+		print("Generacion primitiva 2 :"+str(primitive_offspring_2_chromosome))
 		
-		
+		#Actualizamos el arreglo de ocurrencias, el cual nos da informacion sobre los genes duplicados 
+		for gen in primitive_offspring_1_chromosome :
+			ocurr_1[gen] += 1
+		for gen in primitive_offspring_2_chromosome :
+			ocurr_2[gen] += 1
 
-		mapp_rel, mapp_ocurr = self.pmx_generate_mapping_relationship(primitive_offspring_1_chromosome[cp_1:cp_2], primitive_offspring_2_chromosome[cp_1:cp_2])
+		print("Arreglo de ocurrencias offspring 1 :"+str(ocurr_1))
+		print("Arreglo de ocurrencias offspring 2 :"+str(ocurr_2))
+
+		tabu_1 = np.array([0 for i in range(self.n_queens)])
+		tabu_2 = np.array([0 for i in range(self.n_queens)])
+
+		#REPARACION CROMOSOMA 
+
+	
+		self.fix_chromosome_pmx(primitive_offspring_1_chromosome,cp_1,cp_2,ocurr_1,rel_R,rel_L,tabu_1)
+		self.fix_chromosome_pmx(primitive_offspring_2_chromosome,cp_1,cp_2,ocurr_2,rel_R,rel_L,tabu_2)
+		#Necesitamos un metodo que reciba el chroomosoma, los puntos de corte, el arreglo de ocurrencias
+		#rel_R y rel_L , la lista tabu 
+
+		# for i in range(len(primitive_offspring_1_chromosome)):
+		# 	#Tenemos que revisar que el gen no forme parte de la informacion heredada 
+		# 	if i < cp_1 : 
+		# 		#Revisar si ese gen está duplicado
+		# 		if(ocurr_1[primitive_offspring_1_chromosome[i]] == 2):
+		# 			#En caso de que esté duplicado, buscamos su reemplazo en la relación de mapeo 
+		# 			gen = primitive_offspring_1_chromosome[i] 
+		# 			replacement = self.find_replacement_pmx(gen,rel_R,rel_L,tabu) #Se busca el reemplazo
+		# 			primitive_offspring_1_chromosome[i]	= replacement #Se reemplaza
+		# 	if i >= cp_2 :
+		# 		if(ocurr_1[primitive_offspring_1_chromosome[i]] == 2):
+		# 			#En caso de que esté duplicado, buscamos su reemplazo en la relación de mapeo 
+		# 			gen = primitive_offspring_1_chromosome[i] 
+		# 			replacement = self.find_replacement_pmx(gen,rel_R,rel_L,tabu) #Se busca el reemplazo
+		# 			primitive_offspring_1_chromosome[i]	= replacement #Se reemplaza
+		
+		print("Generacion primitiva 1 REPARADA :"+str(primitive_offspring_1_chromosome))
+		print("Generacion primitiva 2 REPARADA :"+str(primitive_offspring_2_chromosome))
+		# print("Prueba de busqueda de reemplazo")
+		# num = p_2.chromosome[cp_1:cp_2][0]
+		# print("Numero a reemplazar :"+str(num))
+		# replace = self.find_replacement_pmx(num,rel_R,rel_L,tabu)
+		# print("Reemplazo encontrado :"+str(replace))
+		#find_replacement_pmx(self,element,rel_R,rel_L,tabu)
+
+
+		#mapp_rel, mapp_ocurr = self.pmx_generate_mapping_relationship(primitive_offspring_1_chromosome[cp_1:cp_2], primitive_offspring_2_chromosome[cp_1:cp_2])
 		
 		#REPARACION DE CROMOSOMA
 
-		offspring_1_chromosome = primitive_offspring_1_chromosome.copy()
-		print("Relacion de ocurrencias" + str(mapp_ocurr))
-		for i in range(len(offspring_1_chromosome)): 
-			if(mapp_ocurr[offspring_1_chromosome[i]] == 1): #Si esta en la relacion de ocurrencias
-				mapp_ocurr[offspring_1_chromosome[i]] = 0 #Entonces hacemos su ocurrencia 0 para que solo la primer ocurrencia del elemento sea modificada 
-				#Procedemos a encontrar el reemplazo del elemento en la relacion de mapeo 
-				#Hay que copiar la relacion 
-				mapp = mapp_rel.copy() #La operacion de copiar es lineal -> a este punto va n2 
-				end_gen = self.pmx_replacement(offspring_1_chromosome[i],mapp,offspring_1_chromosome[i]) #A este punto es lineal sobre la relacion de mapeo -> sigue en n2
-				#Ya que obtenemos el elemento por el que va a ser reemplazado x, lo reemplazamos e iteramos 
-				#print(end_gen)
-				offspring_1_chromosome[i] = end_gen 
-		print("Relacion de ocurrencias" + str(mapp_ocurr))
+		# offspring_1_chromosome = primitive_offspring_1_chromosome.copy()
+		# print("Relacion de ocurrencias" + str(mapp_ocurr))
+		# for i in range(len(offspring_1_chromosome)): 
+		# 	if(mapp_ocurr[offspring_1_chromosome[i]] == 1): #Si esta en la relacion de ocurrencias
+		# 		mapp_ocurr[offspring_1_chromosome[i]] = 0 #Entonces hacemos su ocurrencia 0 para que solo la primer ocurrencia del elemento sea modificada 
+		# 		#Procedemos a encontrar el reemplazo del elemento en la relacion de mapeo 
+		# 		#Hay que copiar la relacion 
+		# 		mapp = mapp_rel.copy() #La operacion de copiar es lineal -> a este punto va n2 
+		# 		end_gen = self.pmx_replacement(offspring_1_chromosome[i],mapp,offspring_1_chromosome[i]) #A este punto es lineal sobre la relacion de mapeo -> sigue en n2
+		# 		#Ya que obtenemos el elemento por el que va a ser reemplazado x, lo reemplazamos e iteramos 
+		# 		#print(end_gen)
+		# 		offspring_1_chromosome[i] = end_gen 
+		# print("Relacion de ocurrencias" + str(mapp_ocurr))
 
-		# for i in range(len(p_2.chromosome[cp_1:cp_2])):
-		# 	mapping_relation[p_1.chromosome[cp_1:cp_2][i]] = p_2.chromosome[cp_1:cp_2][i] 
-		# 	mapping_relation[p_2.chromosome[cp_1:cp_2][i]] = p_1.chromosome[cp_1:cp_2][i] 	
-
-
-		#Ahora hay que arreglar los chromosomas 
-
-		#ESTA IMPLEMENTACION FUE PUESTA EN PAUSA,
-		#values_1, count_1 = np.unique(primitive_offspring_1_chromosome,return_counts=True)
-		#values_2, count_2 = np.unique(primitive_offspring_2_chromosome,return_counts=True)
-
-		#Obtenemos las ocurrencias de cada numero en los cromosomas primitivos :
-
-	
-		# ocurences_1 = np.array([0 for i in range(self.n_queens)])
-		# ocurences_2 = np.array([0 for i in range(self.n_queens)])
-
-		# #A cada numero en la permutacion le corresponde un índice en el arreglo de ocurrencias
-		# #Cada vez que ocurra el numero "x" el índice x del arreglo de ocurrencias incrementa en 1 
-		# #Si un numero aparace 2 veces entonces el ocurrences[x] =2 
-		# for i in range(self.n_queens):
-		# 	ocurences_1[primitive_offspring_1_chromosome[i]] +=1
-		# 	ocurences_2[primitive_offspring_2_chromosome[i]] +=1 						
-
-		
-		#Sustituir los numeros con ocurrencia 2 usando la relacion de mapeo 
-		# >>>> En proceso
-		#sqkeys = mapping_relation.keys()
-
-		print("Crhomosomas de los padres")
-		print("Padre 1 : ")
-		print(str(p_1.chromosome))
-		print("Padre 2 :")
-		print(str(p_2.chromosome))
-		print("Puntos de corte  P1 :"+str(cp_1)+" P2 :"+str(cp_2))
-		print("Subcadenas consideradas : ")
-		print("Subchain 1 : ")
-		print(str(p_1.chromosome[cp_1:cp_2]))
-		print("Subchain 2 : ")
-		print(str(p_2.chromosome[cp_1:cp_2]))
-		print("Relacion de intercambio : "+str(mapp_rel))
-		print("Chromosomas primitivos")
-		print("Primitivo 1")
-		print(str(primitive_offspring_1_chromosome))
-		print("Cadenas arregladas ")
-		print("Final 1")
-		print(str(offspring_1_chromosome))
+		# print("Crhomosomas de los padres")
+		# print("Padre 1 : ")
+		# print(str(p_1.chromosome))
+		# print("Padre 2 :")
+		# print(str(p_2.chromosome))
+		# print("Puntos de corte  P1 :"+str(cp_1)+" P2 :"+str(cp_2))
+		# print("Subcadenas consideradas : ")
+		# print("Subchain 1 : ")
+		# print(str(p_1.chromosome[cp_1:cp_2]))
+		# print("Subchain 2 : ")
+		# print(str(p_2.chromosome[cp_1:cp_2]))
+		# print("Relacion de intercambio : "+str(mapp_rel))
+		# print("Chromosomas primitivos")
+		# print("Primitivo 1")
+		# print(str(primitive_offspring_1_chromosome))
+		# print("Cadenas arregladas ")
+		# print("Final 1")
+		# print(str(offspring_1_chromosome))
 
 
 		# for i in range(self.n_queens):
@@ -487,6 +472,7 @@ class GeneticAlg:
 		#Generar las cadenas primitivas 
 		
 		#Arreglar las cadenas primitivas 
+			
 		
 	def crossover_ipmx(self, p_1, p_2):
 		'''
@@ -851,46 +837,48 @@ if __name__ == '__main__':
 	child1 = listaSols[0]
 	child2 = listaSols[-1]
 
-	substr_1 = child1.chromosome[3:6]
-	print("Hijo 1 :"+str(child1.chromosome))
-	print("Subcadena 1 : "+str(substr_1))
+	ga.crossover_pmx(child1,child2)
+
+	# substr_1 = child1.chromosome[3:6]
+	# print("Hijo 1 :"+str(child1.chromosome))
+	# print("Subcadena 1 : "+str(substr_1))
 	
-	substr_2 = child2.chromosome[3:6]
-	print("Hijo 1 :"+str(child2.chromosome))
-	print("Subcadena 1 : "+str(substr_2))
+	# substr_2 = child2.chromosome[3:6]
+	# print("Hijo 1 :"+str(child2.chromosome))
+	# print("Subcadena 1 : "+str(substr_2))
 	
-	mapRel, ocurRel = ga.pmx_generate_mapping_relationship(substr_1,substr_2)
-	print("Relacion de mapeo :"+str(mapRel))
-	print("Relacion de ocurrencias :"+str(ocurRel))
+	# mapRel, ocurRel = ga.pmx_generate_mapping_relationship(substr_1,substr_2)
+	# print("Relacion de mapeo :"+str(mapRel))
+	# print("Relacion de ocurrencias :"+str(ocurRel))
 
-	#Vamos a buscar el reemplazo de un numero que esté en la relacion de mapeo 
-	numero_a_reemplazar = 0
-	for i in range(len(ocurRel)):
-		if ocurRel[i] == 1 : 
-			numero_a_reemplazar = i
-			print("Vamos a buscar reemplazar a "+str(numero_a_reemplazar))
-			break; 
+	# #Vamos a buscar el reemplazo de un numero que esté en la relacion de mapeo 
+	# numero_a_reemplazar = 0
+	# for i in range(len(ocurRel)):
+	# 	if ocurRel[i] == 1 : 
+	# 		numero_a_reemplazar = i
+	# 		print("Vamos a buscar reemplazar a "+str(numero_a_reemplazar))
+	# 		break; 
 	
-	end = ga.pmx_replacement(numero_a_reemplazar,mapRel,0)
-	print("Reemplazo encontrado :"+str(end))
+	# end = ga.pmx_replacement(numero_a_reemplazar,mapRel,0)
+	# print("Reemplazo encontrado :"+str(end))
 
 
-	print("Prueba de reemplazo")
-	map_rel_R, map_rel_L  = ga.pmx_mapping_relation_generation([4,2,13,10,8], [6,13,10,12,5])
-	print("Map Rel Right "+str(map_rel_R))
-	print("Map Rel Left "+str(map_rel_L))
-	#print
-	# (map_REL) 		
+	# print("Prueba de reemplazo")
+	# map_rel_R, map_rel_L  = ga.pmx_mapping_relation_generation([4,2,13,10,8], [6,13,10,12,5])
+	# print("Map Rel Right "+str(map_rel_R))
+	# print("Map Rel Left "+str(map_rel_L))
+	# #print
+	# # (map_REL) 		
 
-	print("Esta es la lista tabu")
-	tabu = [0 for i in range(14)]
-	print(tabu)
+	# print("Esta es la lista tabu")
+	# tabu = [0 for i in range(14)]
+	# print(tabu)
 
-	num = 4
-	print("Se quiere reemplazar: "+str(num))
+	# num = 4
+	# print("Se quiere reemplazar: "+str(num))
 
-	replace = ga.find_replacement_pmx(num,map_rel_R,map_rel_L,tabu)
-	print("Reemplazo :"+str(replace))
+	# replace = ga.find_replacement_pmx(num,map_rel_R,map_rel_L,tabu)
+	# print("Reemplazo :"+str(replace))
 	# replace = ga.find_replacement(num,map_REL,tabu)
 
 	
