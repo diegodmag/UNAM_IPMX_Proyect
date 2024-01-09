@@ -1,4 +1,4 @@
-Utilizado 
+## Utilizado 
 
 SO : ubuntu 22.04.04 
 Python 3.10.9
@@ -6,11 +6,11 @@ Bibliotecas utilizadas :
         - numpy
         - matplotlib
 
-Instrucciones para NUMPY: 
+## Instrucciones para NUMPY: 
     
     pip install numpy
 
-Instrucciones para MATPLOTLIB 
+## Instrucciones para MATPLOTLIB 
 Se intstala tanto con pip como con miniconda : 
     
     pip install matplotlib
@@ -19,7 +19,7 @@ Se intstala tanto con pip como con miniconda :
 
     conda install -c conda-forge matplotlib
 
-Ejecucion del programa : 
+# Ejecucion del programa : 
 
 Estando dentro del directorio de la tarea '316032708', el script en donde se ejecutan los algoritmos es src/ga.py y el comando es 
 

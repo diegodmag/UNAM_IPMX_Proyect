@@ -221,11 +221,12 @@ class GeneticAlg:
 		
 		for i in range(len(subs_str_1)):
 			#if subs_str_1[i] != subs_str_2[i]: #Esta condicion es para evitar datos tipo x:x, ACTUALIZACION : SE TIENE QUE QUITAR 
-			map_rel_R[subs_str_1[i]]= subs_str_2[i]
-			map_rel_L[subs_str_2[i]]= subs_str_1[i]
+			map_rel_R[subs_str_2[i]]= subs_str_1[i]
+			map_rel_L[subs_str_1[i]]= subs_str_2[i]
 
 		return map_rel_R, map_rel_L
 
+	#Podemos asegurar que el elemento buscado ya forma parte de la relacion de mapeo ? SOn necesarios esos try 
 	def find_replacement_pmx(self,element,rel_R,rel_L,tabu): 
 		'''
 		Funcion que recibe un elemento(gen), la relacion de mapeo (dos diccionarios) y una lista tabu 
@@ -271,7 +272,7 @@ class GeneticAlg:
 					replacement = self.find_replacement_pmx(gen,map_rel_R,map_rel_L,tabu_list) #Buscamos el reemplazo del gen
 					chromosome[i] = replacement
 				
-	def crossover_pmx(self, p_1, p_2):
+	# def crossover_pmx(self, p_1, p_2):
 		'''
 		Implementacion del Partially Mapped Crossover 
 		'''
@@ -348,121 +349,312 @@ class GeneticAlg:
 		# 	ocurr_2[gen] += 1
 		# print("Unicidad offspring 1 :"+str(ocurr_1))
 		# print("Unicidad offspring 2 :"+str(ocurr_2))
+	
+	def crossover_pmx(self, p_1, p_2):
 		
-
-
-	def crossover_ipmx(self, p_1, p_2):
-		'''
-		Implementacion del Improved Partially Mapped Crossover 
-
-		'''
-
 		#Generar los puntos de corte 
 		all_cut_points = np.arange(self.n_queens)
 		cut_points = sorted(np.random.choice(all_cut_points,2,replace=False))
 		#Este se puede dar el caso de solo se intercambien dos elementos 
 		cp_1 , cp_2= cut_points[0],cut_points[1]
+		print("Cutting points :"+str(cp_1)+" ,"+str(cp_2))
+
+		rel_R, rel_L = self.pmx_mapping_relation_generation(p_1.chromosome[cp_1:cp_2],p_2.chromosome[cp_1:cp_2])
+		print("Mapping Relationship R :"+str(rel_R))
+		print("Mapping Relationship L :"+str(rel_L))
 
 		#Generamos dos copias de los cromosomas de los padres 
+		
 		primitive_offspring_1_chromosome = p_1.chromosome.copy()
 		primitive_offspring_2_chromosome = p_2.chromosome.copy()
-		
+
+		print("Parent 1 :"+str(primitive_offspring_1_chromosome))
+		print("Parent 2 :"+str(primitive_offspring_2_chromosome))
+
 		#Intercambiamos información de los padres con la generacion primitiva usando los puntos de corte 
 		primitive_offspring_1_chromosome[cp_1:cp_2] = p_2.chromosome[cp_1:cp_2]
 		primitive_offspring_2_chromosome[cp_1:cp_2] = p_1.chromosome[cp_1:cp_2]
 
-		#Se genera la lista de intercambio ExchangeList -- Equivalente a la mapping relationship del PMX 
+		print("Substring 1 :"+str(primitive_offspring_1_chromosome[cp_1:cp_2]))
+		print("Substring 2 :"+str(primitive_offspring_2_chromosome[cp_1:cp_2]))
+
+		print("Primitive Offsrping 1 : "+str(primitive_offspring_1_chromosome))
+		print("Primitive Offsrping 2 : "+str(primitive_offspring_2_chromosome))
+
+
+		for i in range(0,cp_1):
+			while primitive_offspring_1_chromosome[i] in rel_R:
+				primitive_offspring_1_chromosome[i] = rel_R[primitive_offspring_1_chromosome[i]] 
+			while primitive_offspring_2_chromosome[i] in rel_L: 
+				primitive_offspring_2_chromosome[i] = rel_L[primitive_offspring_2_chromosome[i]]
 		
-		#DEBUG 
-		print("Crhomosomas de los padres")
-		print("Padre 1 : ")
-		print(str(p_1.chromosome))
-		print("Padre 2 :")
-		print(str(p_2.chromosome))
-		print("Puntos de corte  P1 :"+str(cp_1)+" P2 :"+str(cp_2))
-		print("Subcadenas consideradas : ")
-		print("Subchain 1 : ")
-		print(str(p_1.chromosome[cp_1:cp_2]))
-		print("Subchain 2 : ")
-		print(str(p_2.chromosome[cp_1:cp_2]))	
+		for i in range(cp_2,len(primitive_offspring_1_chromosome)):
+			while primitive_offspring_1_chromosome[i] in rel_R:
+				primitive_offspring_1_chromosome[i] = rel_R[primitive_offspring_1_chromosome[i]] 
+			while primitive_offspring_2_chromosome[i] in rel_L: 
+				primitive_offspring_2_chromosome[i] = rel_L[primitive_offspring_2_chromosome[i]]
 
+	
+		return qrep.Queen_Solution(np.array(primitive_offspring_1_chromosome)),qrep.Queen_Solution(np.array(primitive_offspring_2_chromosome))
 
+	def crossover_impx(self, p_1, p_2):
 
-		mapping_relation = []
-		for i in range(len(p_2.chromosome[cp_1:cp_2])):
-			mapping_relation.append([p_1.chromosome[cp_1:cp_2][i],p_2.chromosome[cp_1:cp_2][i],1])
-			
-		exchange_list = np.array(mapping_relation)
-		print("Tabla de intercambio")
-		print(exchange_list )
-		#Guide List 
-		guide_list = [0 for i in range(self.n_queens)]
+		#Paso 1
+		n = len(p_1.chromosome)
+		all_cut_points = np.arange(self.n_queens)
+		cut_points = sorted(np.random.choice(all_cut_points,2,replace=False))
+		#Este se puede dar el caso de solo se intercambien dos elementos 
+		cp_1 , cp_2= cut_points[0],cut_points[1]
+		print("Cutting points :"+str(cp_1)+" ,"+str(cp_2))
+
+		#Generamos dos copias de los cromosomas de los padres 	
+		primitive_offspring_1_chromosome = p_1.chromosome.copy()
+		primitive_offspring_2_chromosome = p_2.chromosome.copy()
+
+		print("Parent 1 :"+ str(primitive_offspring_1_chromosome))
+		print("Parent 2 :"+ str(primitive_offspring_2_chromosome))
+
+		subs_1 = p_2.chromosome[cp_1:cp_2]
+		subs_2 = p_1.chromosome[cp_1:cp_2]
 		
-		# Para llenar la guide list tenemos que considerar como indices los numeros de la primer columna de la exchange_list 
-		# Para llenar los valores de la guide list tenemos 
+		print("Substring 1:"+str(subs_1))
+		print("Substring 2:"+str(subs_2))
 
-		#Aqui hay un prolema, la implementacion del paper se basa en que el 0 no esta en la permutacion 
-		#Por lo que consideramos -1 como el 0 
-		for tuple in exchange_list:
-			guide_list[tuple[0]] = tuple[1] 
-		print("Lista de Guia")
+		#Paso 2
+		#Intercambiamos información de los padres con la generacion primitiva usando los puntos de corte 
+		primitive_offspring_1_chromosome[cp_1:cp_2] = p_2.chromosome[cp_1:cp_2]
+		primitive_offspring_2_chromosome[cp_1:cp_2] = p_1.chromosome[cp_1:cp_2]
+
+		print("Primitive Offspring 1 :"+ str(primitive_offspring_1_chromosome))
+		print("Primitive Offspring 2 :"+ str(primitive_offspring_2_chromosome))
+
+		#Paso 3 y 4: Generamos e inicializamos la exchange list  (O(m))
+		m = len(p_2.chromosome[cp_1:cp_2]) 
+		exchange_list = np.zeros((m,3), dtype=int)
+		
+		for i in range(m): 
+			exchange_list[i,0] = subs_1[i]
+			exchange_list[i,1] = subs_2[i]
+			exchange_list[i,2] = 1
+
+		print("Exchange List :")
+		print(exchange_list)
+		
+
+		#Paso 5,6 y 7 
+		#Generacion de la guide list 
+		#Nuestra implementacion tiene que usar -1 en vez de 0 por que el 0 se ocupa en nuestra representacion 
+		guide_list = np.full(n,-1,dtype=int)
+		for i in range(m):
+			guide_list[exchange_list[i,0]]=exchange_list[i,1]
+		
+		print("Guide List")
 		print(guide_list)
+		
+		#Generacion L1, L2 y L1+L2 
+		l1 = np.zeros(n,dtype=int)
+		l2 = np.zeros(n,dtype=int)
+		for i in range(m): 
+			l1[exchange_list[i,0]] = 1 
+			l2[exchange_list[i,1]] = 1
+		print("l1 :"+str(l1))
+		print("l2 :"+str(l2))
 
-
-		#Generamos las listas L1 y L2 
-		l1 = [0 for i in range(self.n_queens)]
-		l2 = [0 for i in range(self.n_queens)]
-
-		#Ahora vamos a llenar l1 considerando la primer columna de la exchange list y a l2 con las segunda columna
-		for e in exchange_list[:,0]: 
-			l1[e] =1 
-
-		for e in exchange_list[:,1]: 
-			l2[e] =1 
-
-		print("Listas auxiliares")
-		print("L1 :" + str(l1))
-		print("L2 :" + str(l2))
-
-
-
-
-		#Generamos la suma de ambas listas 
-		l1_plus_l2 = [x+y for x,y in zip(l1,l2)]
-
-		print("Suma de las listas")
-		print("L12:" + str(l1_plus_l2))
-
-		#Cada entrada de l1_plus_l2 que sea igual a 2  indica que es un nodo intermedio, en ese caso actualizamos la lista de intercambio
-		#Actualizamos la lista de intercambio
-		for tuple in exchange_list:
-			if l1_plus_l2[tuple[0]] == 2:
-				tuple[2] = 0  
-		print("Tabla de intercambio actualizada")
+		l1_l2 = l1+l2 
+		print("L1 + L2 :"+str(l1_l2))
+		
+		
+		#Actualizar la exchange list haciendo los nodos intermedios 0 
+		for i in range(m):
+			index = exchange_list[i,0] 
+			if l1_l2[index] == 2 : 
+				exchange_list[i,2] = 0
+				
+		
+		print("Exchange List actualizada :")
 		print(exchange_list)
 
-		#Y luego actualizamos la lista guia en base a la nueva lista de intercambio 
-		#Updated Guide List 
-		for tuple in exchange_list:
-			if(tuple[2] == 0):
-				guide_list[tuple[0]] = 0  
+		#Actualizar exchange list eliminando nodos intermedios y conectado los nodos con camino directo 
+		for i in range(m):
+			if exchange_list[i,2] == 1 : 
+				#El reemplazo actual
+				current_replacement = exchange_list[i,1]
+				#El reemplazo final 
+				final_replacement = -1
+				count = 0  
+				while current_replacement != -1:#Al menos se cumple la primera vez 
+					count = count +1 
+					final_replacement = current_replacement
+					current_replacement = guide_list[final_replacement] 
+					 #Aqui es donde la busqueda "salta" en la guide_list buscando 
+				
+				exchange_list[i,1] = final_replacement
+				
+
+		print("Exchange list con los nuevos caminos")
+		print(exchange_list)
+
+		#Ahora actualizamos la guide list 
+		print("Guide list ANTERIOR")
+		print(guide_list)
+		for i in range(m):
+			if(exchange_list[i,2]==1):
+				guide_list[exchange_list[i,0]] =  exchange_list[i,1]
+			else:
+				guide_list[exchange_list[i,0]] = -1
 		
-		print("Lista de Guia Actualizada")
+		print("Guide list actualizada")
 		print(guide_list)
 
+		print("------------------------------")
+		print("Padre 1 :")
+		print(p_1.chromosome)
+		print("Primitive Offspring 1")
+		print(primitive_offspring_1_chromosome)
+		print("Cadena sustituida :")
+		print("Substring 1:"+str(subs_1)+" for "+str(subs_2))
+		print("------------------------------")
 
-		#Debug 
+		###PASO  8 [PROBLEMA] 
+		for i in range(cp_1):
+
+			#Primero queremos el gen en el padre (excluyendo los genes entre los puntos de corte)
+			#Para ese gen buscamos si su valor en la guide list es distinto de -1
+			#Si lo es, entonces lo sustituimos por el nuevo valor actualizado de la exchange list
+			value = guide_list[p_1.chromosome[i]]
+			print("Indice :"+str(i))
+			print("Elemento del cromosoma del padre :"+str(p_1.chromosome[i]))
+			print("Valor en la guide lsit"+str(value))
+			if value != -1:
+				primitive_offspring_1_chromosome[i] = value
+				# print("Cambiamos "+str(primitive_offspring_1_chromosome[i]))
+				# print("Nuevo valor"+str(value))
+				# print("Elemento actual"+str(primitive_offspring_1_chromosome[i]))
+		
+		print("--------------")
+
+		for i in range(cp_2,len(primitive_offspring_1_chromosome)):
+			#primitive_offspring_1_chromosome
+			value = guide_list[p_1.chromosome[i]]
+			print("Indice :"+str(i))
+			print("Elemento del cromosoma del padre :"+str(p_1.chromosome[i]))
+			print("Valor en la guide lsit"+str(value))
+			if value != -1:
+				primitive_offspring_1_chromosome[i] = value
+
+		# print("Offspring 1 Legalizadad :")
+		# print(primitive_offspring_1_chromosome)
+		return primitive_offspring_1_chromosome
+
+		#
+		# for i in range(0,cp_1):
+		# 	while primitive_offspring_1_chromosome[i] in rel_R:
+		# 		primitive_offspring_1_chromosome[i] = rel_R[primitive_offspring_1_chromosome[i]] 
+		# 	while primitive_offspring_2_chromosome[i] in rel_L: 
+		# 		primitive_offspring_2_chromosome[i] = rel_L[primitive_offspring_2_chromosome[i]]
+		
+		# for i in range(cp_2,len(primitive_offspring_1_chromosome)):
+		# 	while primitive_offspring_1_chromosome[i] in rel_R:
+		# 		primitive_offspring_1_chromosome[i] = rel_R[primitive_offspring_1_chromosome[i]] 
+		# 	while primitive_offspring_2_chromosome[i] in rel_L: 
+		# 		primitive_offspring_2_chromosome[i] = rel_L[primitive_offspring_2_chromosome[i]]
+
+	# def crossover_ipmx(self, p_1, p_2):
+		# '''
+		# Implementacion del Improved Partially Mapped Crossover 
+
+		# '''
+
+		# #Generar los puntos de corte 
+		# all_cut_points = np.arange(self.n_queens)
+		# cut_points = sorted(np.random.choice(all_cut_points,2,replace=False))
+		# #Este se puede dar el caso de solo se intercambien dos elementos 
+		# cp_1 , cp_2= cut_points[0],cut_points[1]
+
+		# #Generamos dos copias de los cromosomas de los padres 
+		# primitive_offspring_1_chromosome = p_1.chromosome.copy()
+		# primitive_offspring_2_chromosome = p_2.chromosome.copy()
+		
+		# #Intercambiamos información de los padres con la generacion primitiva usando los puntos de corte 
+		# primitive_offspring_1_chromosome[cp_1:cp_2] = p_2.chromosome[cp_1:cp_2]
+		# primitive_offspring_2_chromosome[cp_1:cp_2] = p_1.chromosome[cp_1:cp_2]
+
+		# #Esta lista es del tipo [gen, gen, num]
+		# mapping_relation = []
+		# for i in range(len(p_2.chromosome[cp_1:cp_2])):
+		# 	mapping_relation.append([p_1.chromosome[cp_1:cp_2][i],p_2.chromosome[cp_1:cp_2][i],1])
+			
+		# exchange_list = np.array(mapping_relation)
+		# print("Tabla de intercambio")
+		# print(exchange_list )
+		# #Guide List 
+		# guide_list = [0 for i in range(self.n_queens)]
+		
+		# # Para llenar la guide list tenemos que considerar como indices los numeros de la primer columna de la exchange_list 
+		# # Para llenar los valores de la guide list tenemos 
+
+		# #Aqui hay un prolema, la implementacion del paper se basa en que el 0 no esta en la permutacion 
+		# #Por lo que consideramos -1 como el 0 
+		# for tuple in exchange_list:
+		# 	guide_list[tuple[0]] = tuple[1] 
+		# print("Lista de Guia")
+		# print(guide_list)
+
+
+		# #Generamos las listas L1 y L2 
+		# l1 = [0 for i in range(self.n_queens)]
+		# l2 = [0 for i in range(self.n_queens)]
+
+		# #Ahora vamos a llenar l1 considerando la primer columna de la exchange list y a l2 con las segunda columna
+		# for e in exchange_list[:,0]: 
+		# 	l1[e] =1 
+
+		# for e in exchange_list[:,1]: 
+		# 	l2[e] =1 
+
+		# print("Listas auxiliares")
+		# print("L1 :" + str(l1))
+		# print("L2 :" + str(l2))
+
+
+
+		# #Generamos la suma de ambas listas 
+		# l1_plus_l2 = np.array([x+y for x,y in zip(l1,l2)])
+
+		# print("Suma de las listas")
+		# print("L12:" + str(l1_plus_l2))
+
+		# #Cada entrada de l1_plus_l2 que sea igual a 2  indica que es un nodo intermedio, en ese caso actualizamos la lista de intercambio
+		# #Actualizamos la lista de intercambio
+		# for tuple in exchange_list:
+		# 	if l1_plus_l2[tuple[0]] == 2:
+		# 		tuple[2] = 0  
+		# print("Tabla de intercambio actualizada")
+		# print(exchange_list)
+
+		# #Y luego actualizamos la lista guia en base a la nueva lista de intercambio 
+		# #Updated Guide List 
+		# for tuple in exchange_list:
+		# 	if(tuple[2] == 0):
+		# 		guide_list[tuple[0]] = 0  
+		
+		# print("Lista de Guia Actualizada")
+		# print(guide_list)
+
+		
+
+		# #Debug 
 		
 		
-		#Columna 1 = exchange_list[:0]
-		#Columna 2 = exchange_list[:1]
-		#Columna 3 = exchange_list[:2] #Esta es la que nos dara innformacion sobre si existen o no un camino directo  
+		# #Columna 1 = exchange_list[:0]
+		# #Columna 2 = exchange_list[:1]
+		# #Columna 3 = exchange_list[:2] #Esta es la que nos dara innformacion sobre si existen o no un camino directo  
 			
 			
 		
 		
 		
-		pass	 
+		# pass	 
 
 	def crossover_pop(self,population):
 		'''
@@ -710,9 +902,11 @@ if __name__ == '__main__':
 
 	#El 3 es el tamanio del torneo 
 	ga = GeneticAlg(number_q,popultation_size,.8,3,prob_cross,prob_mut,time)
-	ga.execution()
-	print(ga.get_the_best())
-	#ga.init_population()
+	
+	
+	#ga.execution()
+	#print(ga.get_the_best())
+	ga.init_population()
 
 	#rep_iter(10,ga)
 	#time, iters = ga.execution()
@@ -724,11 +918,36 @@ if __name__ == '__main__':
 	
 	# print("---------------")
 
-	# listaSols = sorted(ga.current_pop, key = lambda solution : solution.fitness)
-	# child1 = listaSols[0]
-	# child2 = listaSols[-1]
+	listaSols = sorted(ga.current_pop, key = lambda solution : solution.fitness)
+	child1 = listaSols[0]
+	child2 = listaSols[-1]
 
-	#ga.crossover_pmx(child1,child2)
+	#ga.crossover_ipmx(child1,child2)
+	# i_start_time = tm.time()
+	# i_cpu_start = tm.process_time()
+	
+
+	# permutation1= [2, 1, 9, 7, 8, 3, 6, 10, 5, 4]
+	# permutation2 = [10, 1, 8, 4, 5, 9, 3, 6, 7, 2]
+	
+	offspring =  ga.crossover_impx(child1,child2)
+	print("Legalized offspring")
+	print(offspring)
+	# offspring_1,offspring_2 = ga.crossover_pmx(child1,child2)
+
+	# print(offspring_1.chromosome)
+	# print(offspring_2.chromosome)
+
+
+	# i_end_time = tm.time()
+	# i_cpu_end = tm.process_time()
+
+	# total_time = i_end_time -i_start_time  
+	# cpu_used = i_cpu_end - i_cpu_start
+
+	# print("Tiempo usado por PMX :"+str(total_time))
+
+
 
 	# substr_1 = child1.chromosome[3:6]
 	# print("Hijo 1 :"+str(child1.chromosome))
