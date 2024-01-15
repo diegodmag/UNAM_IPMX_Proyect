@@ -9,7 +9,8 @@ import time as tm
 import sys
 import os 
 import queen_rep as qrep 
-
+import selection_operators as selop 
+import crossover_operators as crossop
 class GeneticAlg: 
 	'''
 	Class modeling the steps and operators of a genetic algorithm to resolve the n-queens problem 
@@ -30,6 +31,8 @@ class GeneticAlg:
 		Probability of crossover  (.8 , .9)
 	mut_prob : float 
 		Probability of select a individual from the population in order to be mutated (.1 , .2)
+	tournament_size : int 
+		Sample's size to consider for a selection 
 	'''
 
 	def __init__(self, n_q, pop_s, p_sel,t_s,cross_p, mut_p, t):
@@ -39,13 +42,18 @@ class GeneticAlg:
 		self.current_pop = np.array([])
 		#self.offspring = np.array([])
 		self.max_time = t  
+		#Ya no se usa la proporcion de seleccion
 		self.sel_proportion = p_sel
 		self.cross_prob = cross_p
 		self.mut_prob = mut_p
 		self.tournament_size = t_s 
 
+		#Tal vez aqui se debe determinar que tipo de operador vamos a usar 
+		self.selection_operator = selop.Tournament(3)
+		#self.selection_operator = selop.Roulette()
+		self.crossover_operator = crossop.Basic()
 		#self.optimal = (n_q*(n_q-1))/2
-		self.optimal=0
+		self.optimal=0 
 		#self.optimal = (n_q*(n_q-1))/2
 
 	def get_the_best(self):
@@ -75,6 +83,8 @@ class GeneticAlg:
 		#[ind.evaluate() for ind in self.current_pop]
 		#[ind.evaluate_min() for ind in self.current_pop]
 
+
+	#COMIENZAN OPERADORES DE SELECCION 
 
 	def selection_rl(self):
 		'''
@@ -141,7 +151,7 @@ class GeneticAlg:
 
 	def get_best_among(self,pop_sample):
 		'''
-		Obtiene la mejor solucion (minimizaciónSS) dado un arreglo de soluciones 	
+		Obtiene la mejor solucion (minimización) dado un arreglo de soluciones 	
 		'''
 		#Obtenemos los fitness de todas las soluciones de la muestra de la poblacion y las almacenamos 
 		fitness_arr = np.array([solution.fitness for solution in pop_sample])
@@ -150,6 +160,16 @@ class GeneticAlg:
 		#Regresamos ese objeto 
 		return pop_sample[min_index]	
 	
+	#COMIENZAN OPERADORES DE CRUZA
+
+	#Necesitamos un metodo para generar una cantidad de representaciones de reinas 
+	#Por cada permutacion recibida 
+	def get_queens_population(self, chromosomes): 
+		queen_pop = []
+		for chromosome in chromosomes:
+			queen_pop.append(qrep.Queen_Solution(np.array(chromosome)))
+		return np.array(queen_pop)
+
 
 	def crossover(self, p_1, p_2):
 		'''
@@ -227,117 +247,40 @@ class GeneticAlg:
 
 		return map_rel_R, map_rel_L
 
-	#Podemos asegurar que el elemento buscado ya forma parte de la relacion de mapeo ? SOn necesarios esos try 
-	def find_replacement_pmx(self,element,rel_R,rel_L,tabu): 
-		'''
-		Funcion que recibe un elemento(gen), la relacion de mapeo (dos diccionarios) y una lista tabu 
-		y regresa el reemplazo de ese elemento en base a la relacion de mapeo 
-		'''
-		try:
-			rel_R[element] #Si esto da error entonces no esta 
-			if tabu[rel_R[element]] == 1:
-				return element
-			else:
-				#Despues de esta linea quiere decir que si esta en rel_R
-				tabu[element] = 1
-				element = rel_R[element]
-				return self.find_replacement_pmx(element,rel_R,rel_L,tabu)
-		except KeyError as error:
-			#Si no esta entonces intentamos en el otro diccionario 
-			try:
-				if tabu[rel_L[element]] == 1:
-					return element
-				else:
-					rel_L[element] #Si esta linea no da error, entonces si esta
-					tabu[element] = 1
-					element = rel_L[element]
-					return self.find_replacement_pmx(element,rel_L,rel_R,tabu)
-			except KeyError as error:
-				print("El elemento no esta en la relacion de mapeo")
-
-
-	def fix_chromosome_pmx(self, chromosome, cutting_point_1, cutting_point_2, occurrences_arr,map_rel_R, map_rel_L, tabu_list):
-		'''
-		Una funcion que arregla el cromosoma en base a la relacion de mapeo y un arreglo de ocurrencias
-		'''
-		for i in range(len(chromosome)):
-			#Buscamos excluir los genes heredados del proceso (aquellos entre los puntos de corte)
-			gen = chromosome[i]
-			if i < cutting_point_1:
-				if(occurrences_arr[gen]==2): #Si el gen esta duplicado
-					replacement = self.find_replacement_pmx(gen,map_rel_R,map_rel_L,tabu_list) #Buscamos el reemplazo del gen
-					chromosome[i] = replacement
-
-			if i >= cutting_point_2:
-				if(occurrences_arr[gen]==2): #Si el gen esta duplicado
-					replacement = self.find_replacement_pmx(gen,map_rel_R,map_rel_L,tabu_list) #Buscamos el reemplazo del gen
-					chromosome[i] = replacement
-				
-	# def crossover_pmx(self, p_1, p_2):
-		'''
-		Implementacion del Partially Mapped Crossover 
-		'''
-		# print("Crossover PMX")
+	def crossover_pmx(self, p_1, p_2):
 		
 		#Generar los puntos de corte 
 		all_cut_points = np.arange(self.n_queens)
 		cut_points = sorted(np.random.choice(all_cut_points,2,replace=False))
 		#Este se puede dar el caso de solo se intercambien dos elementos 
 		cp_1 , cp_2= cut_points[0],cut_points[1]
-
-		#Generar la relacion de mapeo de las cadenas
-		#p_1.chromosome[cp_1:cp_2]
-		#p_2.chromosome[cp_1:cp_2]
-
-		# print("Cromosoma de padre 1 :"+str(p_1.chromosome))
-		# print("Cromosoma de padre 2 :"+str(p_2.chromosome))
-		
-		# print("Puntos de corte :"+str(cut_points))
-
-		# print("Substring 1 :"+str(p_1.chromosome[cp_1:cp_2]))
-		# print("Substring 2 :"+str(p_2.chromosome[cp_1:cp_2]))
-
-		#  relacion de intercambio consiste en dos diccionarios 
+	
 		rel_R, rel_L = self.pmx_mapping_relation_generation(p_1.chromosome[cp_1:cp_2],p_2.chromosome[cp_1:cp_2])
-
-		# print("Relacion de intercambio Right:"+str(rel_R))
-		# print("Relacion de intercambio Left:"+str(rel_L))
-
-
+		
 		#Generamos dos copias de los cromosomas de los padres 
 		primitive_offspring_1_chromosome = p_1.chromosome.copy()
 		primitive_offspring_2_chromosome = p_2.chromosome.copy()
-		
-		#Generamos arreglos de ocurrencias, los cuales nos serviran para saber cuando un gen esta duplicado
-		ocurr_1 = np.array([0 for i in range(self.n_queens)])
-		ocurr_2 = np.array([0 for i in range(self.n_queens)])
 
 		#Intercambiamos información de los padres con la generacion primitiva usando los puntos de corte 
 		primitive_offspring_1_chromosome[cp_1:cp_2] = p_2.chromosome[cp_1:cp_2]
 		primitive_offspring_2_chromosome[cp_1:cp_2] = p_1.chromosome[cp_1:cp_2]
-		
-		# print("Generacion primitiva 1 :"+str(primitive_offspring_1_chromosome))
-		# print("Generacion primitiva 2 :"+str(primitive_offspring_2_chromosome))
-		
-		#Actualizamos el arreglo de ocurrencias, el cual nos da informacion sobre los genes duplicados 
-		for gen in primitive_offspring_1_chromosome :
-			ocurr_1[gen] += 1
-		for gen in primitive_offspring_2_chromosome :
-			ocurr_2[gen] += 1
 
-		# print("Arreglo de ocurrencias offspring 1 :"+str(ocurr_1))
-		# print("Arreglo de ocurrencias offspring 2 :"+str(ocurr_2))
-
-		tabu_1 = np.array([0 for i in range(self.n_queens)])
-		tabu_2 = np.array([0 for i in range(self.n_queens)])
-
-		#REPARACION CROMOSOMA 	
-		self.fix_chromosome_pmx(primitive_offspring_1_chromosome,cp_1,cp_2,ocurr_1,rel_R,rel_L,tabu_1)
-		self.fix_chromosome_pmx(primitive_offspring_2_chromosome,cp_1,cp_2,ocurr_2,rel_R,rel_L,tabu_2)
+		for i in range(0,cp_1):
+			while primitive_offspring_1_chromosome[i] in rel_R:
+				primitive_offspring_1_chromosome[i] = rel_R[primitive_offspring_1_chromosome[i]] 
+			while primitive_offspring_2_chromosome[i] in rel_L: 
+				primitive_offspring_2_chromosome[i] = rel_L[primitive_offspring_2_chromosome[i]]
 		
-		return qrep.Queen_Solution(np.array(primitive_offspring_1_chromosome)),qrep.Queen_Solution(np.array(primitive_offspring_1_chromosome)) 
+		for i in range(cp_2,len(primitive_offspring_1_chromosome)):
+			while primitive_offspring_1_chromosome[i] in rel_R:
+				primitive_offspring_1_chromosome[i] = rel_R[primitive_offspring_1_chromosome[i]] 
+			while primitive_offspring_2_chromosome[i] in rel_L: 
+				primitive_offspring_2_chromosome[i] = rel_L[primitive_offspring_2_chromosome[i]]
+
 	
-	def crossover_pmx(self, p_1, p_2):
+		return qrep.Queen_Solution(np.array(primitive_offspring_1_chromosome)),qrep.Queen_Solution(np.array(primitive_offspring_2_chromosome))
+	
+	def crossover_pmx_debugged(self, p_1, p_2):
 		
 		#Generar los puntos de corte 
 		all_cut_points = np.arange(self.n_queens)
@@ -733,13 +676,25 @@ class GeneticAlg:
 				break
 			else:
 				#SELECTION
-				tournament_selected = self.selection_tournament()
+				selected = self.selection_operator.select(self.current_pop, self.pop_size)
+				#tournament_selected = selop.SelectionOp()
+				#tournament_selected = self.selection_tournament()
 			#Crossover  
 			#roulette_offspring = self.crossover_pop(roulette_selected)
 			#tournament_offspring = self.crossover_pop_2(tournament_selected)
 			#tournament_offspring = self.crossover_pop_pmx(tournament_selected)
-			tournament_offspring = self.crossover_pop_ipmx(tournament_selected)
+			
+			#IMPORTANTE, EL CROSSOVER ESTA CONDICIONADO A UNA PROBA
+			#ESTUDIAR ESTO 
+			# if(rnd.random() < self.cross_prob):
+			# 	#tournament_offspring = self.crossover_pop_ipmx(selected)
+			# 	#Aqui nos van a regresar un arreglo de permutaciones 
+			# 	pop_chromosomes = self.crossover_operator.cross_population(selected, self.pop_size)
+			# 	tournament_offspring = self.get_queens_population(pop_chromosomes)
+			pop_chromosomes = self.crossover_operator.cross_population(selected, self.pop_size)
+			tournament_offspring = self.get_queens_population(pop_chromosomes)
 			#crossover_pop_pmx
+			print("INTERATION")
 			#Elitism Selection  ---> El elitismo debe ser entre padres e hijos 
 			#elite = self.selection_elitism() 
 			#Union of the Selected individuals
@@ -752,29 +707,6 @@ class GeneticAlg:
 			self.mutation_simple()
 			total_iterations = total_iterations+1
 				
-
-		
-
-		# while(self.get_the_best().fitness != self.optimal):
-		# 	#Roullete Selection 
-		# 	#roulette_selected = self.selection_rl(
-		# 	[ind.evaluate_min() for ind in self.current_pop]
-		# 	tournament_selected = self.selection_tournament()
-		# 	#Crossover  
-		# 	#roulette_offspring = self.crossover_pop(roulette_selected)
-		# 	tournament_offspring = self.crossover_pop(tournament_selected)
-		# 	#Elitism Selection  ---> El elitismo debe ser entre padres e hijos 
-		# 	elite = self.selection_elitism() 
-		# 	#Union of the Selected individuals
-		# 	#offspring = np.concatenate((roulette_offspring,elite),axis=0)
-		# 	offspring = np.concatenate((tournament_offspring,elite),axis=0) 
-		# 	#Generational Replacement 
-		# 	self.current_pop = offspring
-		# 	#Mutate
-		# 	self.mutation_simple()
-		# 	total_iterations = total_iterations+1 
-
-
 		end = tm.time()		
 		#Una ultima evaluacion de la ultima generacion 
 		[ind.evaluate_min() for ind in self.current_pop]
@@ -892,13 +824,16 @@ if __name__ == '__main__':
 	# Condicion de termino : Alcanza optimo o maximo de generaciones 
 
 	number_q,popultation_size,prob_cross,prob_mut,time = int(sys.argv[1]),int(sys.argv[2]),float(sys.argv[3]),float(sys.argv[4]),int(sys.argv[5])
-	outputName=str()
+	
+	#Hay que definir un formato para guardar el plot de la representacion visual de la reina.
+	outputName=str('Board'+str(number_q))
 
 	#El 3 es el tamanio del torneo 
 	ga = GeneticAlg(number_q,popultation_size,.8,3,prob_cross,prob_mut,time)
 	
 	ga.execution()
-	plot_queens(ga.get_the_best(), ) 
+	print(ga.get_the_best())
+	plot_queens(ga.get_the_best(),outputName) 
 
 	
 	#ga.execution()
