@@ -1,13 +1,13 @@
 import math 
 import numpy as np 
-# import matplotlib
-# matplotlib.use('TkAgg')
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import random as rnd 
 import copy
 import time as tm 
 import sys
-import os 
+
 import queen_rep as qrep 
 
 class GeneticAlg: 
@@ -40,10 +40,11 @@ class GeneticAlg:
 		#self.offspring = np.array([])
 		self.max_time = t  
 		self.sel_proportion = p_sel
-		self.cross_prob = cross_p
-		self.mut_prob = mut_p
+
 		self.tournament_size = t_s 
 
+		self.cross_prob = cross_p
+		self.mut_prob = mut_p
 		#self.optimal = (n_q*(n_q-1))/2
 		self.optimal=0
 		#self.optimal = (n_q*(n_q-1))/2
@@ -789,7 +790,7 @@ def draw_recursive_diagonals(ax, x, y, direction_x, direction_y, n):
     ax.plot([x, x + direction_x], [y, y + direction_y], color='red', linewidth=2)
     draw_recursive_diagonals(ax, x + direction_x, y + direction_y, direction_x, direction_y, n)
 
-def plot_queens(solution, outputName):
+def plot_queens(solution):
     n = len(solution.chromosome)
     chessboard = np.zeros((n, n), dtype=int)
 
@@ -821,30 +822,19 @@ def plot_queens(solution, outputName):
     ax.set_aspect('equal')
     ax.invert_yaxis()
     ax.axis('off')
-	
-    plt.savefig(get_path_for_output(outputName))
-	#plt.savefig(get_path_for_output('Test'))
-	
 
+	
+    plt.show()
+
+def matplotlib_test():
+	
+	plt.plot([1, 2, 3, 4])
+	plt.show()
 
 def boxplot(sample_1):
 		fig, ax = plt.subplots()
 		bp = ax.boxplot([sample_1], showfliers=False)
 		plt.show()
-
-def get_path_for_output(figure_name):
-
-
-	current_adress = os.path.dirname(os.path.abspath(__file__))
-
-	output_adress = os.path.join(current_adress,'..','output')
-
-	if not os.path.exists(output_adress):
-		os.makedirs(output_adress)
-
-	return os.path.join(output_adress,figure_name)
-
-	
 
 def rep_iter(total_rep, genetic_al):
 	'''
@@ -892,15 +882,14 @@ if __name__ == '__main__':
 	# Condicion de termino : Alcanza optimo o maximo de generaciones 
 
 	number_q,popultation_size,prob_cross,prob_mut,time = int(sys.argv[1]),int(sys.argv[2]),float(sys.argv[3]),float(sys.argv[4]),int(sys.argv[5])
-	outputName=str()
 
 	#El 3 es el tamanio del torneo 
 	ga = GeneticAlg(number_q,popultation_size,.8,3,prob_cross,prob_mut,time)
 	
 	ga.execution()
-	plot_queens(ga.get_the_best(), ) 
+	plot_queens(ga.get_the_best()) 
 
-	
+	matplotlib_test()
 	#ga.execution()
 	#print(ga.get_the_best())
 	#ga.init_population()
