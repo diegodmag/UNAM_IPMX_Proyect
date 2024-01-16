@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import numpy as np 
  
- 
+
 class SelectionOp(ABC):
     '''
     Class modeling different types of selection operators
@@ -18,6 +18,8 @@ class SelectionOp(ABC):
 
 class Roulette(SelectionOp): 
     
+    #POR ALGUNA RAZON SE ESTA CICLANDO EL ALGORITMO GENETICO CON ESTE OPERADOR 
+
     def select(self, population, pop_size):
 
         fitness_sum = sum([ind.fitness for ind in population]); 

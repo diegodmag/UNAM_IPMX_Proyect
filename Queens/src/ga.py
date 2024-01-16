@@ -51,7 +51,8 @@ class GeneticAlg:
 		#Tal vez aqui se debe determinar que tipo de operador vamos a usar 
 		self.selection_operator = selop.Tournament(3)
 		#self.selection_operator = selop.Roulette()
-		self.crossover_operator = crossop.Basic()
+		#self.crossover_operator = crossop.Basic()
+		self.crossover_operator = crossop.PMX()
 		#self.optimal = (n_q*(n_q-1))/2
 		self.optimal=0 
 		#self.optimal = (n_q*(n_q-1))/2
@@ -691,10 +692,10 @@ class GeneticAlg:
 			# 	#Aqui nos van a regresar un arreglo de permutaciones 
 			# 	pop_chromosomes = self.crossover_operator.cross_population(selected, self.pop_size)
 			# 	tournament_offspring = self.get_queens_population(pop_chromosomes)
+			#pop_chromosomes = self.crossover_operator.cross_population(selected, self.pop_size)
 			pop_chromosomes = self.crossover_operator.cross_population(selected, self.pop_size)
 			tournament_offspring = self.get_queens_population(pop_chromosomes)
 			#crossover_pop_pmx
-			print("INTERATION")
 			#Elitism Selection  ---> El elitismo debe ser entre padres e hijos 
 			#elite = self.selection_elitism() 
 			#Union of the Selected individuals
