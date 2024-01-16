@@ -52,7 +52,8 @@ class GeneticAlg:
 		self.selection_operator = selop.Tournament(3)
 		#self.selection_operator = selop.Roulette()
 		#self.crossover_operator = crossop.Basic()
-		self.crossover_operator = crossop.PMX()
+		#self.crossover_operator = crossop.PMX()
+		self.crossover_operator = crossop.IMPX()
 		#self.optimal = (n_q*(n_q-1))/2
 		self.optimal=0 
 		#self.optimal = (n_q*(n_q-1))/2
@@ -695,6 +696,8 @@ class GeneticAlg:
 			#pop_chromosomes = self.crossover_operator.cross_population(selected, self.pop_size)
 			pop_chromosomes = self.crossover_operator.cross_population(selected, self.pop_size)
 			tournament_offspring = self.get_queens_population(pop_chromosomes)
+			
+			#tournament_offspring = self.crossover_pop_ipmx(selected)
 			#crossover_pop_pmx
 			#Elitism Selection  ---> El elitismo debe ser entre padres e hijos 
 			#elite = self.selection_elitism() 
