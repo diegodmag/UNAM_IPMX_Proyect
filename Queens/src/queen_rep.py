@@ -1,5 +1,4 @@
 import numpy as np 
-import math 
 
 class Queen_Solution: 
 	'''
@@ -37,9 +36,6 @@ class Queen_Solution:
 			board = board+str(row)+"\n"
 
 		return board
-
-	def aplly_fitness_func(self, func):
-		func()
 
 
 	def evaluate(self): 
