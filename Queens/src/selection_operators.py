@@ -5,17 +5,19 @@ import numpy as np
 class SelectionOp(ABC):
     '''
     Class modeling different types of selection operators
-
-    Attributes
-    
-    Necesitamos la representacion del problema para acceder a algo ? 
-
     '''
     
     @abstractmethod
-    def select(self):
-        pass 
+    def select(self,population, pop_size):
+        '''
+        Funcion que dada una poblacion, selecciona un conjunto de individuos 
 
+        Params: 
+            population: list[Object]
+                La lista de la cual se seleccionan los individuos 
+            pop_size : int 
+                Tamanio de la poblacion 
+        '''
 class Roulette(SelectionOp): 
     
     #POR ALGUNA RAZON SE ESTA CICLANDO EL ALGORITMO GENETICO CON ESTE OPERADOR 

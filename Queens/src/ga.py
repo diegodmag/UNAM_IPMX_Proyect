@@ -11,6 +11,7 @@ import os
 import queen_rep as qrep 
 import selection_operators as selop 
 import crossover_operators as crossop
+import mutation_operators as mutop
 class GeneticAlg: 
 	'''
 	Class modeling the steps and operators of a genetic algorithm to resolve the n-queens problem 
@@ -53,7 +54,9 @@ class GeneticAlg:
 		#self.selection_operator = selop.Roulette()
 		#self.crossover_operator = crossop.Basic()
 		#self.crossover_operator = crossop.PMX()
-		self.crossover_operator = crossop.IMPX()
+		#Recibe de parametro la probabilidad de cruzarlos 
+		self.crossover_operator = crossop.IMPX(self.cross_prob)
+		self.mutation_operator = mutop.SimpleSwap(self.mut_prob)
 		#self.optimal = (n_q*(n_q-1))/2
 		self.optimal=0 
 		#self.optimal = (n_q*(n_q-1))/2
@@ -708,7 +711,7 @@ class GeneticAlg:
 			#Generational Replacement 
 			self.current_pop = offspring
 			#Mutate
-			self.mutation_simple()
+			self.mutation_operator.mutate_population(self.current_pop)
 			total_iterations = total_iterations+1
 				
 		end = tm.time()		

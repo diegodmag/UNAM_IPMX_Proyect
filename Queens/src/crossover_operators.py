@@ -1,49 +1,88 @@
 from abc import ABC, abstractmethod
 import math 
 import numpy as np 
-import matplotlib.pyplot as plt
 import random as rnd 
 import copy
-import time as tm 
-import sys
 
 class CrossoverOp(ABC):
     '''
-    Class modeling different types of selection operators
+    Class modeling different types of crossover operators
 
-    Attributes
+    Attributes : 
+    self.cross_prob : float 
+        La probabilidad de cruzar a dos individuos seleccionados 
     
-    Necesitamos la representacion del problema para acceder a algo ? 
-
     '''
-    
+    def __init__(self,cross_prob):
+        self.cross_prob = cross_prob
+        
     @abstractmethod
     def cross(self,parent1, parent2):
+        '''
+        Funcion que ejecuta la cruza de dos padres 
+        
+        Params:
+            parent1, parent2 : Object
+                Instancias de una solucion con representacion de permutacion
+
+        Returns:
+            offspring_1, offspring_2 : list[int] 
+                Dos permutaciones legalizadas 
+        '''
         pass
     
     @abstractmethod
     def debugged_cross(self,parent1, parent2):
+        '''
+        Funcion que ejecuta la cruza de dos padres 
+        
+        Params:
+            parent1, parent2 : Object
+                Instancias de una solucion con representacion de permutacion
+
+        Returns:
+            offspring_1, offspring_2 : list[int] 
+                Dos permutaciones legalizadas 
+        '''
         pass
 
-    # @abstractmethod
-    # def cross_population(self, population):
-    #     pass 
-
     def cross_population(self, population, pop_size):
+        '''
+        Funcion para ejecutar la cruza sobre una poblacion dada 
 
+        Params:
+            population : list[Object]
+                Lista con soluciones cuya representacion es una permutacion 
+            pop_size: int 
+                tamanio de la poblacion 
+        
+        Returns: 
+            offspring : list[list[int]]
+                Lista con las permutaciones (cromosomas) para generar la poblacion 
+
+        '''
         offspring = []
         for i in range(int(pop_size/2)):
             #Realizamos tantas interaciones como la mitad de la poblacion
             #Ya que por cada iteracion obtenemos dos hijos 
             parents = np.random.choice(population,2)
-            offspring_1, offspring_2 = self.cross(parents[0],parents[1])
-            offspring.append(offspring_1)
-            offspring.append(offspring_2)
-        
+            if(rnd.random() < self.cross_prob):    
+                offspring_1, offspring_2 = self.cross(parents[0],parents[1])
+                offspring.append(offspring_1)
+                offspring.append(offspring_2)
+            else:
+                #Si la probabilidad es mayor entonces se regresan dos copias de los padres 
+                offspring_1, offspring_2 = copy.copy(parents[0].chromosome),copy.copy(parents[1].chromosome)
+            
         return np.array(offspring)
 
 class Basic(CrossoverOp):
+
+    '''
+    Operador de cruza básico visto en clase 
     
+    '''
+
     def cross(self,parent1,parent2):
 
         n = len(parent1.chromosome)
@@ -87,6 +126,11 @@ class Basic(CrossoverOp):
 
 class PMX(CrossoverOp): 
     
+
+    '''
+        Operador de cruza Partially Mapped Crossover 
+    '''
+
     def cross(self,parent1, parent2):
         
         n = len(parent1.chromosome)
@@ -165,6 +209,24 @@ class PMX(CrossoverOp):
 
     def mapping_relation_generation(self, substr_1, substr_2):
         
+        '''
+        Funcion que genera dos relaciones de mapeo a partir de dos subcadenas. Las relaciones de mapeo 
+        son dos diccionarios. Un cuyas llaves son los elementos de substr_1 y valores los elementos de substr_2
+        y el otro el caso analogo 
+
+        Params: 
+            substr_1 : list[int]
+                Subcadena de un cromosoma
+            substr_2 : list[int]
+                Subcadena de un cromosoma 
+        
+        Returns : 
+            map_rel_R : dic[int:int] 
+                Relacion de mapeo de direccion substr_2 : substr_1
+
+            map_rel_L : dic[int:int] 
+                Relacion de mapeo de direccion substr_1 : substr_2
+        '''
         map_rel_R={}
         map_rel_L={}
 
