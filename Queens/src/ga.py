@@ -19,10 +19,7 @@ class GeneticAlg:
 	current_pop : list :  Queen_Solution
 		The current population of the current iteration 
 	offspring : list :  Queen_Solution
-		The next generation of individuals 
-	sel_proportion : float  
-		Proportion of the population to be selected by roullete selection, the rest is selected by elitism
-		We setted between (.6 , .8)  
+		The next generation of individuals  
 	cross_prob : float 
 		Probability of crossover  (.8 , .9)
 	mut_prob : float 
@@ -35,39 +32,53 @@ class GeneticAlg:
 
 		self.permutation_size = per_size 
 		self.pop_size = pop_s
-		self.current_pop = np.array([])
-		#self.offspring = np.array([])
-		self.max_time = t  
-		#Ya no se usa la proporcion de seleccion
 		self.sel_proportion = p_sel
+		self.tournament_size = t_s 
 		self.cross_prob = cross_p
 		self.mut_prob = mut_p
-		self.tournament_size = t_s 
+		self.max_time = t  
+		self.current_pop = np.array([])
+		
+		#Necesitamos un parametro para determinar las generaciones 
 
-		#Se declara asi para que se puedan usar sus metodos 
+
+		#Problema con representacion de la solucion en permutacion 
 		self.permutation_based_problem = perproblems.NQueens([0])
+		#El optimo de ese problema
 		self.optimal = self.permutation_based_problem.optimal
 		
-		#Tal vez aqui se debe determinar que tipo de operador vamos a usar 
+		#Operadores de SELECCION 
 		self.selection_operator = selop.Tournament(3)
 		#self.selection_operator = selop.Roulette()
-		#Recibe de parametro la probabilidad de cruzarlos 
+		#Operadores de CRUZA  
 		#self.crossover_operator = crossop.Basic(self.cross_prob)
 		#self.crossover_operator = crossop.PMX(self.cross_prob)
 		self.crossover_operator = crossop.IMPX(self.cross_prob)
+		#Operadores de MUTACION
 		self.mutation_operator = mutop.SimpleSwap(self.mut_prob)
-		#Replacement 
+		#Operadores de REEMPLAZO 
 		self.generation_replacement = genreplacement.ElitismMuPlusLambda(self.pop_size)
 		
 		
-	def get_the_best(self):
-		#return sorted(self.current_pop, key = lambda solution : -solution.fitness)[0]
+	def get_the_best(self, population):
 		'''
-		Obtiene el mejor individuo de la población (el de menor fitness)
+		Obtiene el mejor individuo de una poblacion dada  (el de menor fitness)
+		Params : 
+			population : list[Object]
+				Unas poblacion de invididuos con atributo fitness
 		La función sorted los ordena de menor a mayor, por lo que el elemento en la posición 0 es el de menor fitness
 		'''
-		return sorted(self.current_pop, key = lambda solution : solution.fitness)[0]		
+		return sorted(population, key = lambda ind : ind.fitness)[0]		
 
+	def get_avg_fitness(self, population):
+		'''
+		Obtiene el promedio de fitness dado una poblacion 
+		Params : 
+			population : list[Object]
+				Unas poblacion de invididuos con atributo fitness
+		'''
+		return np.mean(np.array([ind.fitness for ind in population]))
+		
 	def show_pop(self):
 		for ind in self.current_pop:
 			print(ind)
@@ -81,13 +92,51 @@ class GeneticAlg:
 
 		for i in range(self.pop_size):
 			#init_pop.append(qrep.Queen_Solution(np.random.permutation(self.permutation_size)))
-			init_pop.append(self.permutation_based_problem.get_instance(np.random.permutation(self.permutation_size)))
+			ind = self.permutation_based_problem.get_instance(np.random.permutation(self.permutation_size))
+			ind.evaluate()
+			init_pop.append(ind)
+			
 		self.current_pop=np.array(init_pop)
+
 				
-	
 	#Tenemos que hacer una ejecucion individual de la cual obtengamos varios datos 
 	#Tal vez guardarlos en un .csv 
 	#Luego hacemos una que repita varias 
+
+	# por cada iteracion debemos obtener :
+	# best (mejor solucion)
+	# avg (promedio fitness)
+	# avg_hijos (promedio hijos)
+	# best_hijo (mejor)
+
+	#Necesitamos la mejor solucion 
+	#El promedio del fitness 
+	#Mejor hijo -> Es decir obtener el mejor de la cruza 
+	#Promedio de fitness de hijos 
+
+	def individual_execution(self):
+		#Evaluamos a los individuos de la poblacion actual 
+		[ind.evaluate() for ind in self.current_pop]
+		#SELECCION
+		selected = self.selection_operator.select(self.current_pop, self.pop_size)
+		#CRUZA 1 -> OBTENEMOS UNA POBLACION DE PERMUTACIONES
+		primitive_offspring_chromosomes = self.crossover_operator.cross_population(selected, self.pop_size)
+		#CRUZA 2 -> GENERACION DE POBLACION BASADA EN LOS CROMOSOMAS 
+		primitive_offspring_population = self.permutation_based_problem.get_population(primitive_offspring_chromosomes)
+		[ind.evaluate() for ind in primitive_offspring_population]
+		best_son = self.get_the_best(primitive_offspring_population) #MEJOR HIJO
+		offspring_avg_fitness = self.get_avg_fitness(primitive_offspring_population) #PROMEDIO DE FITNESS DE HIJOS
+		print("Mejor hijo :"+str(best_son.fitness))
+		print("AVG Fitness Hijos :"+str(offspring_avg_fitness))
+		#REEMPLAZO GENERACIONAL 
+		self.current_pop = self.generation_replacement.replace(self.current_pop, primitive_offspring_population)
+		#MUTACION 
+		self.mutation_operator.mutate_population(self.current_pop)
+		[ind.evaluate() for ind in primitive_offspring_population]
+		best_current_pop = self.get_the_best(self.current_pop) #MEJOR DE LA EJECUCION 
+		current_pop_avg_fitness = self.get_avg_fitness(self.current_pop) #PROMEDIO DE FITNESS 
+		print("Mejor de iteracion :"+str(best_current_pop.fitness))
+		print("AVG Fitness Iteracion :"+str(current_pop_avg_fitness))
 
 
 	def execution(self):
@@ -109,37 +158,27 @@ class GeneticAlg:
 		#while tm.time() < self.max_time or self.get_the_best().fitness != self.optimal:
 		#while(tm.time() < self.max_time):
 		#for i in range(2):
-
-		while True :
-			[ind.evaluate() for ind in self.current_pop]
-			if(self.get_the_best().fitness == self.optimal):
-				break
-			else:
-				#SELECTION
-				selected = self.selection_operator.select(self.current_pop, self.pop_size)
-				
-			
-			pop_chromosomes = self.crossover_operator.cross_population(selected, self.pop_size)
-			tournament_offspring = self.permutation_based_problem.get_population(pop_chromosomes)
-			offspring = self.generation_replacement.replace(self.current_pop, tournament_offspring)
-			self.current_pop = offspring
-			self.mutation_operator.mutate_population(self.current_pop)
-			total_iterations = total_iterations+1
+		cont = 1
+		#CONDICIONES DE TERMINO IMPORTANTES -> Por generacion y por alcanzar el optimo 
+		while True:
+			if(self.get_the_best(self.current_pop).fitness == self.optimal):
+				#Aqui hay que revisar la condicion de paro (falta la condición por generacion maxima alcanzada)
+				#print(self.get_the_best(self.current_pop))
+				break 
+			else : 
+				#print("Iteracion :"+str(total_iterations))
+				self.individual_execution()
+				print(">>>>>>>>>>>>>>>>>>>>>")
 				
 		end = tm.time()		
-		#Una ultima evaluacion de la ultima generacion 
-		
-		[ind.evaluate() for ind in self.current_pop]
-		
-		
+			
 		return (end-start), total_iterations
-
+	
+#Este hay que moverlo a uno de puras metricas 
 def boxplot(sample_1):
 		fig, ax = plt.subplots()
 		bp = ax.boxplot([sample_1], showfliers=False)
 		plt.show()
-
-
 	
 # Este es el que ejecuta el algoritmo varias veces 
 def rep_iter(total_rep, genetic_al):
@@ -160,7 +199,7 @@ def rep_iter(total_rep, genetic_al):
 	gens = [] 
 	for i in range(total_rep): 
 		tmp_time, tmp_generations = genetic_al.execution()
-		data.append(genetic_al.get_the_best().fitness)
+		data.append(genetic_al.get_the_best(genetic_al.current_pop).fitness)
 		times.append(tmp_time)
 		gens.append(tmp_generations)
 
@@ -172,7 +211,7 @@ def rep_iter(total_rep, genetic_al):
 	print("AVG Geeneraciones: "+str(avg_genes))
 	#print(data)
 	print("AVG Fitness: "+str(avg_fitness))
-	print("Best possible fitness: "+str(genetic_al.get_the_best().max_conflics))
+	print("Best possible fitness: "+str(genetic_al.get_the_best(genetic_al.current_pop).max_conflics))
 		
 	#boxplot(data)
 
@@ -187,7 +226,7 @@ if __name__ == '__main__':
 	ga = GeneticAlg(number_q,popultation_size,.8,3,prob_cross,prob_mut,time)
 	
 	ga.execution()
-	print(ga.get_the_best())
+	#print(ga.get_the_best(ga.current_pop))
 	#ga.get_the_best().output_plot()
 	#plot_queens(ga.get_the_best(),outputName) 
 
