@@ -37,3 +37,8 @@ Ejemplo :
     python3  src/ga.py 8 100 .8 .1 5 
 
 El anterior ejemplo es ejecutar el algoritmo genetico de 8 reinas con una poblacion de 100, probabiliidad de cruza de .8, probabilidad de mutacion de .1 y con un maximo de 5 segundos. 
+
+
+    python3 src/executions.py 8 100 .8 .1 50 5 1 3 1 0 0
+
+def __init__(self,per_size, pop_s,cross_p, mut_p,max_gen ,t, sel_op,t_s,croos_op, mut_op, gen_rep_op):

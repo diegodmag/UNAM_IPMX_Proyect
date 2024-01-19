@@ -1,65 +1,117 @@
 import numpy as np 
-import matplotlib.pyplot as plt
-import time as tm 
-import sys
 import permutation_based_problems as perproblems 
 import selection_operators as selop 
 import crossover_operators as crossop
 import mutation_operators as mutop
 import generational_replacement_operators as genreplacement 
+
 class GeneticAlg: 
 	'''
 	Class modeling the steps and operators of a genetic algorithm to resolve the n-queens problem 
 
 	Attributes : 
-	queens : int 
-		Number of the n-queen problem
+	permutation_size : int 
+		Number of the n-permutation problem
 	pop_size : int 
 		Size of the population
-	current_pop : list :  Queen_Solution
-		The current population of the current iteration 
-	offspring : list :  Queen_Solution
-		The next generation of individuals  
 	cross_prob : float 
 		Probability of crossover  (.8 , .9)
 	mut_prob : float 
 		Probability of select a individual from the population in order to be mutated (.1 , .2)
+	current_pop : list :  Queen_Solution
+		The current population of the current iteration  
+	max_generations : int 
+		Max number of generations for the algorithm 
+	max_time : int 
+		Max execution time for the algorithm
+
+	#-> Por definir : permutation_based_problem (Por defecto el de las n-queens)
+	optimal : int/float 
+		The optimal value for the permutation based problem
+	selection_operator : SelectionOp
+		Selection Operators 
+			0 -> Roulette
+			1 -> Tournament
 	tournament_size : int 
 		Sample's size to consider for a selection 
+	crossover_operator : CrossoverOp
+		Crossover Operators
+			0 -> Basic
+			1 -> PMX
+			2 -> IMPX
+	mutation_operator : MutationOp
+		Mutation Operators 
+			0 -> SimpleSwap
+	generation_replacement : class GenerationalReplacement:
+		Generational Replacement Operator 
+			0 -> ElitismMuPlusLambda
+ 	
 	'''
 
-	def __init__(self, per_size, pop_s, p_sel,t_s,cross_p, mut_p, t):
+	def __init__(self,per_size, pop_s,cross_p, mut_p,max_gen ,t, sel_op,t_s,croos_op, mut_op, gen_rep_op):
 
+		
 		self.permutation_size = per_size 
 		self.pop_size = pop_s
-		self.sel_proportion = p_sel
-		self.tournament_size = t_s 
 		self.cross_prob = cross_p
 		self.mut_prob = mut_p
-		self.max_time = t  
 		self.current_pop = np.array([])
+		self.max_generations = max_gen
+		self.max_time = t  
 		
-		#Necesitamos un parametro para determinar las generaciones 
-
-
 		#Problema con representacion de la solucion en permutacion 
 		self.permutation_based_problem = perproblems.NQueens([0])
 		#El optimo de ese problema
 		self.optimal = self.permutation_based_problem.optimal
+		self.tournament_size = t_s 
 		
+		self.selection_operator = self.set_selection_op(sel_op)
+
+		self.crossover_operator = self.set_crossover_op(croos_op)
+		
+		self.mutation_operator = self.set_mutation_op(mut_op)
+
+		self.generation_replacement = self.set_generational_replacement_op(gen_rep_op)
+
+		
+	def set_selection_op(self,sel_op):
 		#Operadores de SELECCION 
-		self.selection_operator = selop.Tournament(3)
-		#self.selection_operator = selop.Roulette()
+		if(sel_op==0):
+			return selop.Roulette()
+		elif(sel_op==1):
+			return selop.Tournament(self.tournament_size)
+		else:
+			#Por defecto toma el 3-torneo
+			return selop.Tournament(3)			
+
+	def set_crossover_op(self,croos_op): 
 		#Operadores de CRUZA  
-		#self.crossover_operator = crossop.Basic(self.cross_prob)
-		#self.crossover_operator = crossop.PMX(self.cross_prob)
-		self.crossover_operator = crossop.IMPX(self.cross_prob)
+		if(croos_op==0):
+			return crossop.Basic(self.cross_prob)
+		elif(croos_op==1):
+			return crossop.PMX(self.cross_prob)
+		elif(croos_op==2):
+			return crossop.IMPX(self.cross_prob)
+		else:
+			#Por defecto toma PMX
+			return crossop.PMX(self.cross_prob)
+		
+	def set_mutation_op(self, mut_op):
 		#Operadores de MUTACION
-		self.mutation_operator = mutop.SimpleSwap(self.mut_prob)
+		if(mut_op==0):
+			return mutop.SimpleSwap(self.mut_prob)
+		else: 
+			#Por defecto toma SimpleSwap
+			return mutop.SimpleSwap(self.mut_prob)
+	
+	def set_generational_replacement_op(self,gen_rep_op):
 		#Operadores de REEMPLAZO 
-		self.generation_replacement = genreplacement.ElitismMuPlusLambda(self.pop_size)
-		
-		
+		if(gen_rep_op==0):
+			return genreplacement.ElitismMuPlusLambda(self.pop_size)
+		else:
+			#Por defecto toma el Reemplazo Generacional
+			return genreplacement.ElitismMuPlusLambda(self.pop_size) 
+
 	def get_the_best(self, population):
 		'''
 		Obtiene el mejor individuo de una poblacion dada  (el de menor fitness)
@@ -98,7 +150,6 @@ class GeneticAlg:
 			
 		self.current_pop=np.array(init_pop)
 
-				
 	#Tenemos que hacer una ejecucion individual de la cual obtengamos varios datos 
 	#Tal vez guardarlos en un .csv 
 	#Luego hacemos una que repita varias 
@@ -149,11 +200,11 @@ class GeneticAlg:
 			iteration / execution : int 
 				Total time generation 
 		'''
-		start = tm.time()
+		# start = tm.time()
 		
 		total_iterations = 0 
-		ga.init_population()
-
+		#ga.init_population()
+		self.init_population()
 		#while (tm.time() - start < self.max_time) and (self.get_the_best().fitness != self.optimal):
 		#while tm.time() < self.max_time or self.get_the_best().fitness != self.optimal:
 		#while(tm.time() < self.max_time):
@@ -170,71 +221,11 @@ class GeneticAlg:
 				self.individual_execution()
 				print(">>>>>>>>>>>>>>>>>>>>>")
 				
-		end = tm.time()		
+		# end = tm.time()		
 			
-		return (end-start), total_iterations
+		# return (end-start), total_iterations
+		print(self.get_the_best(self.current_pop))
 	
-#Este hay que moverlo a uno de puras metricas 
-def boxplot(sample_1):
-		fig, ax = plt.subplots()
-		bp = ax.boxplot([sample_1], showfliers=False)
-		plt.show()
-	
-# Este es el que ejecuta el algoritmo varias veces 
-def rep_iter(total_rep, genetic_al):
-	'''
-	Execute the algortihm "total_rep" times
-
-	Args: 
-	total_rep : int 
-		The total number of repetitions to execute the genetic 
-	genetic_al : GeneticAlg 
-		The 
-	'''
-	#Save the bests fitness 
-	data = []
-	#Save the times 
-	times = []
-	#Save the number of generations 
-	gens = [] 
-	for i in range(total_rep): 
-		tmp_time, tmp_generations = genetic_al.execution()
-		data.append(genetic_al.get_the_best(genetic_al.current_pop).fitness)
-		times.append(tmp_time)
-		gens.append(tmp_generations)
-
-	#AVG Time
-	avg_time = sum(times)/len(times)
-	avg_genes = sum(gens)/len(gens)
-	avg_fitness = sum(data)/len(data)
-	#print("AVG Tiempo : " + str(avg_time))
-	print("AVG Geeneraciones: "+str(avg_genes))
-	#print(data)
-	print("AVG Fitness: "+str(avg_fitness))
-	print("Best possible fitness: "+str(genetic_al.get_the_best(genetic_al.current_pop).max_conflics))
-		
-	#boxplot(data)
-
-if __name__ == '__main__':
-
-	# Condicion de termino : Alcanza optimo o maximo de generaciones 
-
-	number_q,popultation_size,prob_cross,prob_mut,time = int(sys.argv[1]),int(sys.argv[2]),float(sys.argv[3]),float(sys.argv[4]),int(sys.argv[5])
-	
-	
-	#El 3 es el tamanio del torneo 
-	ga = GeneticAlg(number_q,popultation_size,.8,3,prob_cross,prob_mut,time)
-	
-	ga.execution()
-	#print(ga.get_the_best(ga.current_pop))
-	#ga.get_the_best().output_plot()
-	#plot_queens(ga.get_the_best(),outputName) 
-
-	
-	
-
-
-
 	
 
 
