@@ -4,7 +4,6 @@ import time
 import matplotlib.pyplot as plt
 import pandas as pd
 import os 
-import csv
 import numpy as np 
 class Metrics:
 
@@ -39,35 +38,32 @@ class Metrics:
 		#Inicializamos poblacion para obtener cromosomas randoms 
 		individuals = np.random.choice(self.genetic_algo.current_pop,2)
 		#Se realiza la cruza 
-		print(">>>>")
 		time_start = time.time()
 		offs_1,offs_2 = self.genetic_algo.crossover_operator.cross(individuals[0],individuals[1])
 		time_end = time.time()
-		print("offspring 1 "+str(offs_1))
-		print("offspring 2 "+str(offs_2))
-		print(">>>>")
 		total_time = time_end-time_start
-		print(total_time)
 		return total_time
-	# parents = np.random.choice(population,2)
-    #         if(rnd.random() < self.cross_prob):    
-    #             offspring_1, offspring_2 = self.cross(parents[0],parents[1])
-    #             offspring.append(offspring_1)
-    #             offspring.append(offspring_2)
 	
-	def register_time(self,iterations):
+	def register_crossover_time(self,min_per_size,max_per_size,iterations,file_name):
+		'''
+		Esta funcion registra en 
+		
+		'''
+		
 		#De uno a n vamos incrementar las reinas ? 
 		#Buscamos realizar 30 veces el get crossover time y registrarlo en el .csv 
+		file = "output/crossoverdata/"+str(file_name)
 		self.genetic_algo.init_population()
-		for i in range(8,21):
+		for i in range(min_per_size,max_per_size+1):
 			data = []
 			data.append(str(i))
 			j = 0
-			self.genetic_algo.permutation_size = i 
+			self.genetic_algo.permutation_size = i
+			self.genetic_algo.init_population() 
 			for i in range(iterations):
 				data.append(self.get_crossover_time())
 			##Ahora hay que registrarlo en el .csv
-			file = get_path_for_output("output/crossoverOp/PMXTimes.txt") 
+			file = get_path_for_file(file) 
 			writte_txt_data(file,data)
 			j+=1
 			
@@ -79,22 +75,26 @@ def boxplot(sample_1):
 		plt.show()
 
 #Funcion para encontrar la ruta de un archivo
-def get_path_for_output(output_file_name):
+def get_path_for_file(output_file_name):
+		'''
+		Obtiene la ruta de un archivo a partir de un nombre
+		'''
 		current_address = os.path.dirname(os.path.abspath(__file__))
 		current_address = os.path.dirname(current_address)
 		output_address = os.path.join(current_address,output_file_name)
 		return output_address
 
 def writte_txt_data(file_path, data):
-
 	with open(file_path, 'a') as file:
 		line = f"{data[0]},{','.join(map(str,data[1:]))}\n"
-
 		file.write(line)
 
 def get_data_from_txt(file_path):
-	
-	file_path = get_path_for_output(file_path)
+	'''
+	Obtiene la data de un archivo .txt donde cada linea está separada solo por ','
+	'''
+	file_path = "output/crossoverdata/"+str(file_path)
+	file_path = get_path_for_file(file_path)
 	results = []
 	with open(file_path, 'r') as file : 
 		for line in file:
@@ -105,6 +105,52 @@ def get_data_from_txt(file_path):
 	
 	return results
 
+def generate_avg_data(data):
+	'''
+	'''
+	#Considerando que nuestra data son arreglos bidimencionales 
+	data_1 = []
+	avg_data = []
+
+	for results in data : 
+		#Aqui ya vamos por linea 
+		#Primero guardamos el valor el cual siempre esta en el primer indice 
+		data_1.append(results[0])
+		avg = np.array(results[1:])
+		avg = np.mean(avg)
+		avg_data.append(avg)
+
+	return data_1,avg_data
+
+def gen_basic_graph(data_1,data_2,file_path):
+	title = file_path
+	file_path = "output/crossovervisuals/"+str(file_path)
+	file_path = get_path_for_file(file_path)
+
+	plt.plot(data_1,data_2)
+	plt.xlabel('Tamaño permutacion')
+	plt.ylabel('Tiempo promedio')
+	#Srive para mostrar todos los puntos 
+	plt.xticks(data_1)
+	plt.title('Tiempo promedio para realizar la cruza de '+str(title))
+	plt.savefig(file_path)
+
+def gen_vs_graph(data_1,data_2,file_path,data_name_1, data_name_2):
+	title = file_path
+	file_path = "output/crossovervisuals/"+str(file_path)
+	file_path = get_path_for_file(file_path)
+
+	plt.plot(data_1[0],data_1[1],label=data_name_1,marker='o', linestyle='--', color='blue')
+	plt.plot(data_2[0],data_2[1],label=data_name_2,marker='s', linestyle='--', color='orange')
+	plt.xlabel('Tamaño permutacion')
+	plt.ylabel('Tiempo promedio')
+	#Srive para mostrar todos los puntos 
+	plt.xticks(data_1[0])
+	plt.legend()
+	plt.title('Tiempo promedio para realizar la cruza de '+str(title))
+	plt.savefig(file_path)
+
+#plt.savefig(self.get_path_for_file(str('Board'+str(len(self.chromosome)))))
 
 # Este es el que ejecuta el algoritmo varias veces 
 def rep_iter(total_rep, genetic_al):
@@ -141,30 +187,31 @@ def rep_iter(total_rep, genetic_al):
 		
 	#boxplot(data)
 
-if __name__ == '__main__':
+def graph_generation(file_name):
+	raw_data = get_data_from_txt(file_name+".txt")
+	d_1, d_2 = generate_avg_data(raw_data)
+	file_name_generic = file_name
+	gen_basic_graph(d_1,d_2,file_name_generic)
 
-    #get_params_execute()
-	# Condicion de termino : Alcanza optimo o maximo de generaciones 
+def graph_vs_generation(file_name1,file_name2):
+	raw_data_1 = get_data_from_txt(file_name1+".txt")
+	raw_data_2 = get_data_from_txt(file_name2+".txt")
+	d_1_1, d_1_2 = generate_avg_data(raw_data_1)
+	d_2_1, d_2_2 = generate_avg_data(raw_data_2)
+	file_name_generic = file_name1+"vs"+file_name2
+	gen_vs_graph([d_1_1,d_1_2], [d_2_1,d_2_2],file_name_generic,file_name1,file_name2)
+	#gen_basic_graph(d_1,d_2,file_name_generic)
+
+if __name__ == '__main__':
+ 
 	metrics = Metrics()
 	metrics.get_params()
-	#metrics.register_time(5)
-	# cross_time = metrics.get_crossover_time()
-	print(get_data_from_txt("output/crossoverOp/PMXTimes.txt"))
-	
-	#metrics.execute_algorithm()
-	#number_q,popultation_size,prob_cross,prob_mut,time = int(sys.argv[1]),int(sys.argv[2]),float(sys.argv[3]),float(sys.argv[4]),int(sys.argv[5])
-	
-	
-	#El 3 es el tamanio del torneo 
-	#ga = GeneticAlg(number_q,popultation_size,.8,3,prob_cross,prob_mut,time)
-	
-	#ga.execution()
-	#print(ga.get_the_best(ga.current_pop))
-	#ga.get_the_best().output_plot()
-	#plot_queens(ga.get_the_best(),outputName) 
 
-	
-
+	#Se registran 
+	#file_name = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"Times"
+	#metrics.register_crossover_time(15, 35, 30,file_name+".txt")
+	#graph_generation(file_name)
+	graph_vs_generation("IMPXTimes","PMXTimes")
 
 
 
