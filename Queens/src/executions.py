@@ -184,20 +184,20 @@ def gen_basic_graph(data_1,data_2,file_path):
 	title = file_path
 	file_path = "output/crossovervisuals/"+str(file_path)
 	file_path = get_path_for_file(file_path)
-
+	plt.figure(figsize=(10, 8))
 	plt.plot(data_1,data_2)
 	plt.xlabel('Tamaño permutacion')
 	plt.ylabel('Tiempo promedio')
 	#Srive para mostrar todos los puntos 
 	plt.xticks(data_1)
 	plt.title('Tiempo promedio para realizar la cruza de '+str(title))
-	plt.savefig(file_path)
+	plt.savefig(file_path, dpi=300)
 
 def gen_vs_graph(data_1,data_2,file_path,data_name_1, data_name_2):
 	title = file_path
 	file_path = "output/crossovervisuals/"+str(file_path)
 	file_path = get_path_for_file(file_path)
-
+	plt.figure(figsize=(10, 8))
 	plt.plot(data_1[0],data_1[1],label=data_name_1,marker='o', linestyle='--', color='blue')
 	plt.plot(data_2[0],data_2[1],label=data_name_2,marker='s', linestyle='--', color='orange')
 	plt.xlabel('Tamaño permutacion')
@@ -206,7 +206,7 @@ def gen_vs_graph(data_1,data_2,file_path,data_name_1, data_name_2):
 	plt.xticks(data_1[0])
 	plt.legend()
 	plt.title('Tiempo promedio para realizar la cruza de '+str(title))
-	plt.savefig(file_path)
+	plt.savefig(file_path, dpi=300)
 
 def get_ind_exe_graph(data,data_names,colors,file_path):
 	'''
@@ -216,7 +216,7 @@ def get_ind_exe_graph(data,data_names,colors,file_path):
 	title = file_path
 	file_path = "output/gaindividualexecutionsvisuals/"+str(file_path)
 	file_path = get_path_for_file(file_path)
-
+	plt.figure(figsize=(10, 8))
 	for i in range(1,len(data)):
 		#Generamos un color random 
 		random_color = (random.random(), random.random(), random.random())
@@ -225,10 +225,10 @@ def get_ind_exe_graph(data,data_names,colors,file_path):
 	plt.xlabel('Generacion')
 	plt.ylabel('Fitness')
 	#Srive para mostrar todos los puntos 
-	plt.xticks(data[0])
+	#plt.xticks(data[0])
 	plt.legend()
 	plt.title('Evolucion del valor fitness de una ejecucion individual'+str(title))
-	plt.savefig(file_path)
+	plt.savefig(file_path, dpi=300)
 
 #plt.savefig(self.get_path_for_file(str('Board'+str(len(self.chromosome)))))
 
@@ -289,7 +289,7 @@ if __name__ == '__main__':
 	#metrics.execute_algorithm()
 	file_name_txt = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"IndExecution.txt"
 	file_name_graph = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"IndExecution"
-	#metrics.register_ga_individual_execution(file_name)
+	metrics.register_ga_individual_execution(file_name_txt)
 
 	data = get_data_from_txt_individuals(file_name_txt,"gaindividualexecutions")
 	colors = ['black', 'red', 'blue', 'green', 'purple']
