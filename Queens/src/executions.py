@@ -3,6 +3,7 @@ import sys
 import time  
 import matplotlib.pyplot as plt
 import pandas as pd
+import random
 import os 
 import numpy as np 
 class Metrics:
@@ -28,7 +29,12 @@ class Metrics:
 		self.genetic_algo = ga.GeneticAlg(permutation_size,population_size,crossover_probability,mutation_probability,max_generations,max_time,selection_operator,tournament_size,crossover_operator,mutation_operator,generational_replacement_operator)
 	
 	def execute_algorithm(self):
-		self.genetic_algo.execution()
+		a,x,y,z,w = self.genetic_algo.execution()
+		print(a)
+		print(x)
+		print(y)
+		print(z)
+		print(w)
 	
 	#Una funcion que ejecute el operador de cruza con dos cromosomas random y regrese el tiempo 
 	#que tardó realizando la cruza. 
@@ -67,7 +73,29 @@ class Metrics:
 			writte_txt_data(file,data)
 			j+=1
 			
+	def register_ga_individual_execution(self,file_name):
+		'''
+		Esta funcion ejecuta el algoritmo evolutivo y escribe los datos para la ejecucion individual 
+		a lo largo de las generaciones 
+		'''
+		generations,best_sons,avg_offspring,best_all,avg_fitness = self.genetic_algo.execution()
+		file = "output/gaindividualexecutions/"+str(file_name)
+		#Hay que hacer el formaro de cada linea 
+		total_data = []
+		for i in range(len(generations)):
+			line = [generations[i], best_sons[i], avg_offspring[i],best_all[i], avg_fitness[i]]
+			total_data.append(line)
+		
+		for line in total_data:
+			writte_txt_data(file,line)
+		# writte_txt_data(file,generations,best_sons)
+		# writte_txt_data(file,best_sons)
+		# writte_txt_data(file,avg_offspring)
+		# writte_txt_data(file,best_all)
+		# writte_txt_data(file,avg_fitness)
 
+		#Estaria bien guardar informacion del Operador de Cruza, El operador de Seleccion, Operador Mutacion, Operador de seleccion
+		
 #Este hay que moverlo a uno de puras metricas 
 def boxplot(sample_1):
 		fig, ax = plt.subplots()
@@ -89,11 +117,12 @@ def writte_txt_data(file_path, data):
 		line = f"{data[0]},{','.join(map(str,data[1:]))}\n"
 		file.write(line)
 
-def get_data_from_txt(file_path):
+
+def get_data_from_txt(file_path,output_dir):
 	'''
 	Obtiene la data de un archivo .txt donde cada linea está separada solo por ','
 	'''
-	file_path = "output/crossoverdata/"+str(file_path)
+	file_path = "output/"+str(output_dir)+"/"+str(file_path)
 	file_path = get_path_for_file(file_path)
 	results = []
 	with open(file_path, 'r') as file : 
@@ -104,6 +133,35 @@ def get_data_from_txt(file_path):
 			results.append([value]+times)
 	
 	return results
+
+def get_data_from_txt_individuals(file_path,output_dir):
+	'''
+	Obtiene los datos de una ejecucion individual en formato [gen, best_individual_offspring, avg_ofspring, best, avg_fitness]
+	'''
+	file_path = "output/"+str(output_dir)+"/"+str(file_path)
+	file_path = get_path_for_file(file_path)
+
+	gens_data = []
+	best_ind_offspring_data = []
+	avg_offspring_data = []
+	best_ind_data=[]
+	avg_fitness_data = []
+	with open(file_path,'r') as file : 
+		for line in file : 
+			data = line.strip().split(',')
+			# gen = int(data[0])
+			# best_ind_offspring = int(data[1])
+			# avg_offspring = float(data[2])
+			# best_ind = int(data[3])
+			# avg_fitness = float(data[0])
+			gens_data.append(int(data[0]))
+			best_ind_offspring_data.append(int(data[1]))
+			avg_offspring_data.append(float(data[2]))
+			best_ind_data.append(float(data[3]))
+			avg_fitness_data.append(float(data[4]))
+
+	return [gens_data,best_ind_offspring_data,avg_offspring_data,best_ind_data,avg_fitness_data] 
+	
 
 def generate_avg_data(data):
 	'''
@@ -148,6 +206,28 @@ def gen_vs_graph(data_1,data_2,file_path,data_name_1, data_name_2):
 	plt.xticks(data_1[0])
 	plt.legend()
 	plt.title('Tiempo promedio para realizar la cruza de '+str(title))
+	plt.savefig(file_path)
+
+def get_ind_exe_graph(data,data_names,colors,file_path):
+	'''
+	La grafica de ejecuciones individuales, se considera como data[0] las generaciones 
+	'''
+	
+	title = file_path
+	file_path = "output/gaindividualexecutionsvisuals/"+str(file_path)
+	file_path = get_path_for_file(file_path)
+
+	for i in range(1,len(data)):
+		#Generamos un color random 
+		random_color = (random.random(), random.random(), random.random())
+		plt.plot(data[0],data[i],label=data_names[i],linestyle='--', color=colors[i])
+
+	plt.xlabel('Generacion')
+	plt.ylabel('Fitness')
+	#Srive para mostrar todos los puntos 
+	plt.xticks(data[0])
+	plt.legend()
+	plt.title('Evolucion del valor fitness de una ejecucion individual'+str(title))
 	plt.savefig(file_path)
 
 #plt.savefig(self.get_path_for_file(str('Board'+str(len(self.chromosome)))))
@@ -206,12 +286,19 @@ if __name__ == '__main__':
  
 	metrics = Metrics()
 	metrics.get_params()
+	#metrics.execute_algorithm()
+	file_name_txt = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"IndExecution.txt"
+	file_name_graph = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"IndExecution"
+	#metrics.register_ga_individual_execution(file_name)
 
+	data = get_data_from_txt_individuals(file_name_txt,"gaindividualexecutions")
+	colors = ['black', 'red', 'blue', 'green', 'purple']
+	get_ind_exe_graph(data,["Generations", "Best of Offspring", "Avg Offspring", "Best", "Avg Fitness"],colors, file_name_graph)
+	#print(data,["Generations", "Best of Offspring", "Avg Offspring", "Best", "Avg Fitness"],file_name_graph)
 	#Se registran 
-	#file_name = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"Times"
 	#metrics.register_crossover_time(15, 35, 30,file_name+".txt")
 	#graph_generation(file_name)
-	graph_vs_generation("IMPXTimes","PMXTimes")
+	#graph_vs_generation("IMPXTimes","PMXTimes")
 
 
 
