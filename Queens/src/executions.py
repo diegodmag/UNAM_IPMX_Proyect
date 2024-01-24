@@ -2,7 +2,6 @@ import ga
 import sys
 import time  
 import matplotlib.pyplot as plt
-import pandas as pd
 import random
 import os 
 import numpy as np 
