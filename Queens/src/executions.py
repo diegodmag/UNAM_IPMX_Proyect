@@ -27,6 +27,10 @@ class Metrics:
 		#Inicializamos el algoritmo 
 		self.genetic_algo = ga.GeneticAlg(permutation_size,population_size,crossover_probability,mutation_probability,max_generations,max_time,selection_operator,tournament_size,crossover_operator,mutation_operator,generational_replacement_operator)
 	
+	def simple_execution(self):
+		
+		print(self.genetic_algo.simple_execution())
+
 	def execute_algorithm(self):
 		a,x,y,z,w = self.genetic_algo.execution()
 		print(a)
@@ -285,14 +289,19 @@ if __name__ == '__main__':
  
 	metrics = Metrics()
 	metrics.get_params()
+	metrics.simple_execution()
+	
+	
+	#EN REVISION >>>
+	
 	#metrics.execute_algorithm()
-	file_name_txt = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"IndExecution.txt"
-	file_name_graph = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"IndExecution"
-	metrics.register_ga_individual_execution(file_name_txt)
+	# file_name_txt = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"IndExecution.txt"
+	# file_name_graph = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"IndExecution"
+	# metrics.register_ga_individual_execution(file_name_txt)
 
-	data = get_data_from_txt_individuals(file_name_txt,"gaindividualexecutions")
-	colors = ['black', 'red', 'blue', 'green', 'purple']
-	get_ind_exe_graph(data,["Generations", "Best of Offspring", "Avg Offspring", "Best", "Avg Fitness"],colors, file_name_graph)
+	#data = get_data_from_txt_individuals(file_name_txt,"gaindividualexecutions")
+	#colors = ['black', 'red', 'blue', 'green', 'purple']
+	#get_ind_exe_graph(data,["Generations", "Best of Offspring", "Avg Offspring", "Best", "Avg Fitness"],colors, file_name_graph)
 	#print(data,["Generations", "Best of Offspring", "Avg Offspring", "Best", "Avg Fitness"],file_name_graph)
 	#Se registran 
 	#metrics.register_crossover_time(15, 35, 30,file_name+".txt")

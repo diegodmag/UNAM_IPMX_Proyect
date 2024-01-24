@@ -165,6 +165,17 @@ class GeneticAlg:
 	#Mejor hijo -> Es decir obtener el mejor de la cruza 
 	#Promedio de fitness de hijos 
 
+	def simple_individual_execution(self):
+	
+		[ind.evaluate() for ind in self.current_pop]
+		selected = self.selection_operator.select(self.current_pop, self.pop_size)
+		primitive_offspring_chromosomes = self.crossover_operator.cross_population(selected, self.pop_size)
+		primitive_offspring_population = self.permutation_based_problem.get_population(primitive_offspring_chromosomes)
+		[ind.evaluate() for ind in primitive_offspring_population]
+		self.current_pop = self.generation_replacement.replace(self.current_pop, primitive_offspring_population)
+		self.mutation_operator.mutate_population(self.current_pop)
+		[ind.evaluate() for ind in self.current_pop] 
+
 	def individual_execution(self):
 		#Evaluamos a los individuos de la poblacion actual 
 		[ind.evaluate() for ind in self.current_pop]
@@ -181,35 +192,13 @@ class GeneticAlg:
 		self.current_pop = self.generation_replacement.replace(self.current_pop, primitive_offspring_population)
 		#MUTACION 
 		self.mutation_operator.mutate_population(self.current_pop)
-		[ind.evaluate() for ind in primitive_offspring_population]
+		[ind.evaluate() for ind in self.current_pop]
 		best_current_pop = self.get_the_best(self.current_pop).fitness #MEJOR DE LA EJECUCION 
 		current_pop_avg_fitness = self.get_avg_fitness(self.current_pop) #PROMEDIO DE FITNESS 
 		
 		
 		return best_son, offspring_avg_fitness, best_current_pop, current_pop_avg_fitness
 	
-	def debugged_individual_execution(self):
-		#Evaluamos a los individuos de la poblacion actual 
-		[ind.evaluate() for ind in self.current_pop]
-		#SELECCION
-		selected = self.selection_operator.select(self.current_pop, self.pop_size)
-		#CRUZA 1 -> OBTENEMOS UNA POBLACION DE PERMUTACIONES
-		primitive_offspring_chromosomes = self.crossover_operator.cross_population(selected, self.pop_size)
-		#CRUZA 2 -> GENERACION DE POBLACION BASADA EN LOS CROMOSOMAS 
-		primitive_offspring_population = self.permutation_based_problem.get_population(primitive_offspring_chromosomes)
-		[ind.evaluate() for ind in primitive_offspring_population]
-		best_son = self.get_the_best(primitive_offspring_population) #MEJOR HIJO
-		offspring_avg_fitness = self.get_avg_fitness(primitive_offspring_population) #PROMEDIO DE FITNESS DE HIJOS
-		#REEMPLAZO GENERACIONAL 
-		self.current_pop = self.generation_replacement.replace(self.current_pop, primitive_offspring_population)
-		#MUTACION 
-		self.mutation_operator.mutate_population(self.current_pop)
-		[ind.evaluate() for ind in primitive_offspring_population]
-		best_current_pop = self.get_the_best(self.current_pop) #MEJOR DE LA EJECUCION 
-		current_pop_avg_fitness = self.get_avg_fitness(self.current_pop) #PROMEDIO DE FITNESS 
-		
-		return best_son, offspring_avg_fitness, best_current_pop, current_pop_avg_fitness
-
 
 	def execution(self):
 		'''
@@ -251,9 +240,35 @@ class GeneticAlg:
 				current_pop_avg_fitness_data.append(current_pop_avg_fitness)
 				generations_data.append(generations)
 				#Aqui podemos guardar los datos o regresarselos a alguien 
-				print(">>>>>>>>>>>>>>>>>>>>>")
+				#print(">>>>>>>>>>>>>>>>>>>>>")
 		
 		return generations_data, best_son_data, offspring_avg_fitness_data, best_current_pop_data, current_pop_avg_fitness_data
+	
+	#BORRAR >>>>>
+	def simple_execution(self):
+		'''
+		Whole execution of the genetic algortihm 
+		
+		Returns : 
+			time : float 
+				Total execution time 
+			iteration / execution : int 
+				Total time generation 
+		'''
+		self.init_population()
+		generations = 0
+		#CONDICIONES DE TERMINO IMPORTANTES -> Por generacion y por alcanzar el optimo 
+		while True:
+			#if(self.get_the_best(self.current_pop).fitness == self.optimal or generations == self.max_generations):
+			if(generations == self.max_generations):	
+				break 
+			else : 
+				
+				self.simple_individual_execution()
+				generations+=1
+				
+				
+		return self.get_the_best(self.current_pop)
 
 	
 	

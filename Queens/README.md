@@ -11,7 +11,6 @@
 ## IMPORTANTE : 
 - La presente investigacion toma como punto de partida el reporte realizado en el curso de Computo Evolutivo impartido por el Mtro. Oscar Hernández Constantino : `reporteT4.pdf` 
 
-
 ## Recursos utiles 
 
 - [Genetic Algorithms and Their Applications](https://link.springer.com/chapter/10.1007/978-1-4471-7503-2_33)
