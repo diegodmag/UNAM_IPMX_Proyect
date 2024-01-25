@@ -1,4 +1,4 @@
-# Proyecto titulacion : IMPX (Improved Partially Mapped Crossover)
+<!-- # Proyecto titulacion : IMPX (Improved Partially Mapped Crossover)
 
 [Articulo principal IPMX](https://www.sciencedirect.com/science/article/pii/S0957417420302050?casa_token=CG6i4BQlFOQAAAAA:nLkUWj7xPbZy06ALiW8eOyXG5avLBMGfrYqnqrsj-ybv8ktjiCFkjiAe80HYU_uX1H0P4HKsdtU6)
 
@@ -16,4 +16,4 @@
 - [Genetic Algorithms and Their Applications](https://link.springer.com/chapter/10.1007/978-1-4471-7503-2_33)
 - [Reasoning About Order Crossover in Genetic Algorithms](https://link.springer.com/chapter/10.1007/978-3-031-09677-8_22)
 - [Genetic Algorithms for the Travelling Salesman Problem: A Review of Representations and Operators](https://www.researchgate.net/publication/226665831_Genetic_Algorithms_for_the_Travelling_Salesman_Problem_A_Review_of_Representations_and_Operators)
-
+ -->
