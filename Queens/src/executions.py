@@ -39,6 +39,7 @@ class Metrics:
 		print(z)
 		print(w)
 	
+	 
 	#Una funcion que ejecute el operador de cruza con dos cromosomas random y regrese el tiempo 
 	#que tardó realizando la cruza. 
 	# Tenemos que obtener el self.crossover_operator.cross y pasarle dos 
@@ -55,7 +56,7 @@ class Metrics:
 	
 	def register_crossover_time(self,min_per_size,max_per_size,iterations,file_name):
 		'''
-		Esta funcion registra en 
+		Esta funcion registra en un archivo los tiempos que toma un algoritmo por tamanio de permutacion 
 		
 		'''
 		
@@ -63,6 +64,9 @@ class Metrics:
 		#Buscamos realizar 30 veces el get crossover time y registrarlo en el .csv 
 		file = "output/crossoverdata/"+str(file_name)
 		self.genetic_algo.init_population()
+		#Hay que guardar en la primer file los parametros de la ejecucion 
+
+		#Aqui se mete la informacion basica 
 		for i in range(min_per_size,max_per_size+1):
 			data = []
 			data.append(str(i))
@@ -75,7 +79,31 @@ class Metrics:
 			file = get_path_for_file(file) 
 			writte_txt_data(file,data)
 			j+=1
-			
+	
+
+	def register_ga_avg_execution(self,file_name,iteration):
+		
+		file = "output/executionsforavg/"+str(file_name)
+		
+		#Por cada iteracion se guardan todos los datos obtenidos en cada generacion
+
+		total_best_sons_data = []
+		total_avg_offspring_data = []
+		total_best_all_data=[]
+		total_avg_fitness_data=[]
+
+		#Total de iteraciones 
+		#Por cada iteracion hay que guardar los datos obtenidos 
+		for i in range(iteration):
+			# Realizamos una ejecucion 
+			generations, best_sons_ind_data, avg_offspring_ind_data, best_all_ind_data,avg_fitness_ind_data = self.genetic_algo.execution()
+			pass
+
+
+		
+		pass
+		
+
 	def register_ga_individual_execution(self,file_name):
 		'''
 		Esta funcion ejecuta el algoritmo evolutivo y escribe los datos para la ejecucion individual 
@@ -89,6 +117,14 @@ class Metrics:
 			line = [generations[i], best_sons[i], avg_offspring[i],best_all[i], avg_fitness[i]]
 			total_data.append(line)
 		
+
+		#La primer linea deben ser los parametros 
+		selection_operator_line = str(self.genetic_algo.selection_operator.__class__.__name__)
+		cross_operator_line = str(self.genetic_algo.crossover_operator.__class__.__name__)
+		mutation_operator_line = str(self.genetic_algo.mutation_operator.__class__.__name__)
+		replacement_operator_line = str(self.genetic_algo.generation_replacement.__class__.__name__)
+		params_line=[self.genetic_algo.permutation_size, self.genetic_algo.pop_size, self.genetic_algo.cross_prob, self.genetic_algo.mut_prob,self.genetic_algo.max_generations,self.genetic_algo.max_time,selection_operator_line, self.genetic_algo.tournament_size,cross_operator_line, mutation_operator_line,replacement_operator_line ]
+		writte_txt_data(file,params_line)
 		for line in total_data:
 			writte_txt_data(file,line)
 		# writte_txt_data(file,generations,best_sons)
@@ -129,6 +165,10 @@ def get_data_from_txt(file_path,output_dir):
 	file_path = get_path_for_file(file_path)
 	results = []
 	with open(file_path, 'r') as file : 
+		#Hay que leer la primer linea la cual lleva los parametros del algoritmo 
+
+		#Leemos la primer linea que es la que carga info sobre la ejecucion 
+
 		for line in file:
 			data = line.strip().split(',')
 			value = int(data[0])
@@ -150,6 +190,11 @@ def get_data_from_txt_individuals(file_path,output_dir):
 	best_ind_data=[]
 	avg_fitness_data = []
 	with open(file_path,'r') as file : 
+		#Hay que leer la primera linea como los parametro
+
+		#Leemos la primer linea de forma particular 
+		params_Line = file.readline().strip().split(',')
+		
 		for line in file : 
 			data = line.strip().split(',')
 			# gen = int(data[0])
@@ -163,7 +208,7 @@ def get_data_from_txt_individuals(file_path,output_dir):
 			best_ind_data.append(float(data[3]))
 			avg_fitness_data.append(float(data[4]))
 
-	return [gens_data,best_ind_offspring_data,avg_offspring_data,best_ind_data,avg_fitness_data] 
+	return [params_Line,gens_data,best_ind_offspring_data,avg_offspring_data,best_ind_data,avg_fitness_data] 
 	
 
 def generate_avg_data(data):
@@ -211,7 +256,7 @@ def gen_vs_graph(data_1,data_2,file_path,data_name_1, data_name_2):
 	plt.title('Tiempo promedio para realizar la cruza de '+str(title))
 	plt.savefig(file_path, dpi=300)
 
-def get_ind_exe_graph(data,data_names,colors,file_path):
+def get_ind_exe_graph(info,data,data_names,colors,file_path):
 	'''
 	La grafica de ejecuciones individuales, se considera como data[0] las generaciones 
 	'''
@@ -219,6 +264,7 @@ def get_ind_exe_graph(data,data_names,colors,file_path):
 	title = file_path
 	file_path = "output/gaindividualexecutionsvisuals/"+str(file_path)
 	file_path = get_path_for_file(file_path)
+
 	plt.figure(figsize=(10, 8))
 	for i in range(1,len(data)):
 		#Generamos un color random 
@@ -230,8 +276,22 @@ def get_ind_exe_graph(data,data_names,colors,file_path):
 	#Srive para mostrar todos los puntos 
 	#plt.xticks(data[0])
 	plt.legend()
-	plt.title('Evolucion del valor fitness de una ejecucion individual'+str(title))
-	plt.savefig(file_path, dpi=300)
+
+	title_font = {
+    'fontsize': 6,          # Tamaño de la fuente
+    'fontweight': 'bold',    # Peso de la fuente
+    'color': 'blue',         # Color del texto
+    'verticalalignment': 'bottom',  # Alineación vertical
+	}
+
+	#info = "Tamaño permutación : {}\nTamaño población : {}\nProb.Crossover : {}\nProb.Mutación : {}\nGeneraciones Max : {}\nTiempo Max {}\nSelección : {}\k-Torneo : {}\nCrossover : {}\nMutación : {}\nReemplazo : {}".format(info[0],info[1],info[2],info[3],info[4],info[5],info[6],info[7],info[8],info[9], info[10])
+	info_1 = "Tamaño permutación : {}\nTamaño población : {}\nProb.Crossover : {}\nProb.Mutación : {}\nGeneraciones Max : {}".format(info[0],info[1],info[2],info[3],info[4])
+	info_2 = "Tiempo Max {}\nSelección : {}\k-Torneo : {}\nCrossover : {}\nMutación : {}\nReemplazo : {}".format(info[5],info[6],info[7],info[8],info[9], info[10])
+	#"Tiempo Max {}\nSelección : {}\k-Torneo : {}\nCrossover : {}\nMutación : {}\nReemplazo : {}".format(info[5],info[6],info[7],info[8],info[9], info[10])
+	plt.title('Evolucion del valor fitness de una ejecucion individual '+str(title),y=1.2)
+	plt.text(x=.15, y=.95, s=info_1, fontsize=9, ha='left', va='center', transform=plt.gcf().transFigure)
+	plt.text(x=.35, y=.95, s=info_2, fontsize=9, ha='left', va='center', transform=plt.gcf().transFigure)
+	plt.savefig(file_path,bbox_inches='tight')
 
 #plt.savefig(self.get_path_for_file(str('Board'+str(len(self.chromosome)))))
 
@@ -289,19 +349,36 @@ if __name__ == '__main__':
  
 	metrics = Metrics()
 	metrics.get_params()
-	metrics.simple_execution()
+	# metrics.simple_execution()
 	
 	
 	#EN REVISION >>>
 	
+	#File output
+	#file_name_txt = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"IndExecutionTest.txt"
+	file_name_txt = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"IndExecution.txt"
+
+	#Individual Execution 
+	#Se registran las ejecuciones individuales en una file 
+	#metrics.register_ga_individual_execution(file_name_txt)
+	
+	#Se leen los datos de esa file 
+	data = get_data_from_txt_individuals(file_name_txt, "gaindividualexecutions")
+	#Generamos la grafica 
+	file_name_graph = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"IndExecution"
+	colors = ['black', 'red', 'blue', 'green', 'purple']
+	get_ind_exe_graph(data[0],data[1:],["Generations", "Best of Offspring", "Avg Offspring", "Best", "Avg Fitness"],colors, file_name_graph)
+
+
+
+
+
+
 	#metrics.execute_algorithm()
 	# file_name_txt = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"IndExecution.txt"
 	# file_name_graph = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"IndExecution"
-	# metrics.register_ga_individual_execution(file_name_txt)
 
 	#data = get_data_from_txt_individuals(file_name_txt,"gaindividualexecutions")
-	#colors = ['black', 'red', 'blue', 'green', 'purple']
-	#get_ind_exe_graph(data,["Generations", "Best of Offspring", "Avg Offspring", "Best", "Avg Fitness"],colors, file_name_graph)
 	#print(data,["Generations", "Best of Offspring", "Avg Offspring", "Best", "Avg Fitness"],file_name_graph)
 	#Se registran 
 	#metrics.register_crossover_time(15, 35, 30,file_name+".txt")
