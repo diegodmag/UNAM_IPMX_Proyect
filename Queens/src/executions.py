@@ -566,7 +566,7 @@ if __name__ == '__main__':
 	#generate_ind_txt_and_graphic(""); 
 
 	#GENERAR DATOS Y GRAFICAS EVOLUCION PROMEDIO 
-	generate_avg_txt_and_graphic("", 5)
+	generate_avg_txt_and_graphic("", 50)
 
 	
 	
