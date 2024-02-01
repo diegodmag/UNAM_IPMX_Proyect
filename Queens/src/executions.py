@@ -441,10 +441,35 @@ def graph_vs_generation(file_name1,file_name2):
 	gen_vs_graph([d_1_1,d_1_2], [d_2_1,d_2_2],file_name_generic,file_name1,file_name2)
 	#gen_basic_graph(d_1,d_2,file_name_generic)
 
-if __name__ == '__main__':
- 
+
+def generate_avg_txt_and_graphic(file, iterations):
+	'''
+		Metodo para generar un .txt de datos de una evolucion promedio y despues leer los datos
+		y generar una grafica 
+	
+	'''
 	metrics = Metrics()
 	metrics.get_params()
+
+	colors = ['black', 'red', 'blue', 'green', 'purple']
+
+	file+="MeanEvolution"
+
+	file_name_txt = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+str(file)+".txt"
+
+	metrics.register_ga_avg_execution(file_name_txt,iterations)
+
+	data = get_data_from_txt_mean_evolution(file_name_txt,"executionsforavg")
+
+	file_name_graph = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+file
+	get_avg_exe_graph(data[0],data[1:],["Generations", "Best of Offspring", "Avg Offspring", "Best", "Avg Fitness"],colors, file_name_graph)
+	
+	
+
+if __name__ == '__main__':
+ 
+	# metrics = Metrics()
+	# metrics.get_params()
 	# metrics.simple_execution()
 	
 	
@@ -462,22 +487,22 @@ if __name__ == '__main__':
 	#data = get_data_from_txt_individuals(file_name_txt, "gaindividualexecutions")
 	#Generamos la grafica 
 	#file_name_graph = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"IndExecution"
-	colors = ['black', 'red', 'blue', 'green', 'purple']
-	#get_ind_exe_graph(data[0],data[1:],["Generations", "Best of Offspring", "Avg Offspring", "Best", "Avg Fitness"],colors, file_name_graph)
-
-	#Evolucion promedio --> Pruebas 
-	#>>>>>>>>>>>>>>>>>
-	file_name_txt = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"MeanEvolutionTest.txt"
+	# colors = ['black', 'red', 'blue', 'green', 'purple']
+	# #get_ind_exe_graph(data[0],data[1:],["Generations", "Best of Offspring", "Avg Offspring", "Best", "Avg Fitness"],colors, file_name_graph)
+	# file = "MeanEvolutionTest"
+	# #Evolucion promedio --> Pruebas 
+	# #>>>>>>>>>>>>>>>>>
+	# file_name_txt = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+file+".txt"
 	
-	#metrics.register_ga_avg_execution(file_name_txt,5)
+	# #metrics.register_ga_avg_execution(file_name_txt,5)
 
-	data = get_data_from_txt_mean_evolution(file_name_txt,"executionsforavg")
+	# data = get_data_from_txt_mean_evolution(file_name_txt,"executionsforavg")
 
-	file_name_graph = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"MeanEvolutionTest"
-	get_avg_exe_graph(data[0],data[1:],["Generations", "Best of Offspring", "Avg Offspring", "Best", "Avg Fitness"],colors, file_name_graph)
+	# file_name_graph = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+file
+	# get_avg_exe_graph(data[0],data[1:],["Generations", "Best of Offspring", "Avg Offspring", "Best", "Avg Fitness"],colors, file_name_graph)
 	#<<<<<<<<<<<<<<<<<
 
-
+	generate_avg_txt_and_graphic("", 5)
 
 
 	#metrics.execute_algorithm()
