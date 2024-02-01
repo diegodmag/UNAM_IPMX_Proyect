@@ -76,6 +76,9 @@ class CrossoverOp(ABC):
             
         return np.array(offspring)
 
+    #Tambien necesitamos un metodo que le cambie la semilla 
+    
+
 class Basic(CrossoverOp):
 
     '''

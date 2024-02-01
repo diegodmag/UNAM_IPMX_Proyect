@@ -112,6 +112,8 @@ class GeneticAlg:
 			#Por defecto toma el Reemplazo Generacional
 			return genreplacement.ElitismMuPlusLambda(self.pop_size) 
 
+	#Necesitamos un metodo que cambie la semilla aleatoria. 
+	
 	def get_the_best(self, population):
 		'''
 		Obtiene el mejor individuo de una poblacion dada  (el de menor fitness)
