@@ -476,7 +476,7 @@ def generate_croossover_time_and_graphic(file, iterations,min_per_size,max_per_s
 	metrics = Metrics()
 	metrics.get_params()
 
-	file_basic = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"CrossTime"
+	file_basic = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"CrossTime"+str(min_per_size)+"-"+str(max_per_size)
 	file_name_txt = file_basic+".txt"
 	metrics.register_crossover_time(min_per_size,max_per_size,iterations,file_name_txt)
 
@@ -533,8 +533,19 @@ def generate_avg_txt_and_graphic(file, iterations):
 
 if __name__ == '__main__':
  
-	# metrics = Metrics()
-	# metrics.get_params()
+	# TOMA DE PARAMETROS POR DEFECTO
+	metrics = Metrics()
+	metrics.get_params()
+
+	# PRUEBAS DE CROSSOVER 
+	metrics.genetic_algo.init_population()
+	s_1 = metrics.genetic_algo.current_pop[0]
+	s_2 = metrics.genetic_algo.current_pop[1]
+	print(s_1)
+	print(s_2)
+	print("CROSSOVER")
+	metrics.genetic_algo.crossover_operator.cross(s_1,s_2)
+
 	# metrics.simple_execution()
 	
 	
@@ -558,15 +569,24 @@ if __name__ == '__main__':
 
 	#GENERAR DATOS Y GRAFICAS DE TIEMPOS DE CROSSOVER 
 	#generate_croossover_time_and_graphic("", 40,15,50)
+	
+	#PRUEBAS PARA PERMUTACIONES GRANDES 
+	#generate_croossover_time_and_graphic("", 50,100,150)
+
 
 	#CONTRASTE DE CROSSOVERS 
 	#graph_vs_generation("BasicCrossTime","IMPXCrossTime","PMXCrossTime")
+	#PERMUTACIONES GRANDES
+	#graph_vs_generation("BasicCrossTime100-150","IMPXCrossTime100-150","PMXCrossTime100-150")
 
+	#Queens/output/crossoverdata/BasicCrossTime100-150.txt
+	#Queens/output/crossoverdata/IMPXCrossTime100-150.txt
+	#Queens/output/crossoverdata/PMXCrossTime100-150.txt
 	#GENERAR DATOS Y GRAFIFCAS DE EJECUCIONES INDIVIDUALES 
 	#generate_ind_txt_and_graphic(""); 
 
 	#GENERAR DATOS Y GRAFICAS EVOLUCION PROMEDIO 
-	generate_avg_txt_and_graphic("", 50)
+	#generate_avg_txt_and_graphic("", 50)
 
 	
 	
@@ -583,3 +603,4 @@ if __name__ == '__main__':
 	#metrics.register_crossover_time(15, 35, 30,file_name+".txt")
 	#graph_generation(file_name)
 	#graph_vs_generation("IMPXTimes","PMXTimes")
+	pass
