@@ -331,6 +331,27 @@ def gen_vs_graph(data_1,data_2,data_3,file_path,data_name_1, data_name_2,data_na
 	plt.title('Tiempo promedio para realizar la cruza de '+str(title))
 	plt.savefig(file_path, dpi=300)
 
+def gen_vs_graph_for_n(datas, file_path, data_names):
+    title = file_path
+    file_path = "output/crossovervisuals/"+str(file_path)
+    file_path = get_path_for_file(file_path)
+    plt.figure(figsize=(10, 8))
+    
+    markers = ['o', 's', 'D', '^', 'v', '<', '>', '1', '2', '3', '4', '8', 'p', 'P', '*', 'h', 'H', '+', 'x', 'X', 'D', '|', '_']
+    colors = ['blue', 'orange', 'green', 'red', 'purple', 'brown', 'pink', 'gray', 'olive', 'cyan']
+    
+    for i, data in enumerate(datas):
+        plt.plot(data[0], data[1], label=data_names[i], marker=markers[i % len(markers)], linestyle='--', color=colors[i % len(colors)])
+    
+    plt.xlabel('Tamaño permutacion')
+    plt.ylabel('Tiempo promedio')
+    plt.xticks(datas[0][0])
+    plt.legend()
+    plt.title('Tiempo promedio para realizar la cruza de '+str(title))
+    plt.savefig(file_path, dpi=300)
+
+
+
 def get_ind_exe_graph(info,data,data_names,colors,file_path):
 	'''
 	La grafica de ejecuciones individuales, se considera como data[0] las generaciones 
@@ -465,6 +486,17 @@ def graph_vs_generation(file_name1,file_name2, file_name3):
 	gen_vs_graph([d_1_1,d_1_2], [d_2_1,d_2_2],[d_3_1,d_3_2],file_name_generic,file_name1,file_name2,file_name3)
 	#gen_basic_graph(d_1,d_2,file_name_generic)
 
+def graph_vs_generation_for_n(file_names):
+	avgs_datas = []
+	file_path = ""
+	for i, file in enumerate(file_names):
+		raw = get_data_from_txt(file+".txt","crossoverdata")
+		d_1,d_2 = generate_avg_data(raw)
+		avgs_datas.append((d_1,d_2))
+		file_path += file+"vs"
+	
+	gen_vs_graph_for_n(avgs_datas, file_path, file_names)
+	
 
 
 #METODOS PARA AUTOMATIZAR EL PROCESO DE GUARDAR LOS DATOS EN UN .TXT Y GENERAR LAS GRAFICAS 
@@ -538,14 +570,16 @@ if __name__ == '__main__':
 	metrics.get_params()
 
 	# PRUEBAS DE CROSSOVER 
-	metrics.genetic_algo.init_population()
-	s_1 = metrics.genetic_algo.current_pop[0]
-	s_2 = metrics.genetic_algo.current_pop[1]
-	print(s_1)
-	print(s_2)
-	print("CROSSOVER")
-	metrics.genetic_algo.crossover_operator.cross(s_1,s_2)
+	# metrics.genetic_algo.init_population()
+	# s_1 = metrics.genetic_algo.current_pop[0]
+	# s_2 = metrics.genetic_algo.current_pop[1]
+	# print(s_1.chromosome)
+	# print(s_2.chromosome)
+	# print("CROSSOVER")
+	# news_1, news_2 = metrics.genetic_algo.crossover_operator.cross(s_1,s_2)
 
+	# print(news_1)
+	# print(news_2)
 	# metrics.simple_execution()
 	
 	
@@ -573,7 +607,11 @@ if __name__ == '__main__':
 	#PRUEBAS PARA PERMUTACIONES GRANDES 
 	#generate_croossover_time_and_graphic("", 50,100,150)
 
+	#CONTRASTE DE CROSSOVER -> FUNCIONAL 
+	files = ["BasicCrossTime100-150","IMPXCrossTime100-150","PMXCrossTime100-150","OrderedCrossTime100-150"] 
+	graph_vs_generation_for_n(files)
 
+	#Queens/output/crossoverdata/OrderedCrossTime100-150.txt
 	#CONTRASTE DE CROSSOVERS 
 	#graph_vs_generation("BasicCrossTime","IMPXCrossTime","PMXCrossTime")
 	#PERMUTACIONES GRANDES

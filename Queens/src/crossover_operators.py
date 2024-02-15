@@ -133,7 +133,84 @@ class Basic(CrossoverOp):
 
 class Ordered(CrossoverOp):
 
+
     def cross(self, parent1, parent2):
+        n = len(parent1.chromosome)
+
+        #Puntos de corte
+        cut_points= sorted(np.random.choice(np.arange(n),2,replace=False))
+        cp_1, cp_2 = cut_points[0],cut_points[1]
+
+        #Las copias del  
+        primitive_offspring_1_chromosome = parent1.chromosome.copy()
+        primitive_offspring_2_chromosome = parent2.chromosome.copy()
+        
+        primitive_offspring_1_chromosome[cp_1:cp_2] = parent2.chromosome[cp_1:cp_2]
+        primitive_offspring_2_chromosome[cp_1:cp_2] = parent1.chromosome[cp_1:cp_2]
+
+        #Necesitamos borrar los elementos de P2 que ya estan en PO1 
+        #Para eso requerimos saber cuales son 
+        marked_1 = np.full(n,-1,dtype=int)
+        marked_2 = np.full(n,-1,dtype=int)
+
+        #Marcamos los elementos que ya estan en la cadena 
+        for gen in primitive_offspring_1_chromosome[cp_1:cp_2]: 
+            marked_1[gen] = 1
+        for gen in primitive_offspring_2_chromosome[cp_1:cp_2]: 
+            marked_2[gen] = 1
+         
+        p1_copy = parent1.chromosome.copy()
+        p2_copy = parent2.chromosome.copy()
+
+        #Eliminamos a los marcados 
+        for i in range(n):
+            if(marked_1[p1_copy[i]]==1):
+                p1_copy[i]=-1
+        for i in range(n):
+            if(marked_2[p2_copy[i]]==1):
+                p2_copy[i]=-1
+            
+        #LEGALIZING SECOND OFFSPRING 1 
+        cont = 0 
+        cont_p = 0 
+        while cont < cp_1:
+            if(p1_copy[cont_p] != -1):
+                primitive_offspring_1_chromosome[cont]=p1_copy[cont_p]
+                cont +=1
+                cont_p+=1
+            else:
+                cont_p+=1
+        cont = cp_2 
+        while cont < n:
+            if(p1_copy[cont_p] != -1):
+                primitive_offspring_1_chromosome[cont]=p1_copy[cont_p]
+                cont +=1
+                cont_p+=1
+            else:
+                cont_p+=1
+
+    #LEGALIZING SECOND OFFSPRING 2 
+        cont = 0 
+        cont_p = 0 
+        while cont < cp_1:
+            if(p2_copy[cont_p] != -1):
+                primitive_offspring_2_chromosome[cont]=p2_copy[cont_p]
+                cont +=1
+                cont_p+=1
+            else:
+                cont_p+=1
+        cont = cp_2 
+        while cont < n:
+            if(p2_copy[cont_p] != -1):
+                primitive_offspring_2_chromosome[cont]=p2_copy[cont_p]
+                cont +=1
+                cont_p+=1
+            else:
+                cont_p+=1
+
+        return np.array(primitive_offspring_1_chromosome), np.array(primitive_offspring_2_chromosome)
+
+    def debugged_cross(self, parent1, parent2):
         
         n = len(parent1.chromosome)
 
@@ -187,8 +264,7 @@ class Ordered(CrossoverOp):
         print("UPDATED PARENT", p1_copy)
         print("UPDATED PARENT", p2_copy)
 
-        #Legalizamos
-        #Por cada elemento del padre actualizado nos 
+        #LEGALIZING SECOND OFFSPRING 1 
         cont = 0 
         cont_p = 0 
         while cont < cp_1:
@@ -207,7 +283,7 @@ class Ordered(CrossoverOp):
             else:
                 cont_p+=1
 
-    #Para el segundo hijo 
+    #LEGALIZING SECOND OFFSPRING 2 
         cont = 0 
         cont_p = 0 
         while cont < cp_1:
@@ -229,56 +305,9 @@ class Ordered(CrossoverOp):
 
         print("LEGALIZED CHROMOSOME 1", primitive_offspring_1_chromosome)
         print("LEGALIZED CHROMOSOME 2", primitive_offspring_2_chromosome)
-        # cont = cp_2 ;  
-        # while cp_2 < n:
-        #     if(p1_copy[cont_p] != -1):
-        #         primitive_offspring_1_chromosome[cont]=p1_copy[cont_p]
-        #         cont +=1
-        #         cont_p+=1
-        #     else:
-        #         cont_p+=1
-                
         
-        #Ahora hay que copiar de izquierda a derecha ignorando los elementos marcados 
-        # cont_iteration = 0 
-        # cont_insertion = 0         
-
-
-        # while cont_insertion < cp_1:
-        #     #Revisar en P1 
-        #     if(marked_1[p1_copy[cont_iteration]]==1):
-        #         cont_iteration+=1
-        #     else:
-        #         primitive_offspring_1_chromosome[cont_insertion]=p1_copy[cont_insertion]
-        #         cont_insertion+=1
-        #         cont_iteration=cont_insertion
-        
-        # cont_iteration = cp_2 
-        # cont_insertion = cp_2
-        
-        
-        # while cp_2 < n:
-        #     #Revisar en P1 
-        #     if(marked_1[p1_copy[cont_iteration]]==1):
-        #         cont_iteration+=1
-        #     else:
-        #         primitive_offspring_1_chromosome[cont_insertion]=p1_copy[cont_insertion]
-        #         cont_insertion+=1
-        #         cont_iteration=cont_insertion
-
-
-        # while cont < cp_1 : 
-        #     #Revisamos si el elemto esta marcado 
-        #     if(marked_1[primitive_offspring_1_chromosome[cont]]==1):#Entonces ya esta en el cromosoma 
-        #         #Si ya esta marcado lo ignoramos y pasamos al siguiente 
-        #         pass
-        #     else:
-        #         pass 
-        #print("LEGALIZED CHROMOSOME", primitive_offspring_1_chromosome)
-
-    def debugged_cross(self, parent1, parent2):
-        return super().debugged_cross(parent1, parent2)
-
+        return np.array(primitive_offspring_1_chromosome), np.array(primitive_offspring_2_chromosome)
+    
 class PMX(CrossoverOp): 
     
 
