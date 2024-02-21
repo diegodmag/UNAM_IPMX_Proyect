@@ -94,6 +94,10 @@ class GeneticAlg:
 			return crossop.IMPX(self.cross_prob)
 		elif(croos_op==3): #EXPERIMENTAL 
 			return crossop.Ordered(self.cross_prob)
+		elif(croos_op==4):
+			return crossop.PMXSTACK(self.cross_prob)
+		elif(croos_op==5):
+			return crossop.PMXCastudil(self.cross_prob)
 		else:
 			#Por defecto toma PMX
 			return crossop.PMX(self.cross_prob)

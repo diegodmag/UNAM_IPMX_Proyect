@@ -48,11 +48,15 @@ class Metrics:
 		#Inicializamos poblacion para obtener cromosomas randoms 
 		individuals = np.random.choice(self.genetic_algo.current_pop,2)
 		#Se realiza la cruza 
-		time_start = time.time()
-		offs_1,offs_2 = self.genetic_algo.crossover_operator.cross(individuals[0],individuals[1])
-		time_end = time.time()
-		total_time = time_end-time_start
-		return total_time
+		#time_start = time.time()
+		#EXPERIMENTAL >>>
+		#offs_1,offs_2 = self.genetic_algo.crossover_operator.cross(individuals[0],individuals[1])
+		
+		#time_end = time.time()
+		#total_time = time_end-time_start
+		time = self.genetic_algo.crossover_operator.timed_cross(individuals[0],individuals[1])
+
+		return time 
 	
 	def register_crossover_time(self,min_per_size,max_per_size,iterations,file_name):
 		'''
@@ -508,7 +512,7 @@ def generate_croossover_time_and_graphic(file, iterations,min_per_size,max_per_s
 	metrics = Metrics()
 	metrics.get_params()
 
-	file_basic = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"CrossTime"+str(min_per_size)+"-"+str(max_per_size)
+	file_basic = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"CrossTimeNaN"+"iter:"+str(iterations)+"per:"+str(min_per_size)+"-"+str(max_per_size)
 	file_name_txt = file_basic+".txt"
 	metrics.register_crossover_time(min_per_size,max_per_size,iterations,file_name_txt)
 
@@ -569,18 +573,24 @@ if __name__ == '__main__':
 	metrics = Metrics()
 	metrics.get_params()
 
-	# PRUEBAS DE CROSSOVER 
-	# metrics.genetic_algo.init_population()
-	# s_1 = metrics.genetic_algo.current_pop[0]
-	# s_2 = metrics.genetic_algo.current_pop[1]
-	# print(s_1.chromosome)
-	# print(s_2.chromosome)
-	# print("CROSSOVER")
-	# news_1, news_2 = metrics.genetic_algo.crossover_operator.cross(s_1,s_2)
+	#PRUEBAS DE CROSSOVER 
+	metrics.genetic_algo.init_population()
+	s_1 = metrics.genetic_algo.current_pop[0]
+	s_2 = metrics.genetic_algo.current_pop[1]
+	print(s_1.chromosome)
+	print(s_2.chromosome)
+	print("CROSSOVER")
 
-	# print(news_1)
-	# print(news_2)
-	# metrics.simple_execution()
+	# s_1.chromosome = [10,4,11,5,8,0,3,1,12,9,7,2,6]
+	# s_2.chromosome = [0,1,7,6,3,2,5,12,9,11,4,8,10]
+	news_1, news_2 = metrics.genetic_algo.crossover_operator.cross(s_1,s_2)
+	#news_1 = metrics.genetic_algo.crossover_operator.cross(s_1,s_2)
+	# t = metrics.genetic_algo.crossover_operator.timed_cross(s_1,s_2)
+	# print(t)
+	print(news_1)
+	print(news_2)
+	print(metrics.genetic_algo.crossover_operator.__class__.__name__)
+	#metrics.simple_execution()
 	
 	
 	#EN REVISION >>>
@@ -604,12 +614,28 @@ if __name__ == '__main__':
 	#GENERAR DATOS Y GRAFICAS DE TIEMPOS DE CROSSOVER 
 	#generate_croossover_time_and_graphic("", 40,15,50)
 	
-	#PRUEBAS PARA PERMUTACIONES GRANDES 
-	#generate_croossover_time_and_graphic("", 50,100,150)
+	# PRUEBAS PARA PERMUTACIONES GRANDES 
+	#generate_croossover_time_and_graphic("", 100,270,300)
+	#generate_croossover_time_and_graphic("", 5,995,1000)
 
-	#CONTRASTE DE CROSSOVER -> FUNCIONAL 
-	files = ["BasicCrossTime100-150","IMPXCrossTime100-150","PMXCrossTime100-150","OrderedCrossTime100-150"] 
-	graph_vs_generation_for_n(files)
+	#CONTRASTE DE CROSSOVER -> FUNCIONAL
+	#Queens/output/crossovervisuals/BasicCrossTimeNaNiter:80per:150-200.png 
+	#/home/diegodmag/IPMX/IPMX_Proyect/Queens/output/crossoverdata/PMXSTACKCrossTimeNaNiter:100per:270-300.txt
+	# files = ["IMPXCrossTimeNaNiter:80per:150-200","PMXCrossTimeNaNiter:80per:150-200","OrderedCrossTimeNaNiter:80per:150-200","BasicCrossTimeNaNiter:80per:150-200"] 
+	# files = ["IMPXCrossTimeNaNiter:80per:165-200","PMXCrossTimeNaNiter:80per:165-200","OrderedCrossTimeNaNiter:80per:165-200"] 
+
+	# files = ["IMPXCrossTimeNaNiter:100per:270-300","PMXCrossTimeNaNiter:100per:270-300"] 
+	
+	# files = ["PMXSTACKCrossTimeNaNiter:80per:150-200","PMXCrossTimeNaNiter:80per:150-200","OrderedCrossTimeNaNiter:80per:150-200","IMPXCrossTimeNaNiter:80per:150-200"] 
+
+	# graph_vs_generation_for_n(files)
+
+	# files = ["IMPXCrossTimeNaNiter:5per:150-200","PMXCrossTimeNaNiter:5per:150-200","OrderedCrossTimeNaNiter:5per:150-200"] 
+	# graph_vs_generation_for_n(files)	
+
+	# files = ["BasicCrossTime100-150","IMPXCrossTime100-150","PMXCrossTime100-150","OrderedCrossTime100-150"] 
+	# graph_vs_generation_for_n(files)
+
 
 	#Queens/output/crossoverdata/OrderedCrossTime100-150.txt
 	#CONTRASTE DE CROSSOVERS 
