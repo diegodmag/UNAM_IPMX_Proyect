@@ -574,22 +574,22 @@ if __name__ == '__main__':
 	metrics.get_params()
 
 	#PRUEBAS DE CROSSOVER 
-	metrics.genetic_algo.init_population()
-	s_1 = metrics.genetic_algo.current_pop[0]
-	s_2 = metrics.genetic_algo.current_pop[1]
-	print(s_1.chromosome)
-	print(s_2.chromosome)
-	print("CROSSOVER")
+	# metrics.genetic_algo.init_population()
+	# s_1 = metrics.genetic_algo.current_pop[0]
+	# s_2 = metrics.genetic_algo.current_pop[1]
+	# print(s_1.chromosome)
+	# print(s_2.chromosome)
+	# print("CROSSOVER")
 
-	# s_1.chromosome = [10,4,11,5,8,0,3,1,12,9,7,2,6]
-	# s_2.chromosome = [0,1,7,6,3,2,5,12,9,11,4,8,10]
-	news_1, news_2 = metrics.genetic_algo.crossover_operator.cross(s_1,s_2)
-	#news_1 = metrics.genetic_algo.crossover_operator.cross(s_1,s_2)
-	# t = metrics.genetic_algo.crossover_operator.timed_cross(s_1,s_2)
-	# print(t)
-	print(news_1)
-	print(news_2)
-	print(metrics.genetic_algo.crossover_operator.__class__.__name__)
+	# # s_1.chromosome = [10,4,11,5,8,0,3,1,12,9,7,2,6]
+	# # s_2.chromosome = [0,1,7,6,3,2,5,12,9,11,4,8,10]
+	# news_1, news_2 = metrics.genetic_algo.crossover_operator.cross(s_1,s_2)
+	# #news_1 = metrics.genetic_algo.crossover_operator.cross(s_1,s_2)
+	# # t = metrics.genetic_algo.crossover_operator.timed_cross(s_1,s_2)
+	# # print(t)
+	# print(news_1)
+	# print(news_2)
+	# print(metrics.genetic_algo.crossover_operator.__class__.__name__)
 	#metrics.simple_execution()
 	
 	
@@ -618,6 +618,9 @@ if __name__ == '__main__':
 	#generate_croossover_time_and_graphic("", 100,270,300)
 	#generate_croossover_time_and_graphic("", 5,995,1000)
 
+	#generate_croossover_time_and_graphic("", 80,150,200)
+	#generate_croossover_time_and_graphic("", 80,165,200)
+	#generate_croossover_time_and_graphic("", 100,270,300)
 	#CONTRASTE DE CROSSOVER -> FUNCIONAL
 	#Queens/output/crossovervisuals/BasicCrossTimeNaNiter:80per:150-200.png 
 	#/home/diegodmag/IPMX/IPMX_Proyect/Queens/output/crossoverdata/PMXSTACKCrossTimeNaNiter:100per:270-300.txt
@@ -628,7 +631,12 @@ if __name__ == '__main__':
 	
 	# files = ["PMXSTACKCrossTimeNaNiter:80per:150-200","PMXCrossTimeNaNiter:80per:150-200","OrderedCrossTimeNaNiter:80per:150-200","IMPXCrossTimeNaNiter:80per:150-200"] 
 
-	# graph_vs_generation_for_n(files)
+
+	#Queens/output/crossoverdata/IMPXCrossTimeNaNiter:100per:270-300.txt
+	#Queens/output/crossoverdata/PMXCastudilCrossTimeNaNiter:100per:270-300.txt
+	#files = ["IMPXCrossTimeNaNiter:100per:270-300","PMXCastudilCrossTimeNaNiter:100per:270-300","PMXCrossTimeNaNiter:100per:270-300"]
+	files = ["IMPXCrossTimeNaNiter:100per:270-300","PMXCrossTimeNaNiter:100per:270-300","PMXCastudilCrossTimeNaNiter:100per:270-300"]
+	graph_vs_generation_for_n(files)
 
 	# files = ["IMPXCrossTimeNaNiter:5per:150-200","PMXCrossTimeNaNiter:5per:150-200","OrderedCrossTimeNaNiter:5per:150-200"] 
 	# graph_vs_generation_for_n(files)	

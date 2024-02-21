@@ -1005,19 +1005,13 @@ class IMPX(CrossoverOp):
 #Basado en https://github.com/castudil/pmx/blob/master/src/pmx/PMX.java
 class PMXCastudil(CrossoverOp): 
     def timed_cross(self,parent1, parent2):
-        pass
-    def cross(self,parent1, parent2):
-        
+        time_start = time.time()
         n = len(parent1.chromosome)
         #Paso 1
         #Puntos de corte
         cut_points= sorted(np.random.choice(np.arange(n),2,replace=False))
         cp_1, cp_2 = cut_points[0],cut_points[1]
 
-        #Copias de los padres 
-        primitive_offspring_1_chromosome = parent1.chromosome.copy()
-        primitive_offspring_2_chromosome = parent2.chromosome.copy()
-		
         #visited = np.full(n+1,False,dtype=bool)
         visited = np.full(n+1,False,dtype=bool)
         visited_2 = np.full(n+1,False,dtype=bool)
@@ -1038,9 +1032,7 @@ class PMXCastudil(CrossoverOp):
             z_2[i] = parent2.chromosome[i]
             visited_2[z_2[i]] = True
 
-
-        #k = cp_1
-
+        #PRIMER HIJO  
         for i in range(cp_1,top+1):
             if not (visited[parent2.chromosome[i]]):
                 k_2 = i
@@ -1061,7 +1053,79 @@ class PMXCastudil(CrossoverOp):
             if(z[i]==-1):
                 z[i]=parent2.chromosome[i]
 
+        #SEGUNDO HIJO
+        for i in range(cp_1,top+1):
+            if not (visited_2[parent1.chromosome[i]]):
+                k_2 = i
+                elementToBeCopied = parent1.chromosome[i]
+                #Simulando el do - while 
+                while True:
+                    V = parent2.chromosome[k_2]
+                    for j in range(n):
+                        if(parent1.chromosome[j] == V):
+                            k_2=j
+    
+                    if z_2[k_2] == -1: 
+                        break
+                z_2[k_2] = elementToBeCopied
+                visited_2[z_2[k_2]]=True      
+        
+        for i in range(n):
+            if(z_2[i]==-1):
+                z_2[i]=parent1.chromosome[i]
+        
+        time_end = time.time()
+        return time_end-time_start
+    def cross(self,parent1, parent2):
+        
+        n = len(parent1.chromosome)
+        #Paso 1
+        #Puntos de corte
+        cut_points= sorted(np.random.choice(np.arange(n),2,replace=False))
+        cp_1, cp_2 = cut_points[0],cut_points[1]
 
+        #visited = np.full(n+1,False,dtype=bool)
+        visited = np.full(n+1,False,dtype=bool)
+        visited_2 = np.full(n+1,False,dtype=bool)
+
+        z = np.full(n,-1,dtype=int)
+        z_2 = np.full(n,-1,dtype=int)
+
+        top= cp_2
+
+        if(cp_2==n):
+            top=n-1
+        
+        for i in range(cp_1,top+1):
+            z[i] = parent1.chromosome[i]
+            visited[z[i]] = True
+
+        for i in range(cp_1,top+1):
+            z_2[i] = parent2.chromosome[i]
+            visited_2[z_2[i]] = True
+
+        #PRIMER HIJO  
+        for i in range(cp_1,top+1):
+            if not (visited[parent2.chromosome[i]]):
+                k_2 = i
+                elementToBeCopied = parent2.chromosome[i]
+                #Simulando el do - while 
+                while True:
+                    V = parent1.chromosome[k_2]
+                    for j in range(n):
+                        if(parent2.chromosome[j] == V):
+                            k_2=j
+    
+                    if z[k_2] == -1: 
+                        break
+                z[k_2] = elementToBeCopied
+                visited[z[k_2]]=True      
+        
+        for i in range(n):
+            if(z[i]==-1):
+                z[i]=parent2.chromosome[i]
+
+        #SEGUNDO HIJO
         for i in range(cp_1,top+1):
             if not (visited_2[parent1.chromosome[i]]):
                 k_2 = i
