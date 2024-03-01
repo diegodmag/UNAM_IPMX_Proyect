@@ -458,7 +458,7 @@ class PMX(CrossoverOp):
         #Puntos de corte
         cut_points= sorted(np.random.choice(np.arange(n),2,replace=False))
         cp_1, cp_2 = cut_points[0],cut_points[1]
-        
+        #cp_1, cp_2 = 6,10
         #Generamos relacion de mapeo
         rel_R, rel_L = self.mapping_relation_generation(parent1.chromosome[cp_1:cp_2],parent2.chromosome[cp_1:cp_2])
         
@@ -657,7 +657,7 @@ class PMXSTACK(CrossoverOp):
         pass 
 
        
-class IMPX(CrossoverOp):
+class IPMX(CrossoverOp):
     
     def timed_cross(self,parent1, parent2):
         time_start = time.time()
@@ -1076,13 +1076,20 @@ class PMXCastudil(CrossoverOp):
         
         time_end = time.time()
         return time_end-time_start
+    
     def cross(self,parent1, parent2):
+
+
         
         n = len(parent1.chromosome)
         #Paso 1
         #Puntos de corte
         cut_points= sorted(np.random.choice(np.arange(n),2,replace=False))
-        cp_1, cp_2 = cut_points[0],cut_points[1]
+        #cp_1, cp_2 = cut_points[0],cut_points[1]
+
+        #BORRAR 
+        cp_1, cp_2 = 6,10
+
 
         #visited = np.full(n+1,False,dtype=bool)
         visited = np.full(n+1,False,dtype=bool)
@@ -1104,6 +1111,7 @@ class PMXCastudil(CrossoverOp):
             z_2[i] = parent2.chromosome[i]
             visited_2[z_2[i]] = True
 
+        print("PRIMER HIJO")
         #PRIMER HIJO  
         for i in range(cp_1,top+1):
             if not (visited[parent2.chromosome[i]]):
@@ -1121,10 +1129,12 @@ class PMXCastudil(CrossoverOp):
                 z[k_2] = elementToBeCopied
                 visited[z[k_2]]=True      
         
+
         for i in range(n):
             if(z[i]==-1):
                 z[i]=parent2.chromosome[i]
 
+        print("SEGUNDO HIJO")
         #SEGUNDO HIJO
         for i in range(cp_1,top+1):
             if not (visited_2[parent1.chromosome[i]]):

@@ -12,7 +12,8 @@
 - La presente investigacion toma como punto de partida el reporte realizado en el curso de Computo Evolutivo impartido por el Mtro. Oscar Hernández Constantino : `reporteT4.pdf` 
 
 ## Recursos utiles 
-
+- [Performance comparison of genetic algorithms with traditional search techniques on the N-Queen Problem](https://ieeexplore.ieee.org/abstract/document/10335855)
+- [A Survey and Analysis of Evolutionary Operators for Permutations](https://arxiv.org/abs/2311.14595)
 - [Genetic Algorithms and Their Applications](https://link.springer.com/chapter/10.1007/978-1-4471-7503-2_33)
 - [Reasoning About Order Crossover in Genetic Algorithms](https://link.springer.com/chapter/10.1007/978-3-031-09677-8_22)
 - [Genetic Algorithms for the Travelling Salesman Problem: A Review of Representations and Operators](https://www.researchgate.net/publication/226665831_Genetic_Algorithms_for_the_Travelling_Salesman_Problem_A_Review_of_Representations_and_Operators)

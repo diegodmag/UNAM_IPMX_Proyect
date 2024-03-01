@@ -119,6 +119,10 @@ class Metrics:
 			total_avg_fitness_data.append(avg_fitness_ind_data)
 			seeds_per_iteration.append(new_sed)
 
+			#Meter una pausa   (0.1 segundos ) 
+
+		##Meter una pausa 
+
 		#Otenemos los arreglos de promedio por cada generacion  
 		generations = [i for i in range(1, self.genetic_algo.max_generations+1)]
 		mean_generation_best_sons_data = np.mean(total_best_sons_data,axis=0)
@@ -512,7 +516,7 @@ def generate_croossover_time_and_graphic(file, iterations,min_per_size,max_per_s
 	metrics = Metrics()
 	metrics.get_params()
 
-	file_basic = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"CrossTimeNaN"+"iter:"+str(iterations)+"per:"+str(min_per_size)+"-"+str(max_per_size)
+	file_basic = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"CrossTime"+"iter:"+str(iterations)+"per:"+str(min_per_size)+"-"+str(max_per_size)
 	file_name_txt = file_basic+".txt"
 	metrics.register_crossover_time(min_per_size,max_per_size,iterations,file_name_txt)
 
@@ -565,7 +569,65 @@ def generate_avg_txt_and_graphic(file, iterations):
 	file_name_graph = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+file
 	get_avg_exe_graph(data[0],data[1:],["Generations", "Best of Offspring", "Avg Offspring", "Best", "Avg Fitness"],colors, file_name_graph)
 	
+
+
+
+#METODOS PARA CONECTAR CONE L MAKEFILE
+def test_crossover_operator():
+
+	metrics = Metrics()
+	metrics.get_params()
+ 
+	metrics.genetic_algo.init_population()
+	s_1 = metrics.genetic_algo.current_pop[0]
+	s_2 = metrics.genetic_algo.current_pop[1]
+	print("PARENT 1 : "+str(s_1.chromosome))
+	print("PARENT 1 : "+str(s_2.chromosome))
+	print("CROSSOVER OPERATOR :"+str(metrics.genetic_algo.crossover_operator.__class__.__name__))
+	news_1, news_2 = metrics.genetic_algo.crossover_operator.cross(s_1,s_2)
+	t = metrics.genetic_algo.crossover_operator.timed_cross(s_1,s_2)
+	print("OFFSPRING 1 :"+str(news_1))
+	print("OFFSPRING 2 :"+str(news_2))
+	print("USED TIME "+str(t))
 	
+	# print(metrics.genetic_algo.crossover_operator.__class__.__name__)
+	#metrics.simple_execution()
+
+def get_full_data_crossover_time(repetitions, min_permutation, max_permutation):
+
+	metrics = Metrics()
+	metrics.get_params()
+
+	generate_croossover_time_and_graphic("", repetitions,min_permutation,max_permutation)
+
+def compare_crossovers_time_data(crossovers, repetitions, min_permutation, max_permutation):
+	
+	
+
+	["IMPXCrossTimeNaNiter:80per:165-200","PMXCrossTimeNaNiter:80per:165-200","OrderedCrossTimeNaNiter:80per:165-200"] 
+	#graph_vs_generation_for_n(files)
+	pass
+
+
+def get_genetic_algo_ind_execution():
+
+	metrics = Metrics()
+	metrics.get_params()
+
+	file_name_txt = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"IndExecution.txt"
+
+	metrics.register_ga_individual_execution(file_name_txt)
+	
+	data = get_data_from_txt_individuals(file_name_txt, "gaindividualexecutions")
+	
+	file_name_graph = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"IndExecution"
+	colors = ['black', 'red', 'blue', 'green', 'purple']
+	get_ind_exe_graph(data[0],data[1:],["Generations", "Best of Offspring", "Avg Offspring", "Best", "Avg Fitness"],colors, file_name_graph)
+
+def get_genetic_algo_mean_evolution(repetitions):
+	
+	generate_avg_txt_and_graphic("", repetitions)
+
 
 if __name__ == '__main__':
  
@@ -573,22 +635,31 @@ if __name__ == '__main__':
 	metrics = Metrics()
 	metrics.get_params()
 
+	# Basicamente tenemos : 
+	# prubea de la cruza 
+	# Graficas dee ejecucion individual 
+	# Generar datos de tiempo de un crossover 
+	# Comparar datos de varios crossovers 
+	# Generar la grafica de evolucion promedio usando un solo crossover 
+
+
 	#PRUEBAS DE CROSSOVER 
-	# metrics.genetic_algo.init_population()
-	# s_1 = metrics.genetic_algo.current_pop[0]
-	# s_2 = metrics.genetic_algo.current_pop[1]
+	metrics.genetic_algo.init_population()
+	s_1 = metrics.genetic_algo.current_pop[0]
+	s_2 = metrics.genetic_algo.current_pop[1]
 	# print(s_1.chromosome)
 	# print(s_2.chromosome)
 	# print("CROSSOVER")
 
-	# # s_1.chromosome = [10,4,11,5,8,0,3,1,12,9,7,2,6]
-	# # s_2.chromosome = [0,1,7,6,3,2,5,12,9,11,4,8,10]
-	# news_1, news_2 = metrics.genetic_algo.crossover_operator.cross(s_1,s_2)
+	s_1.chromosome = [10,4,11,5,8,0,3,1,12,9,7,2,6]
+	s_2.chromosome = [0,1,7,6,3,2,5,12,9,11,4,8,10]
+	news_1, news_2 = metrics.genetic_algo.crossover_operator.cross(s_1,s_2)
 	# #news_1 = metrics.genetic_algo.crossover_operator.cross(s_1,s_2)
 	# # t = metrics.genetic_algo.crossover_operator.timed_cross(s_1,s_2)
 	# # print(t)
-	# print(news_1)
-	# print(news_2)
+	print(">>>>>>>>>>>>>")
+	print(news_1)
+	print(news_2)
 	# print(metrics.genetic_algo.crossover_operator.__class__.__name__)
 	#metrics.simple_execution()
 	
@@ -609,14 +680,18 @@ if __name__ == '__main__':
 	#file_name_graph = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"IndExecution"
 	# colors = ['black', 'red', 'blue', 'green', 'purple']
 	# #get_ind_exe_graph(data[0],data[1:],["Generations", "Best of Offspring", "Avg Offspring", "Best", "Avg Fitness"],colors, file_name_graph)
+
 	# file = "MeanEvolutionTest"
 
 	#GENERAR DATOS Y GRAFICAS DE TIEMPOS DE CROSSOVER 
-	#generate_croossover_time_and_graphic("", 40,15,50)
+	#generate_croossover_time_and_graphic("", 100,10,40)
 	
 	# PRUEBAS PARA PERMUTACIONES GRANDES 
 	#generate_croossover_time_and_graphic("", 100,270,300)
 	#generate_croossover_time_and_graphic("", 5,995,1000)
+
+	#generate_croossover_time_and_graphic("", 100,970,1000)
+
 
 	#generate_croossover_time_and_graphic("", 80,150,200)
 	#generate_croossover_time_and_graphic("", 80,165,200)
@@ -635,8 +710,11 @@ if __name__ == '__main__':
 	#Queens/output/crossoverdata/IMPXCrossTimeNaNiter:100per:270-300.txt
 	#Queens/output/crossoverdata/PMXCastudilCrossTimeNaNiter:100per:270-300.txt
 	#files = ["IMPXCrossTimeNaNiter:100per:270-300","PMXCastudilCrossTimeNaNiter:100per:270-300","PMXCrossTimeNaNiter:100per:270-300"]
-	files = ["IMPXCrossTimeNaNiter:100per:270-300","PMXCrossTimeNaNiter:100per:270-300","PMXCastudilCrossTimeNaNiter:100per:270-300"]
-	graph_vs_generation_for_n(files)
+	#files = ["IMPXCrossTimeNaNiter:100per:270-300","PMXCrossTimeNaNiter:100per:270-300","PMXCastudilCrossTimeNaNiter:100per:270-300"]
+	#files = ["IPMXCrossTimeiter:100per:10-40","PMXCrossTimeiter:100per:10-40","PMXCastudilCrossTimeiter:100per:10-40"]
+	#graph_vs_generation_for_n(files)
+
+	#print(metrics.genetic_algo.crossover_operator.__class__.__name__)
 
 	# files = ["IMPXCrossTimeNaNiter:5per:150-200","PMXCrossTimeNaNiter:5per:150-200","OrderedCrossTimeNaNiter:5per:150-200"] 
 	# graph_vs_generation_for_n(files)	

@@ -91,7 +91,7 @@ class GeneticAlg:
 		elif(croos_op==1):
 			return crossop.PMX(self.cross_prob)
 		elif(croos_op==2):
-			return crossop.IMPX(self.cross_prob)
+			return crossop.IPMX(self.cross_prob)
 		elif(croos_op==3): #EXPERIMENTAL 
 			return crossop.Ordered(self.cross_prob)
 		elif(croos_op==4):
