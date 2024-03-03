@@ -591,13 +591,13 @@ def compare_crossovers_time_data(crossovers, repetitions, min_permutation, max_p
 
 def get_genetic_algo_ind_execution():
 
-	file_name_txt = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"IndExecution.txt"
+	file_name_txt = f"{str(metrics.genetic_algo.crossover_operator.__class__.__name__)}IndExecutionPer:{metrics.genetic_algo.permutation_size}Pop:{metrics.genetic_algo.pop_size}.txt"
 
 	metrics.register_ga_individual_execution(file_name_txt)
 	
 	data = get_data_from_txt_individuals(file_name_txt, "gaindividualexecutions")
 	
-	file_name_graph = f"{str(metrics.genetic_algo.crossover_operator.__class__.__name__)}IndExecutionPer:{metrics.genetic_algo.permutation_size}"#str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"IndExecution"
+	file_name_graph = f"{str(metrics.genetic_algo.crossover_operator.__class__.__name__)}IndExecutionPer:{metrics.genetic_algo.permutation_size}Pop:{metrics.genetic_algo.pop_size}"
 	colors = ['black', 'red', 'blue', 'green', 'purple']
 	get_ind_exe_graph(data[0],data[1:],["Generations", "Best of Offspring", "Avg Offspring", "Best", "Avg Fitness"],colors, file_name_graph)
 
@@ -624,16 +624,21 @@ if __name__ == '__main__':
 		print(f"REPETITIONS : {repetitions}")
 		print(f"MIN_PERMUTATIONS : {min_permutations}")
 		print(f"MAX_PERMUTATIONS : {max_permutations}")
+		get_full_data_crossover_time(repetitions,min_permutations,max_permutations)
 	elif(operation==2):
 		print("Se comparan datos de crossovers")
 		print(f"REPETITIONS : {repetitions}")
 		print(f"MIN_PERMUTATIONS : {min_permutations}")
 		print(f"MAX_PERMUTATIONS : {max_permutations}")
+		#Trabajando en este 
+		##compare_crossovers_time_data
 	elif(operation==3):
 		print("Ejecucion individual de algoritmo genetico")
+		get_genetic_algo_ind_execution()
 	elif(operation==4):
 		print("Ejecucion promedio de algoritmo genetico")
 		print(f"REPETITIONS : {repetitions}")
+		get_genetic_algo_mean_evolution(repetitions)
 	else:
 		print("Otra seleccion no valida")
 
