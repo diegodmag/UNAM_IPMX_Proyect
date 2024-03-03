@@ -22,11 +22,20 @@ class Metrics:
 		tournament_size = int(sys.argv[8])
 		crossover_operator = int(sys.argv[9])
 		mutation_operator = int(sys.argv[10])
-		generational_replacement_operator = int(sys.argv[11])    
+		generational_replacement_operator = int(sys.argv[11])
+
+		#El ultimo argumento nos dice que operacion hacer 
+		operation = int(sys.argv[13])    
+		
+		#Para las funciones que lo necesitan 
+		repetitions = int(sys.argv[14])
+		min_permutations = int(sys.argv[15])
+		max_permutations = int(sys.argv[16])
 
 		#Inicializamos el algoritmo 
 		self.genetic_algo = ga.GeneticAlg(permutation_size,population_size,crossover_probability,mutation_probability,max_generations,max_time,selection_operator,tournament_size,crossover_operator,mutation_operator,generational_replacement_operator)
-	
+		return operation, repetitions, min_permutations, max_permutations 
+
 	def simple_execution(self):
 		
 		print(self.genetic_algo.simple_execution())
@@ -44,16 +53,7 @@ class Metrics:
 	#que tardó realizando la cruza. 
 	# Tenemos que obtener el self.crossover_operator.cross y pasarle dos 
 	def get_crossover_time(self):
-		#Se tiene que realizar primero el get_params 
-		#Inicializamos poblacion para obtener cromosomas randoms 
 		individuals = np.random.choice(self.genetic_algo.current_pop,2)
-		#Se realiza la cruza 
-		#time_start = time.time()
-		#EXPERIMENTAL >>>
-		#offs_1,offs_2 = self.genetic_algo.crossover_operator.cross(individuals[0],individuals[1])
-		
-		#time_end = time.time()
-		#total_time = time_end-time_start
 		time = self.genetic_algo.crossover_operator.timed_cross(individuals[0],individuals[1])
 
 		return time 
@@ -374,10 +374,7 @@ def get_ind_exe_graph(info,data,data_names,colors,file_path):
 		#Generamos un color random 
 		random_color = (random.random(), random.random(), random.random())
 		plt.plot(data[0],data[i],label=data_names[i],linestyle='--', color=colors[i])
-		plt.annotate(f'({data[0][-1]},{data[i][-1]})', xy = (data[0][-1],data[i][-1]), xytext=(data[0][-1]-i*2,data[i][-1]+(i+.5)),arrowprops=dict(color=colors[i], arrowstyle='->') )
-	
-	# plt.annotate(f'({ultimo_x1:.2f}, {ultimo_y1:.2f})', xy=(ultimo_x1, ultimo_y1), xytext=(ultimo_x1, ultimo_y1 + 0.5),
-    #          arrowprops=dict(facecolor='black', arrowstyle='->'))
+		#plt.annotate(f'({data[0][-1]},{data[i][-1]})', xy = (data[0][-1],data[i][-1]), xytext=(data[0][-1]-i*2,data[i][-1]+(i+.5)),arrowprops=dict(color=colors[i], arrowstyle='->') )
 	
 	plt.xlabel('Generacion')
 	plt.ylabel('Fitness')
@@ -512,10 +509,6 @@ def graph_vs_generation_for_n(file_names):
 
 def generate_croossover_time_and_graphic(file, iterations,min_per_size,max_per_size): 
 	#A este se le tiene que cambiar la semilla aleatoria  
-	
-	metrics = Metrics()
-	metrics.get_params()
-
 	file_basic = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"CrossTime"+"iter:"+str(iterations)+"per:"+str(min_per_size)+"-"+str(max_per_size)
 	file_name_txt = file_basic+".txt"
 	metrics.register_crossover_time(min_per_size,max_per_size,iterations,file_name_txt)
@@ -530,9 +523,6 @@ def generate_ind_txt_and_graphic(file):
 	
 	'''
 	#A este se le tiene que cambiar la semilla aleatoria
-	metrics = Metrics()
-	metrics.get_params()
-
 	colors = ['black', 'red', 'blue', 'green', 'purple']
 
 	file+="IndExecution"
@@ -553,9 +543,6 @@ def generate_avg_txt_and_graphic(file, iterations):
 	
 	'''
 	#A este se le tiene que cambiar la semilla aleatoria
-	metrics = Metrics()
-	metrics.get_params()
-
 	colors = ['black', 'red', 'blue', 'green','purple']
 
 	file+="MeanEvolution" 
@@ -572,47 +559,37 @@ def generate_avg_txt_and_graphic(file, iterations):
 
 
 
-#METODOS PARA CONECTAR CONE L MAKEFILE
+#METODOS PARA CONECTAR CONE EL MAKEFILE 
+	
 def test_crossover_operator():
 
-	metrics = Metrics()
-	metrics.get_params()
- 
+	print("CROSSOVER OPERATOR :"+str(metrics.genetic_algo.crossover_operator.__class__.__name__))
 	metrics.genetic_algo.init_population()
 	s_1 = metrics.genetic_algo.current_pop[0]
 	s_2 = metrics.genetic_algo.current_pop[1]
 	print("PARENT 1 : "+str(s_1.chromosome))
 	print("PARENT 1 : "+str(s_2.chromosome))
-	print("CROSSOVER OPERATOR :"+str(metrics.genetic_algo.crossover_operator.__class__.__name__))
 	news_1, news_2 = metrics.genetic_algo.crossover_operator.cross(s_1,s_2)
 	t = metrics.genetic_algo.crossover_operator.timed_cross(s_1,s_2)
 	print("OFFSPRING 1 :"+str(news_1))
 	print("OFFSPRING 2 :"+str(news_2))
 	print("USED TIME "+str(t))
 	
-	# print(metrics.genetic_algo.crossover_operator.__class__.__name__)
-	#metrics.simple_execution()
-
 def get_full_data_crossover_time(repetitions, min_permutation, max_permutation):
-
-	metrics = Metrics()
-	metrics.get_params()
 
 	generate_croossover_time_and_graphic("", repetitions,min_permutation,max_permutation)
 
 def compare_crossovers_time_data(crossovers, repetitions, min_permutation, max_permutation):
-	
-	
 
-	["IMPXCrossTimeNaNiter:80per:165-200","PMXCrossTimeNaNiter:80per:165-200","OrderedCrossTimeNaNiter:80per:165-200"] 
-	#graph_vs_generation_for_n(files)
-	pass
+	files = []
+	
+	for cross in crossovers : 
+		files.append(f"{cross}CrossTimeiter:{repetitions}per:{min_permutation}-{max_permutation}")
 
+	graph_vs_generation_for_n(files)
+	
 
 def get_genetic_algo_ind_execution():
-
-	metrics = Metrics()
-	metrics.get_params()
 
 	file_name_txt = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"IndExecution.txt"
 
@@ -620,7 +597,7 @@ def get_genetic_algo_ind_execution():
 	
 	data = get_data_from_txt_individuals(file_name_txt, "gaindividualexecutions")
 	
-	file_name_graph = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"IndExecution"
+	file_name_graph = f"{str(metrics.genetic_algo.crossover_operator.__class__.__name__)}IndExecutionPer:{metrics.genetic_algo.permutation_size}"#str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"IndExecution"
 	colors = ['black', 'red', 'blue', 'green', 'purple']
 	get_ind_exe_graph(data[0],data[1:],["Generations", "Best of Offspring", "Avg Offspring", "Best", "Avg Fitness"],colors, file_name_graph)
 
@@ -628,12 +605,42 @@ def get_genetic_algo_mean_evolution(repetitions):
 	
 	generate_avg_txt_and_graphic("", repetitions)
 
+# Necesitamos un metodo para mostrar la ejecucion sobre el ejemplar del articulo , el qe
+
 
 if __name__ == '__main__':
- 
-	# TOMA DE PARAMETROS POR DEFECTO
+
+	#Dependiendo de la operacion se realiza 
+	# operation= int(sys.argv[1])
+	# print(operation)
+
 	metrics = Metrics()
-	metrics.get_params()
+	operation, repetitions, min_permutations, max_permutations  = metrics.get_params()
+
+	if(operation==0):
+		test_crossover_operator()
+	elif(operation==1):
+		print("Se obtienen datos de tiempo promedio de crossover")
+		print(f"REPETITIONS : {repetitions}")
+		print(f"MIN_PERMUTATIONS : {min_permutations}")
+		print(f"MAX_PERMUTATIONS : {max_permutations}")
+	elif(operation==2):
+		print("Se comparan datos de crossovers")
+		print(f"REPETITIONS : {repetitions}")
+		print(f"MIN_PERMUTATIONS : {min_permutations}")
+		print(f"MAX_PERMUTATIONS : {max_permutations}")
+	elif(operation==3):
+		print("Ejecucion individual de algoritmo genetico")
+	elif(operation==4):
+		print("Ejecucion promedio de algoritmo genetico")
+		print(f"REPETITIONS : {repetitions}")
+	else:
+		print("Otra seleccion no valida")
+
+
+	# TOMA DE PARAMETROS POR DEFECTO
+	# metrics = Metrics()
+	# metrics.get_params()
 
 	# Basicamente tenemos : 
 	# prubea de la cruza 
@@ -642,28 +649,30 @@ if __name__ == '__main__':
 	# Comparar datos de varios crossovers 
 	# Generar la grafica de evolucion promedio usando un solo crossover 
 
-
+	#compare_crossovers_time_data(["PMX","IPMX","PMXCastudil"],100,10,40)
+	#get_full_data_crossover_time(50,10,20)
 	#PRUEBAS DE CROSSOVER 
-	metrics.genetic_algo.init_population()
-	s_1 = metrics.genetic_algo.current_pop[0]
-	s_2 = metrics.genetic_algo.current_pop[1]
-	# print(s_1.chromosome)
-	# print(s_2.chromosome)
-	# print("CROSSOVER")
+	# metrics.genetic_algo.init_population()
+	# s_1 = metrics.genetic_algo.current_pop[0]
+	# s_2 = metrics.genetic_algo.current_pop[1]
+	# # print(s_1.chromosome)
+	# # print(s_2.chromosome)
+	# # print("CROSSOVER")
 
-	s_1.chromosome = [10,4,11,5,8,0,3,1,12,9,7,2,6]
-	s_2.chromosome = [0,1,7,6,3,2,5,12,9,11,4,8,10]
-	news_1, news_2 = metrics.genetic_algo.crossover_operator.cross(s_1,s_2)
-	# #news_1 = metrics.genetic_algo.crossover_operator.cross(s_1,s_2)
-	# # t = metrics.genetic_algo.crossover_operator.timed_cross(s_1,s_2)
-	# # print(t)
-	print(">>>>>>>>>>>>>")
-	print(news_1)
-	print(news_2)
+	# s_1.chromosome = [10,4,11,5,8,0,3,1,12,9,7,2,6]
+	# s_2.chromosome = [0,1,7,6,3,2,5,12,9,11,4,8,10]
+	# news_1, news_2 = metrics.genetic_algo.crossover_operator.cross(s_1,s_2)
+	# # #news_1 = metrics.genetic_algo.crossover_operator.cross(s_1,s_2)
+	# # # t = metrics.genetic_algo.crossover_operator.timed_cross(s_1,s_2)
+	# # # print(t)
+	# print(">>>>>>>>>>>>>")
+	# print(news_1)
+	# print(news_2)
 	# print(metrics.genetic_algo.crossover_operator.__class__.__name__)
 	#metrics.simple_execution()
 	
-	
+	#get_genetic_algo_mean_evolution(1)
+	##get_genetic_algo_ind_execution()
 	#EN REVISION >>>
 	
 	#File output
