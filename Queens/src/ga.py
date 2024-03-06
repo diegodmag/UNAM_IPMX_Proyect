@@ -4,7 +4,7 @@ import selection_operators as selop
 import crossover_operators as crossop
 import mutation_operators as mutop
 import generational_replacement_operators as genreplacement 
-
+import time
 class GeneticAlg: 
 	'''
 	Class modeling the steps and operators of a genetic algorithm to resolve the n-queens problem 
@@ -251,7 +251,9 @@ class GeneticAlg:
 				#print(">>>>>>>>>>>>>>>>>>>>>")
 		
 		return generations_data, best_son_data, offspring_avg_fitness_data, best_current_pop_data, current_pop_avg_fitness_data
-	
+		#time_start = time.time()
+		#time_end = time.time()
+		#return time_end-time_start
 	#BORRAR >>>>>
 	def simple_execution(self):
 		'''

@@ -29,7 +29,7 @@ else ifeq ($(CROSSOVER), IPMX)
 	CROSSNUM = 2
 else ifeq ($(CROSSOVER), Ordered)
 	CROSSNUM = 3
-else ifeq ($(CROSSOVER), PMX_Castudil)
+else ifeq ($(CROSSOVER), PMXCastudil)
 	CROSSNUM = 5
 else
 	CROSSNUM = 1
