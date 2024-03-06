@@ -70,7 +70,8 @@ class Metrics:
 		#self.genetic_algo.init_population()
 		#Hay que guardar en la primer file los parametros de la ejecucion 
 		#Que me interesa saber de los operadores de cruza ?? 
-			
+		if os.path.exists(file)	:
+			os.remove(file)
 		#Aqui se mete la informacion basica 
 		for i in range(min_per_size,max_per_size+1):
 			#CMABIAMOS LA SEMILLA 
@@ -99,7 +100,10 @@ class Metrics:
 		file_seeds = "output/executionsforavgseedsperiterations/"+str(file_name)
 		
 		#Por cada iteracion se guardan todos los datos obtenidos en cada generacion
-
+		if os.path.exists(file)	:
+			os.remove(file)
+		if os.path.exists(file_seeds):	
+			os.remove(file_seeds)
 		total_best_sons_data = []
 		total_avg_offspring_data = []
 		total_best_all_data=[]
@@ -167,7 +171,8 @@ class Metrics:
 		'''
 		generations,best_sons,avg_offspring,best_all,avg_fitness = self.genetic_algo.execution()
 		file = "output/gaindividualexecutions/"+str(file_name)
-		
+		if os.path.exists(file)	:
+			os.remove(file)
 		#Hay que hacer el formaro de cada linea 
 		total_data = []
 		for i in range(len(generations)):
@@ -212,6 +217,8 @@ def get_data_from_txt(file_path,output_dir):
 	'''
 	file_path = "output/"+str(output_dir)+"/"+str(file_path)
 	file_path = get_path_for_file(file_path)
+	if os.path.exists(file_path)	:
+			os.remove(file_path)
 	results = []
 	with open(file_path, 'r') as file : 
 		#Hay que leer la primer linea la cual lleva los parametros del algoritmo 
