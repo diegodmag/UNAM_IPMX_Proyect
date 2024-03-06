@@ -167,19 +167,19 @@ class Metrics:
 		'''
 		generations,best_sons,avg_offspring,best_all,avg_fitness = self.genetic_algo.execution()
 		file = "output/gaindividualexecutions/"+str(file_name)
+		
 		#Hay que hacer el formaro de cada linea 
 		total_data = []
 		for i in range(len(generations)):
 			line = [generations[i], best_sons[i], avg_offspring[i],best_all[i], avg_fitness[i]]
 			total_data.append(line)
 		
-
 		#La primer linea deben ser los parametros 
 		selection_operator_line = str(self.genetic_algo.selection_operator.__class__.__name__)
 		cross_operator_line = str(self.genetic_algo.crossover_operator.__class__.__name__)
 		mutation_operator_line = str(self.genetic_algo.mutation_operator.__class__.__name__)
 		replacement_operator_line = str(self.genetic_algo.generation_replacement.__class__.__name__)
-		params_line=[self.genetic_algo.permutation_size, self.genetic_algo.pop_size, self.genetic_algo.cross_prob, self.genetic_algo.mut_prob,self.genetic_algo.max_generations,self.genetic_algo.max_time,selection_operator_line, self.genetic_algo.tournament_size,cross_operator_line, mutation_operator_line,replacement_operator_line ]
+		params_line=[self.genetic_algo.permutation_size, self.genetic_algo.pop_size, self.genetic_algo.cross_prob, self.genetic_algo.mut_prob,self.genetic_algo.max_generations,self.genetic_algo.max_time,selection_operator_line, self.genetic_algo.tournament_size,cross_operator_line, mutation_operator_line,replacement_operator_line,best_all[-1], best_sons[-1], avg_offspring[-1], avg_fitness[-1]]
 		writte_txt_data(file,params_line)
 		for line in total_data:
 			writte_txt_data(file,line)
@@ -391,12 +391,12 @@ def get_ind_exe_graph(info,data,data_names,colors,file_path):
 
 	#info = "Tamaño permutación : {}\nTamaño población : {}\nProb.Crossover : {}\nProb.Mutación : {}\nGeneraciones Max : {}\nTiempo Max {}\nSelección : {}\k-Torneo : {}\nCrossover : {}\nMutación : {}\nReemplazo : {}".format(info[0],info[1],info[2],info[3],info[4],info[5],info[6],info[7],info[8],info[9], info[10])
 	info_1 = "Tamaño permutación : {}\nTamaño población : {}\nProb.Crossover : {}\nProb.Mutación : {}\nGeneraciones Max : {}".format(info[0],info[1],info[2],info[3],info[4])
-	info_2 = "Tiempo Max {}\nSelección : {}\k-Torneo : {}\nCrossover : {}\nMutación : {}\nReemplazo : {}".format(info[5],info[6],info[7],info[8],info[9], info[10])
-	#"Tiempo Max {}\nSelección : {}\k-Torneo : {}\nCrossover : {}\nMutación : {}\nReemplazo : {}".format(info[5],info[6],info[7],info[8],info[9], info[10])
-	
+	info_2 = "Tiempo Max {}\nSelección : {}\nk-Torneo : {}\nCrossover : {}\nMutación : {}\nReemplazo : {}".format(info[5],info[6],info[7],info[8],info[9], info[10])
+	info_3 = "Best Fitness {}\nBest Sons : {}\nLast AVG offspring : {}\nLast AVG Fitness : {}".format(info[11],info[12],info[13],info[14])
 	plt.title('Evolucion del valor fitness de una ejecucion individual '+str(title),y=1.2)
 	plt.text(x=.15, y=.95, s=info_1, fontsize=9, ha='left', va='center', transform=plt.gcf().transFigure)
 	plt.text(x=.35, y=.95, s=info_2, fontsize=9, ha='left', va='center', transform=plt.gcf().transFigure)
+	plt.text(x=.6, y=.95, s=info_3, fontsize=9, ha='left', va='center', transform=plt.gcf().transFigure)
 	plt.savefig(file_path,bbox_inches='tight')
 
 def get_avg_exe_graph(info,data,data_names,colors,file_path):
