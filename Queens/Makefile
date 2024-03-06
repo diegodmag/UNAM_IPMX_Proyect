@@ -13,6 +13,7 @@ CROSSNUM ?= 0
 # Nombres de crossovers 
 CROSSOVERSNAMES = PMX IPMX PMXCastudil
 
+export CROSSOVERSNAMES
 
 # Seleccion de crossovers 
 
@@ -43,6 +44,7 @@ crossover_test :
 crossover_times : 
 	python3 src/executions.py $(PERMUTATIONSIZE) $(POPULATIONSIZE) .8 .1 50 5 1 3 $(CROSSNUM) 0 0 0 1 $(REPETITIONS) $(MINPERMUTATIONS) $(MAXPERMUTATIONS) 
 compare_crossover_times : 
+#make compare_crossover_times CROSSOVERSNAMES='PMXCastudil , IPMX' REPETITIONS=100 MINPERMUTATIONS=970 MAXPERMUTATIONS=1000
 	python3 src/executions.py $(PERMUTATIONSIZE) $(POPULATIONSIZE) .8 .1 50 5 1 3 $(CROSSNUM) 0 0 0 2 $(REPETITIONS) $(MINPERMUTATIONS) $(MAXPERMUTATIONS)
 individual_execution : 
 	python3 src/executions.py $(PERMUTATIONSIZE) $(POPULATIONSIZE) .8 .1 50 5 1 3 $(CROSSNUM) 0 0 0 3 0 0 0 

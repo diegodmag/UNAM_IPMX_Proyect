@@ -353,9 +353,9 @@ def gen_vs_graph_for_n(datas, file_path, data_names):
     
     plt.xlabel('Tamaño permutacion')
     plt.ylabel('Tiempo promedio')
-    plt.xticks(datas[0][0])
+    # plt.xticks(datas[0][0])
     plt.legend()
-    plt.title('Tiempo promedio para realizar la cruza de '+str(title))
+    plt.title('Tiempo Promedio')
     plt.savefig(file_path, dpi=300)
 
 
@@ -616,6 +616,8 @@ if __name__ == '__main__':
 
 	metrics = Metrics()
 	operation, repetitions, min_permutations, max_permutations  = metrics.get_params()
+	crossovers = [crossover.strip() for crossover in os.environ['CROSSOVERSNAMES'].split() if crossover != ',']
+
 
 	if(operation==0):
 		test_crossover_operator()
@@ -630,8 +632,9 @@ if __name__ == '__main__':
 		print(f"REPETITIONS : {repetitions}")
 		print(f"MIN_PERMUTATIONS : {min_permutations}")
 		print(f"MAX_PERMUTATIONS : {max_permutations}")
+		print(f"CROSSOVERS {crossovers}")
 		#Trabajando en este 
-		##compare_crossovers_time_data
+		compare_crossovers_time_data(crossovers,repetitions,min_permutations,max_permutations)
 	elif(operation==3):
 		print("Ejecucion individual de algoritmo genetico")
 		get_genetic_algo_ind_execution()
