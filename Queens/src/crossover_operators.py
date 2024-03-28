@@ -187,7 +187,72 @@ class Basic(CrossoverOp):
 #Ordered Crossover 
 #Determinar los puntos de
 # 
+class Uniform(CrossoverOp):
+    def cross(self, parent1, parent2):
+        n = len(parent1.chromosome)
 
+        #Las copias del  
+        p1_copy = parent1.chromosome.copy()
+        p2_copy = parent2.chromosome.copy()
+
+        offspring_1 = np.full(n,-1,dtype=int)
+        offspring_2 = np.full(n,-1,dtype=int)
+
+        marked_1 = np.full(n,-1,dtype=int)
+        marked_2 = np.full(n,-1,dtype=int)
+
+        #OFFSPRING 1 
+        for i in range(n):
+            if(rnd.random()<0.5):
+                    marked_1[p2_copy[i]]=1
+                    offspring_1[i]=p2_copy[i]
+            else:
+                offspring_1[i]=-1
+        
+        #Guardamos los indices en donde se acompleta la informacion del hijo con parent_1
+        offs_1_indexes = [i for i in range(n) if offspring_1[i]==-1]
+        
+        #Legalizamos la permutacion con la información 
+        for i in range(n):
+            if(marked_1[p1_copy[i]] == 1):
+                #Entonces ya fue agregado y no hacemos nada
+                pass
+            else:
+               index = offs_1_indexes.pop(0)
+               offspring_1[index]=p1_copy[i]
+
+        #OFFSPRING 2 
+        for i in range(n):
+            if(rnd.random()<0.5):
+                    marked_2[p1_copy[i]]=1
+                    offspring_2[i]=p1_copy[i]
+            else:
+                offspring_2[i]=-1
+
+        #Guardamos los indices en donde se acompleta la informacion del hijo con parent_2
+        offs_2_indexes = [i for i in range(n) if offspring_2[i]==-1]
+
+        #Legalizamos la permutacion con la información 
+        for i in range(n):
+            if(marked_2[p2_copy[i]] == 1):
+                #Entonces ya fue agregado y no hacemos nada
+                pass
+            else:
+               index = offs_2_indexes.pop(0)
+               offspring_2[index]=p2_copy[i]
+
+        return offspring_1, offspring_2
+
+    def timed_cross(self, parent1, parent2):
+        
+        time_start = time.time()
+        self.cross(parent1, parent2)
+        time_end = time.time()  
+
+        return time_end-time_start
+
+    def debugged_cross(self, parent1, parent2):
+        pass 
 class Ordered(CrossoverOp):
 
 
@@ -1244,3 +1309,8 @@ class IMPXMYR(CrossoverOp):
         return np.array(offspring1), np.array(offspring2)
     def debugged_cross(self,parent1, parent2):
         pass 
+
+
+
+
+

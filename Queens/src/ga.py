@@ -98,6 +98,8 @@ class GeneticAlg:
 			return crossop.PMXSTACK(self.cross_prob)
 		elif(croos_op==5):
 			return crossop.PMXCastudil(self.cross_prob)
+		elif(croos_op==6):
+			return crossop.Uniform(self.cross_prob)
 		else:
 			#Por defecto toma PMX
 			return crossop.PMX(self.cross_prob)

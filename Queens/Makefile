@@ -3,14 +3,15 @@
 # Parametros del algoritmo genetico
 
 PERMUTATIONSIZE ?= 8
-POPULATIONSIZE ?= 100
+POPULATIONSIZE ?= 500
 
 CROSSOVER ?= IPMX
 CROSSNUM ?= 0
 
 GENERATIONS ?=50
 
-CROSSPROBA ?=.8
+CROSSPROBA ?=1
+MUTATIONPROBA ?=0
 
 # Parametros de la generacion y visualizacion de los datos 
 
@@ -31,6 +32,8 @@ else ifeq ($(CROSSOVER), Ordered)
 	CROSSNUM = 3
 else ifeq ($(CROSSOVER), PMXCastudil)
 	CROSSNUM = 5
+else ifeq ($(CROSSOVER), Uniform)
+	CROSSNUM = 6
 else
 	CROSSNUM = 1
 endif
@@ -44,16 +47,26 @@ MINPERMUTATIONS ?= 10
 MAXPERMUTATIONS ?= 40 
 
 crossover_test : 
-	python3 src/executions.py $(PERMUTATIONSIZE) $(POPULATIONSIZE) $(CROSSPROBA) .1 $(GENERATIONS) 5 1 3 $(CROSSNUM) 0 0 0 0 0 0 0
+	python3 src/executions.py $(PERMUTATIONSIZE) $(POPULATIONSIZE) $(CROSSPROBA) $(MUTATIONPROBA) $(GENERATIONS) 5 1 3 $(CROSSNUM) 0 0 0 0 0 0 0
 crossover_times : 
-	python3 src/executions.py $(PERMUTATIONSIZE) $(POPULATIONSIZE) $(CROSSPROBA) .1 $(GENERATIONS) 5 1 3 $(CROSSNUM) 0 0 0 1 $(REPETITIONS) $(MINPERMUTATIONS) $(MAXPERMUTATIONS) 
+	python3 src/executions.py $(PERMUTATIONSIZE) $(POPULATIONSIZE) $(CROSSPROBA) $(MUTATIONPROBA) $(GENERATIONS) 5 1 3 $(CROSSNUM) 0 0 0 1 $(REPETITIONS) $(MINPERMUTATIONS) $(MAXPERMUTATIONS) 
 compare_crossover_times : 
 #make compare_crossover_times CROSSOVERSNAMES='PMXCastudil , IPMX' REPETITIONS=100 MINPERMUTATIONS=970 MAXPERMUTATIONS=1000
-	python3 src/executions.py $(PERMUTATIONSIZE) $(POPULATIONSIZE) $(CROSSPROBA) .1 $(GENERATIONS) 5 1 3 $(CROSSNUM) 0 0 0 2 $(REPETITIONS) $(MINPERMUTATIONS) $(MAXPERMUTATIONS)
+	python3 src/executions.py $(PERMUTATIONSIZE) $(POPULATIONSIZE) $(CROSSPROBA) $(MUTATIONPROBA) $(GENERATIONS) 5 1 3 $(CROSSNUM) 0 0 0 2 $(REPETITIONS) $(MINPERMUTATIONS) $(MAXPERMUTATIONS)
 individual_execution : 
-	python3 src/executions.py $(PERMUTATIONSIZE) $(POPULATIONSIZE) $(CROSSPROBA) .1 $(GENERATIONS) 5 1 3 $(CROSSNUM) 0 0 0 3 0 0 0 
+	python3 src/executions.py $(PERMUTATIONSIZE) $(POPULATIONSIZE) $(CROSSPROBA) $(MUTATIONPROBA) $(GENERATIONS) 5 1 3 $(CROSSNUM) 0 0 0 3 0 0 0 
 mean_evolution : 
-	python3 src/executions.py $(PERMUTATIONSIZE) $(POPULATIONSIZE) $(CROSSPROBA) .1 $(GENERATIONS) 5 1 3 $(CROSSNUM) 0 0 0 4 $(REPETITIONS) 0 0
+	python3 src/executions.py $(PERMUTATIONSIZE) $(POPULATIONSIZE) $(CROSSPROBA) $(MUTATIONPROBA) $(GENERATIONS) 5 1 3 $(CROSSNUM) 0 0 0 4 $(REPETITIONS) 0 0
+
+
+#Para hacer pruebas dejar corriendo esto 
+
+individual_execution_samples:
+	@for PERMUTATIONSIZE in 400 500 600 700 800 900; do \
+		for CROSSOVER in PMX IPMX Ordered PMXCastudil Uniform; do \
+			make individual_execution PERMUTATIONSIZE=$$PERMUTATIONSIZE CROSSOVER=$$CROSSOVER; \
+		done; \
+	done
 
 # repetitions = int(sys.argv[14])
 # 		min_permutations = int(sys.argv[15])
