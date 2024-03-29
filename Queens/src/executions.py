@@ -624,6 +624,35 @@ def get_genetic_algo_mean_evolution(repetitions):
 # Necesitamos un metodo para mostrar la ejecucion sobre el ejemplar del articulo , el qe
 
 
+def specific_case_crossover():
+	metrics = Metrics()
+	metrics.get_params()
+	
+	cp_1, cp_2 = 6, 10 
+	print(f"Puntos de cruza :{cp_1} , {cp_2}")
+
+	#Debe de ser tamanio 13 y con dos padres especificos 
+
+	metrics.genetic_algo.init_population()
+	#Obtenemos dos individuos 
+	s_1 = metrics.genetic_algo.current_pop[0]
+	s_2 = metrics.genetic_algo.current_pop[1]
+
+
+	s_1.chromosome = [10,4,11,5,8,0,3,1,12,9,7,2,6]
+	s_2.chromosome = [0,1,7,6,3,2,5,12,9,11,4,8,10]
+
+	#Por motivos de muestra se suma 1 
+	
+	print("Parent 1 :", [x+1 for x in s_1.chromosome.copy()])
+	print("Parent 2 :", [x+1 for x in s_2.chromosome.copy()])
+	#La ejecucion especifica 
+	offs_1, offs_2 = metrics.genetic_algo.crossover_operator.cross_with_specific_points(s_1,s_2,cp_1,cp_2)
+
+	print([x+1 for x in offs_1])
+	print([x+1 for x in offs_2])
+	#Para que 
+
 if __name__ == '__main__':
 
 	#Dependiendo de la operacion se realiza 
@@ -635,33 +664,37 @@ if __name__ == '__main__':
 	operation, repetitions, min_permutations, max_permutations  = metrics.get_params()
 	crossovers = [crossover.strip() for crossover in os.environ['CROSSOVERSNAMES'].split() if crossover != ',']
 
+	
 	#generate_croossover_time_and_graphic("", 100,10,40)
 
-	# if(operation==0):
-	# 	test_crossover_operator()
-	# elif(operation==1):
-	# 	print("Se obtienen datos de tiempo promedio de crossover")
-	# 	print(f"REPETITIONS : {repetitions}")
-	# 	print(f"MIN_PERMUTATIONS : {min_permutations}")
-	# 	print(f"MAX_PERMUTATIONS : {max_permutations}")
-	# 	get_full_data_crossover_time(repetitions,min_permutations,max_permutations)
-	# elif(operation==2):
-	# 	print("Se comparan datos de crossovers")
-	# 	print(f"REPETITIONS : {repetitions}")
-	# 	print(f"MIN_PERMUTATIONS : {min_permutations}")
-	# 	print(f"MAX_PERMUTATIONS : {max_permutations}")
-	# 	print(f"CROSSOVERS {crossovers}")
-	# 	#Trabajando en este 
-	# 	compare_crossovers_time_data(crossovers,repetitions,min_permutations,max_permutations)
-	# elif(operation==3):
-	# 	print("Ejecucion individual de algoritmo genetico")
-	# 	get_genetic_algo_ind_execution()
-	# elif(operation==4):
-	# 	print("Ejecucion promedio de algoritmo genetico")
-	# 	print(f"REPETITIONS : {repetitions}")
-	# 	get_genetic_algo_mean_evolution(repetitions)
-	# else:
-	# 	print("Otra seleccion no valida")
+	if(operation==0):
+		test_crossover_operator()
+	elif(operation==1):
+		print("Se obtienen datos de tiempo promedio de crossover")
+		print(f"REPETITIONS : {repetitions}")
+		print(f"MIN_PERMUTATIONS : {min_permutations}")
+		print(f"MAX_PERMUTATIONS : {max_permutations}")
+		get_full_data_crossover_time(repetitions,min_permutations,max_permutations)
+	elif(operation==2):
+		print("Se comparan datos de crossovers")
+		print(f"REPETITIONS : {repetitions}")
+		print(f"MIN_PERMUTATIONS : {min_permutations}")
+		print(f"MAX_PERMUTATIONS : {max_permutations}")
+		print(f"CROSSOVERS {crossovers}")
+		#Trabajando en este 
+		compare_crossovers_time_data(crossovers,repetitions,min_permutations,max_permutations)
+	elif(operation==3):
+		print("Ejecucion individual de algoritmo genetico")
+		get_genetic_algo_ind_execution()
+	elif(operation==4):
+		print("Ejecucion promedio de algoritmo genetico")
+		print(f"REPETITIONS : {repetitions}")
+		get_genetic_algo_mean_evolution(repetitions)
+	elif(operation==5):
+		print("Ejecució específica de cruza")
+		specific_case_crossover(); 
+	else:
+		print("Otra seleccion no valida")
 
 
 	# TOMA DE PARAMETROS POR DEFECTO

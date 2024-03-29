@@ -61,6 +61,22 @@ class CrossoverOp(ABC):
         '''
         pass
 
+    @abstractmethod
+    def cross_with_specific_points(self, parent1, parent2, p_1, p_2):
+        '''
+        Funcion que ejecuta la cruza de dos padres con puntos de cruza especificos
+        
+        Params:
+            parent1, parent2 : Object
+                Instancias de una solucion con representacion de permutacion
+
+        Returns:
+            offspring_1, offspring_2 : list[int] 
+                Dos permutaciones legalizadas 
+        '''
+        pass
+        
+
     def cross_population(self, population, pop_size):
         '''
         Funcion para ejecutar la cruza sobre una poblacion dada 
@@ -183,6 +199,8 @@ class Basic(CrossoverOp):
           
     def debugged_cross(self,parent1, parent2):
         pass
+    def cross_with_specific_points(self, parent1, parent2, p_1, p_2):
+        pass
 
 #Ordered Crossover 
 #Determinar los puntos de
@@ -251,8 +269,11 @@ class Uniform(CrossoverOp):
 
         return time_end-time_start
 
+
     def debugged_cross(self, parent1, parent2):
         pass 
+    def cross_with_specific_points(self, parent1, parent2, p_1, p_2):
+        pass
 class Ordered(CrossoverOp):
 
 
@@ -612,6 +633,37 @@ class PMX(CrossoverOp):
 
         print("Primitive Offsrping 1 : "+str(primitive_offspring_1_chromosome))
         print("Primitive Offsrping 2 : "+str(primitive_offspring_2_chromosome))
+
+        for i in range(0,cp_1):
+            while primitive_offspring_1_chromosome[i] in rel_R:
+                primitive_offspring_1_chromosome[i]=rel_R[primitive_offspring_1_chromosome[i]]
+            while primitive_offspring_2_chromosome[i] in rel_L:
+                primitive_offspring_2_chromosome[i]=rel_L[primitive_offspring_2_chromosome[i]]
+        
+        for i in range(cp_2,n):
+            while primitive_offspring_1_chromosome[i] in rel_R:
+                primitive_offspring_1_chromosome[i]=rel_R[primitive_offspring_1_chromosome[i]]
+            while primitive_offspring_2_chromosome[i] in rel_L:
+                primitive_offspring_2_chromosome[i]=rel_L[primitive_offspring_2_chromosome[i]]
+
+        return np.array(primitive_offspring_1_chromosome), np.array(primitive_offspring_2_chromosome)
+
+    def cross_with_specific_points(self, parent1, parent2, p_1, p_2):
+        n = len(parent1.chromosome)
+        
+        #Puntos de corte
+        cp_1, cp_2 = p_1,p_2
+        #cp_1, cp_2 = 6,10
+        #Generamos relacion de mapeo
+        rel_R, rel_L = self.mapping_relation_generation(parent1.chromosome[cp_1:cp_2],parent2.chromosome[cp_1:cp_2])
+        
+        #Copias de los padres 
+        primitive_offspring_1_chromosome = parent1.chromosome.copy()
+        primitive_offspring_2_chromosome = parent2.chromosome.copy()
+
+        #Intercambiamos información de los padres con la generacion primitiva usando los puntos de corte
+        primitive_offspring_1_chromosome[cp_1:cp_2] = parent2.chromosome[cp_1:cp_2]
+        primitive_offspring_2_chromosome[cp_1:cp_2] = parent1.chromosome[cp_1:cp_2]
 
         for i in range(0,cp_1):
             while primitive_offspring_1_chromosome[i] in rel_R:
@@ -1065,6 +1117,119 @@ class IPMX(CrossoverOp):
         print(str(primitive_offspring_2_chromosome))
 
         return primitive_offspring_1_chromosome,primitive_offspring_2_chromosome
+    
+    def cross_with_specific_points(self, parent1, parent2, p_1, p_2):
+        n = len(parent1.chromosome)
+        #Paso 1
+        #Puntos de corte
+        cp_1, cp_2 = p_1,p_2
+
+        #Copias de los padres 
+        primitive_offspring_1_chromosome = parent1.chromosome.copy()
+        primitive_offspring_2_chromosome = parent2.chromosome.copy()
+		
+        subs_1 = parent2.chromosome[cp_1:cp_2]
+        subs_2 = parent1.chromosome[cp_1:cp_2]
+
+        
+        #Paso 2
+        #Intercambiamos información de los padres con la generacion primitiva usando los puntos de corte
+        primitive_offspring_1_chromosome[cp_1:cp_2] = parent2.chromosome[cp_1:cp_2]
+        primitive_offspring_2_chromosome[cp_1:cp_2] = parent1.chromosome[cp_1:cp_2]
+
+        #Paso 3 y 4: Generamos e inicializamos la exchange list  (O(m))
+        m = len(parent2.chromosome[cp_1:cp_2])
+        exchange_list = np.zeros((m,3), dtype=int)
+
+        for i in range(m):
+            exchange_list[i,0]= subs_1[i]
+            exchange_list[i,1]= subs_2[i]
+            exchange_list[i,2]= 1
+
+        #Paso 5,6 y 7 
+        #Generacion de la guide list
+        #Nuestra implementacion tiene que usar -1 en vez de 0 por que el 0 se ocupa en nuestra representacion 
+
+        guide_list = np.full(n,-1,dtype=int)
+        guide_list_prev = np.full(n,-1,dtype=int)
+        for i in range(m):
+            guide_list[exchange_list[i,0]]=exchange_list[i,1]
+            #Es la de regreso 
+            guide_list_prev[exchange_list[i,1]]=exchange_list[i,0]
+
+        #guide_list_preve -> Es un diccionario en el otro sentido
+
+        l1 = np.zeros(n,dtype=int)
+        l2 = np.zeros(n,dtype=int)
+
+        for i in range(m):
+            l1[exchange_list[i,0]] = 1
+            l2[exchange_list[i,1]] = 1
+        
+
+        l1_l2 = l1+l2
+
+        #Actualizar la exchange list haciendo los nodos intermedios 0 
+        for i in range(m):
+            # l1[exchange_list[i,0]]+l1[exchange_list[i,0]]
+            index = exchange_list[i,0]
+            if l1_l2[index] == 2: 
+                exchange_list[i,2] = 0
+                #index es nodo intermedio 
+                next_node = guide_list[index] 
+                prev_node = guide_list_prev[index]
+                
+                guide_list[prev_node] = next_node
+                guide_list_prev[next_node] = prev_node
+
+                guide_list[index] = -1 
+                guide_list_prev[index] = -1
+
+                
+        #Actualizar exchange list eliminando nodos intermedios y conectado los nodos con camino directo 
+        # for i in range(m):
+        #     if exchange_list[i,2] == 1: 
+        #         #El reemplazo actual 
+        #         current_replacement = exchange_list[i,1]
+        #         #El reemplazo final
+        #         final_replacement = -1
+        #         while current_replacement != -1:#Al menos se cumple la primera vez 
+        #             final_replacement = current_replacement
+        #             current_replacement = guide_list[final_replacement]
+
+        #         exchange_list[i,1] = final_replacement
+
+        #Ahora actualizamos la guide list   
+        # for i in range(m):
+        #     if(exchange_list[i,2]==1):
+        #         guide_list[exchange_list[i,0]] =  exchange_list[i,1]
+        #     else:
+        #         guide_list[exchange_list[i,0]] = -1
+
+        ###PASO  8
+        for i in range(cp_1):
+            #Primero queremos el gen en el padre (excluyendo los genes entre los puntos de corte)
+			#Para ese gen buscamos si su valor en la guide list es distinto de -1
+			#Si lo es, entonces lo sustituimos por el nuevo valor actualizado de la exchange list
+            value = guide_list[parent1.chromosome[i]]
+            if value != -1:
+                primitive_offspring_1_chromosome[i] = value
+
+        for i in range(cp_2,len(primitive_offspring_1_chromosome)):
+            value = guide_list[parent1.chromosome[i]]
+            if value != -1:
+                primitive_offspring_1_chromosome[i] = value
+
+        f = np.full(n,-1,dtype=int)
+        for i in range(n):
+            f[primitive_offspring_1_chromosome[i]]=parent1.chromosome[i]
+
+        for i in range(n):
+            primitive_offspring_2_chromosome[i]=f[parent2.chromosome[i]]
+
+          
+        return primitive_offspring_1_chromosome,primitive_offspring_2_chromosome
+
 
 
 #Basado en https://github.com/castudil/pmx/blob/master/src/pmx/PMX.java
@@ -1144,8 +1309,6 @@ class PMXCastudil(CrossoverOp):
     
     def cross(self,parent1, parent2):
 
-
-        
         n = len(parent1.chromosome)
         #Paso 1
         #Puntos de corte
@@ -1221,6 +1384,78 @@ class PMXCastudil(CrossoverOp):
 
     def debugged_cross(self,parent1, parent2):
         pass 
+
+    def cross_with_specific_points(self, parent1, parent2, p_1, p_2):
+        n = len(parent1.chromosome)
+        #Paso 1
+        #Puntos de corte
+        cp_1, cp_2 = p_1,p_2
+
+
+        #visited = np.full(n+1,False,dtype=bool)
+        visited = np.full(n+1,False,dtype=bool)
+        visited_2 = np.full(n+1,False,dtype=bool)
+
+        z = np.full(n,-1,dtype=int)
+        z_2 = np.full(n,-1,dtype=int)
+
+        top= cp_2
+
+        if(cp_2==n):
+            top=n-1
+        
+        for i in range(cp_1,top+1):
+            z[i] = parent1.chromosome[i]
+            visited[z[i]] = True
+
+        for i in range(cp_1,top+1):
+            z_2[i] = parent2.chromosome[i]
+            visited_2[z_2[i]] = True
+
+        #PRIMER HIJO  
+        for i in range(cp_1,top+1):
+            if not (visited[parent2.chromosome[i]]):
+                k_2 = i
+                elementToBeCopied = parent2.chromosome[i]
+                #Simulando el do - while 
+                while True:
+                    V = parent1.chromosome[k_2]
+                    for j in range(n):
+                        if(parent2.chromosome[j] == V):
+                            k_2=j
+    
+                    if z[k_2] == -1: 
+                        break
+                z[k_2] = elementToBeCopied
+                visited[z[k_2]]=True      
+        
+
+        for i in range(n):
+            if(z[i]==-1):
+                z[i]=parent2.chromosome[i]
+
+        #SEGUNDO HIJO
+        for i in range(cp_1,top+1):
+            if not (visited_2[parent1.chromosome[i]]):
+                k_2 = i
+                elementToBeCopied = parent1.chromosome[i]
+                #Simulando el do - while 
+                while True:
+                    V = parent2.chromosome[k_2]
+                    for j in range(n):
+                        if(parent1.chromosome[j] == V):
+                            k_2=j
+    
+                    if z_2[k_2] == -1: 
+                        break
+                z_2[k_2] = elementToBeCopied
+                visited_2[z_2[k_2]]=True      
+        
+        for i in range(n):
+            if(z_2[i]==-1):
+                z_2[i]=parent1.chromosome[i]
+        
+        return np.array(z), np.array(z_2) 
 
 ##>>>>>>>>EXPERIMENTAL NO FUNCIONA 
 #Recuperado de https://github.com/Myrrthud/Implementation-of-IPMX-Genetic-Algorithm/blob/main/gaipmx.ipynb
@@ -1309,6 +1544,8 @@ class IMPXMYR(CrossoverOp):
         return np.array(offspring1), np.array(offspring2)
     def debugged_cross(self,parent1, parent2):
         pass 
+    def cross_with_specific_points(self, parent1, parent2, p_1, p_2):
+        pass
 
 
 

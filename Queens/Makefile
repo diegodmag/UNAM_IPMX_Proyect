@@ -57,7 +57,8 @@ individual_execution :
 	python3 src/executions.py $(PERMUTATIONSIZE) $(POPULATIONSIZE) $(CROSSPROBA) $(MUTATIONPROBA) $(GENERATIONS) 5 1 3 $(CROSSNUM) 0 0 0 3 0 0 0 
 mean_evolution : 
 	python3 src/executions.py $(PERMUTATIONSIZE) $(POPULATIONSIZE) $(CROSSPROBA) $(MUTATIONPROBA) $(GENERATIONS) 5 1 3 $(CROSSNUM) 0 0 0 4 $(REPETITIONS) 0 0
-
+crossover_specific:
+	python3 src/executions.py 13 $(POPULATIONSIZE) $(CROSSPROBA) $(MUTATIONPROBA) $(GENERATIONS) 5 1 3 $(CROSSNUM) 0 0 0 5 0 0 0
 
 #Para hacer pruebas dejar corriendo esto 
 
