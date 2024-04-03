@@ -172,6 +172,10 @@ class Metrics:
 		#time_start = time.time()
 		#time_end = time.time()
 		#return time_end-time_start
+
+
+		##CHECAR TIEMPOS
+
 		time_start = time.time()
 		generations,best_sons,avg_offspring,best_all,avg_fitness = self.genetic_algo.execution()
 		time_end = time.time()

@@ -63,11 +63,19 @@ crossover_specific:
 #Para hacer pruebas dejar corriendo esto 
 
 individual_execution_samples:
-	@for PERMUTATIONSIZE in 400 500 600 700 800 900; do \
+	@for PERMUTATIONSIZE in 600 700 800 900; do \
 		for CROSSOVER in PMX IPMX Ordered PMXCastudil Uniform; do \
 			make individual_execution PERMUTATIONSIZE=$$PERMUTATIONSIZE CROSSOVER=$$CROSSOVER; \
 		done; \
 	done
+
+individual_execution_samples_low:
+	@for PERMUTATIONSIZE in 10 20 30 40 50 60 70 80 90; do \
+		for CROSSOVER in PMX IPMX Ordered PMXCastudil Uniform; do \
+			make individual_execution PERMUTATIONSIZE=$$PERMUTATIONSIZE CROSSOVER=$$CROSSOVER; \
+		done; \
+	done
+
 
 # repetitions = int(sys.argv[14])
 # 		min_permutations = int(sys.argv[15])
