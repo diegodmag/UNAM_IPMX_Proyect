@@ -116,7 +116,8 @@ class Metrics:
 			new_sed = int(time.time()) 
 			np.random.seed(new_sed)
 			# Realizamos una ejecucion 
-			generations, best_sons_ind_data, avg_offspring_ind_data, best_all_ind_data,avg_fitness_ind_data = self.genetic_algo.execution()
+			# Podemos guardar tambien el tiempo promedio que nos regresa 
+			generations, best_sons_ind_data, avg_offspring_ind_data, best_all_ind_data,avg_fitness_ind_data, total_execution_time = self.genetic_algo.execution()
 			total_best_sons_data.append(best_sons_ind_data)
 			total_avg_offspring_data.append(avg_offspring_ind_data)
 			total_best_all_data.append(best_all_ind_data)
@@ -176,10 +177,12 @@ class Metrics:
 
 		##CHECAR TIEMPOS
 
-		time_start = time.time()
-		generations,best_sons,avg_offspring,best_all,avg_fitness = self.genetic_algo.execution()
-		time_end = time.time()
-		total_time = time_end-time_start
+		#Aqui sólo hay que guardar el tiempo que nos regresa la ejecucion 
+
+		#time_start = time.time()
+		generations,best_sons,avg_offspring,best_all,avg_fitness,total_execution_time = self.genetic_algo.execution()
+		# time_end = time.time()
+		# total_time = time_end-time_start
 		file = "output/gaindividualexecutions/"+str(file_name)
 		if os.path.exists(file)	:
 			os.remove(file)
@@ -194,7 +197,7 @@ class Metrics:
 		cross_operator_line = str(self.genetic_algo.crossover_operator.__class__.__name__)
 		mutation_operator_line = str(self.genetic_algo.mutation_operator.__class__.__name__)
 		replacement_operator_line = str(self.genetic_algo.generation_replacement.__class__.__name__)
-		params_line=[self.genetic_algo.permutation_size, self.genetic_algo.pop_size, self.genetic_algo.cross_prob, self.genetic_algo.mut_prob,self.genetic_algo.max_generations,self.genetic_algo.max_time,selection_operator_line, self.genetic_algo.tournament_size,cross_operator_line, mutation_operator_line,replacement_operator_line,best_all[-1], best_sons[-1], avg_offspring[-1], avg_fitness[-1],total_time]
+		params_line=[self.genetic_algo.permutation_size, self.genetic_algo.pop_size, self.genetic_algo.cross_prob, self.genetic_algo.mut_prob,self.genetic_algo.max_generations,self.genetic_algo.max_time,selection_operator_line, self.genetic_algo.tournament_size,cross_operator_line, mutation_operator_line,replacement_operator_line,best_all[-1], best_sons[-1], avg_offspring[-1], avg_fitness[-1],total_execution_time]
 		writte_txt_data(file,params_line)
 		for line in total_data:
 			writte_txt_data(file,line)

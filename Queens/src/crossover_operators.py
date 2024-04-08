@@ -105,6 +105,8 @@ class CrossoverOp(ABC):
                 #Si la probabilidad es mayor entonces se regresan dos copias de los padres 
                 offspring_1, offspring_2 = copy.copy(parents[0].chromosome),copy.copy(parents[1].chromosome)
             
+            #Podriamos convertirlos a ejemplares justo despues de obtener la cruza
+            #Y luego evaluarlos y ver si mejora el tiempo 
         return np.array(offspring)
 
     #Tambien necesitamos un metodo que le cambie la semilla 

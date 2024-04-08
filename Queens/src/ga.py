@@ -175,8 +175,19 @@ class GeneticAlg:
 	#Mejor hijo -> Es decir obtener el mejor de la cruza 
 	#Promedio de fitness de hijos 
 
+# 	start_time = time.perf_counter()
+
+# # Your code here
+
+# end_time = time.perf_counter()
+
+# execution_time = end_time - start_time
+
+# print(f"The code executed in {execution_time} seconds.")
+
+
 	def simple_individual_execution(self):
-	
+		
 		[ind.evaluate() for ind in self.current_pop]
 		selected = self.selection_operator.select(self.current_pop, self.pop_size)
 		primitive_offspring_chromosomes = self.crossover_operator.cross_population(selected, self.pop_size)
@@ -187,27 +198,102 @@ class GeneticAlg:
 		[ind.evaluate() for ind in self.current_pop] 
 
 	def individual_execution(self):
+		print("Ejecucion >>>>>>>>>>>>>")
 		#Evaluamos a los individuos de la poblacion actual 
+		time_elpased = 0 
+
+
+		#EVALUACION INICIAL 
+  		#SUMA A LA EJECUCION TOTAL 
+		time_i = time.process_time()
 		[ind.evaluate() for ind in self.current_pop]
+		time_f = time.process_time()
+		time_elpased+=time_f-time_i
+		print("Tiempo de evaluacion ", time_f-time_i)
+		
 		#SELECCION
+		#SUMA A LA EJECUCION TOTAL 
+		time_i = time.process_time()
 		selected = self.selection_operator.select(self.current_pop, self.pop_size)
+		time_f = time.process_time()
+		time_elpased+=time_f-time_i
+		print("Tiempo de seleccion ", time_f-time_i)
+		
 		#CRUZA 1 -> OBTENEMOS UNA POBLACION DE PERMUTACIONES
+  		#SUMA A LA EJECUCION TOTAL 
+		time_i = time.process_time()
 		primitive_offspring_chromosomes = self.crossover_operator.cross_population(selected, self.pop_size)
-		#CRUZA 2 -> GENERACION DE POBLACION BASADA EN LOS CROMOSOMAS 
+		time_f = time.process_time()
+		time_elpased+=time_f-time_i
+		print("Tiempo de cruza ", time_f-time_i)
+		
+		#CRUZA 2 -> GENERACION DE POBLACION BASADA EN LOS CROMOSOMAS //Probablemente esto se pueda hacer dentro del mismo crossover
+		#SUMA A LA EJECUCION TOTAL 
+		time_i = time.process_time()
 		primitive_offspring_population = self.permutation_based_problem.get_population(primitive_offspring_chromosomes)
+		time_f = time.process_time()
+		time_elpased+=time_f-time_i
+		print("Tiempo para convertir permutaciones en ejemplares de reina ", time_f-time_i)
+		
+		#Requerimos esta evaluacion para obtener el mejor y el promedio 
+		#Pero también para el reeemplazo generacional 
+		time_i = time.process_time()
 		[ind.evaluate() for ind in primitive_offspring_population]
+		time_f = time.process_time()
+		time_elpased+=time_f-time_i
+		print("Tiempo de evaluacion de nueva poblacion", time_f-time_i)
+		
+		#SE DISCRIMINA ---->>> 
+		time_i = time.process_time()
+		#Esto no debe estar dentro del tiempo total del algoritmo
 		best_son = self.get_the_best(primitive_offspring_population).fitness #MEJOR HIJO
+		time_f = time.process_time()
+		print("Tiempo para obtener al mejor de la generacion", time_f-time_i)
+		
+		#SE DISCRIMINA -----> 
+		time_i = time.process_time()
+		#Esto no debe estar dentro del tiempo total del algoritmo
 		offspring_avg_fitness = self.get_avg_fitness(primitive_offspring_population) #PROMEDIO DE FITNESS DE HIJOS
-		#REEMPLAZO GENERACIONAL 
+		time_f = time.process_time()
+		print("Tiempo para obtener el promedio", time_f-time_i)
+		
+		#REEMPLAZO GENERACIONAL (El cual si necesita que los individuos estén evaluados)
+		time_i = time.process_time()
 		self.current_pop = self.generation_replacement.replace(self.current_pop, primitive_offspring_population)
+		time_f = time.process_time()
+		time_elpased+=time_f-time_i
+		print("Tiempo realizar el reemplazo", time_f-time_i)
+		
 		#MUTACION 
+		time_i = time.process_time()
 		self.mutation_operator.mutate_population(self.current_pop)
+		time_f = time.process_time()
+		time_elpased+=time_f-time_i
+		print("Tiempo realizar la mutacion", time_f-time_i)
+
+		#Requerimos esta evaluacion para obtener el mejor de la ejecucion y el promedio fitness 
+		time_i = time.process_time()
 		[ind.evaluate() for ind in self.current_pop]
+		time_f = time.process_time()
+		print("Tiempo de evaluación", time_f-time_i)
+		
+		#SE DISCRIMINA ----->
+		time_i = time.process_time()
 		best_current_pop = self.get_the_best(self.current_pop).fitness #MEJOR DE LA EJECUCION 
+		time_f = time.process_time()
+		print("Tiempo de otener el mejor de la ejecucion", time_f-time_i)
+		
+		#SE DISCRIMINA ----->
+		time_i = time.process_time()
 		current_pop_avg_fitness = self.get_avg_fitness(self.current_pop) #PROMEDIO DE FITNESS 
+		time_f = time.process_time()
+		print("Tiempo de otener el promedio de la poblacion", time_f-time_i)
 		
-		
-		return best_son, offspring_avg_fitness, best_current_pop, current_pop_avg_fitness
+
+		#Podriamos regresar el tiempo 
+
+
+		return best_son, offspring_avg_fitness, best_current_pop, current_pop_avg_fitness, time_elpased
 	
 
 	def execution(self):
@@ -232,17 +318,23 @@ class GeneticAlg:
 		current_pop_avg_fitness_data = []
 		generations_data = []
 		self.init_population()
+
+		#Cada ejecucion individual nos regresara un tiempo, ese tiempo hay que sumarlo 
+		total_execution_time = 0 
+
 		generations = 0
 		#CONDICIONES DE TERMINO IMPORTANTES -> Por generacion y por alcanzar el optimo 
 		while True:
 			#if(self.get_the_best(self.current_pop).fitness == self.optimal or generations == self.max_generations):
 			if(generations == self.max_generations):	
+				#self.get_the_best(self.current_pop).output_plot()
 				#Aqui hay que revisar la condicion de paro (falta la condición por generacion maxima alcanzada)
 				#print(self.get_the_best(self.current_pop))
 				break 
 			else : 
 				#print("Iteracion :"+str(total_iterations))
-				best_son, offspring_avg_fitness, best_current_pop, current_pop_avg_fitness =  self.individual_execution()
+				best_son, offspring_avg_fitness, best_current_pop, current_pop_avg_fitness, time_elpased =  self.individual_execution()
+				total_execution_time+=time_elpased
 				generations+=1
 				best_son_data.append(best_son)
 				offspring_avg_fitness_data.append(offspring_avg_fitness)
@@ -252,10 +344,10 @@ class GeneticAlg:
 				#Aqui podemos guardar los datos o regresarselos a alguien 
 				#print(">>>>>>>>>>>>>>>>>>>>>")
 		
-		return generations_data, best_son_data, offspring_avg_fitness_data, best_current_pop_data, current_pop_avg_fitness_data
-		#time_start = time.time()
-		#time_end = time.time()
-		#return time_end-time_start
+
+		#Ahora regresa el tiempo total 
+		return generations_data, best_son_data, offspring_avg_fitness_data, best_current_pop_data, current_pop_avg_fitness_data, total_execution_time
+		
 	#BORRAR >>>>>
 	def simple_execution(self):
 		'''

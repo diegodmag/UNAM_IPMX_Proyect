@@ -60,24 +60,43 @@ class NQueens(PermutationBasedProblem):
     def __init__(self, permutation):
         super().__init__(permutation)
         self.fitness=0
-        self.board_rep = [ ["--" for i in self.chromosome] for j in self.chromosome]
+        self.board_rep = ""
         self.optimal = 0 
 
     def __str__(self):
         return "Chromosome : {}".format(str(self.chromosome))+"\n"+"Fitness Value : {}".format(self.fitness)+"\n"+"Board Representation :"+"\n"+str(self.set_board())
 
-    def evaluate(self):
-        '''
-		El valor objetivo de una solución es la cantidad de conflictos, por lo que mientras menos conflictos mejor solución es 
-		'''
-        conflicts=0
-        for i in range(len(self.chromosome)):
-            for j in range(i+1,len(self.chromosome)):
-                if(abs(i-j) == abs(self.chromosome[i]-self.chromosome[j])):
-                    conflicts=conflicts+1
+    # def evaluate(self):
+    #     '''
+	# 	El valor objetivo de una solución es la cantidad de conflictos, por lo que mientras menos conflictos mejor solución es 
+	# 	'''
+    #     conflicts=0
+    #     for i in range(len(self.chromosome)):
+    #         for j in range(i+1,len(self.chromosome)):
+    #             if(abs(i-j) == abs(self.chromosome[i]-self.chromosome[j])):
+    #                 conflicts=conflicts+1
         
-        self.fitness = conflicts
+    #     self.fitness = conflicts
     
+    def evaluate(self):
+        diagonal1 = [0] * (2*len(self.chromosome) - 1)
+        diagonal2 = [0] * (2*len(self.chromosome) - 1)
+
+            # Contar las ocurrencias en cada diagonal
+        for i in range(len(self.chromosome)):
+            diagonal1[i+self.chromosome[i]] += 1
+            diagonal2[len(self.chromosome)-i+self.chromosome[i]-1] += 1
+
+            # Calcular los conflictos
+        conflicts = 0
+        for i in range(2*len(self.chromosome) - 1):
+            if diagonal1[i] > 1:
+                conflicts += diagonal1[i] - 1
+            if diagonal2[i] > 1:
+                conflicts += diagonal2[i] - 1
+
+        self.fitness = conflicts
+
     def get_instance(self,chromosome):
         return NQueens(chromosome)
          
@@ -88,6 +107,8 @@ class NQueens(PermutationBasedProblem):
         return np.array(nqueens_pop)
 
     def set_board(self):
+
+        self.board_rep= [ ["--" for i in self.chromosome] for j in self.chromosome]
         '''
         Generate the visual representation od the individual 
         ''' 
