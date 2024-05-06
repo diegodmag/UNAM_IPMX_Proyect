@@ -1245,6 +1245,7 @@ class PMXCastudil(CrossoverOp):
         cp_1, cp_2 = cut_points[0],cut_points[1]
 
         #visited = np.full(n+1,False,dtype=bool)
+        #Dos arreglos de boleanos
         visited = np.full(n+1,False,dtype=bool)
         visited_2 = np.full(n+1,False,dtype=bool)
 
@@ -1256,6 +1257,7 @@ class PMXCastudil(CrossoverOp):
         if(cp_2==n):
             top=n-1
         
+        #Lineal sobre n 
         for i in range(cp_1,top+1):
             z[i] = parent1.chromosome[i]
             visited[z[i]] = True
@@ -1266,11 +1268,15 @@ class PMXCastudil(CrossoverOp):
 
         #PRIMER HIJO  
         for i in range(cp_1,top+1):
+            #Si el gen del padre_2 no fue visitado al generar a z entonces procede
             if not (visited[parent2.chromosome[i]]):
+                #Guardamos el índice del elemento que no fue visitado
                 k_2 = i
+                #Guardamos ese elemento que no fue visitado
                 elementToBeCopied = parent2.chromosome[i]
                 #Simulando el do - while 
                 while True:
+                    #V es el i-ésimo elemento de parent_1 
                     V = parent1.chromosome[k_2]
                     for j in range(n):
                         if(parent2.chromosome[j] == V):
@@ -1458,6 +1464,49 @@ class PMXCastudil(CrossoverOp):
                 z_2[i]=parent1.chromosome[i]
         
         return np.array(z), np.array(z_2) 
+
+
+#Recuperado de https://github.com/ruta-tamosiunaite/partially-mapped-crossover/blob/main/partially_mapped_crossover.py
+class PMXRUTA(CrossoverOp):
+
+    def timed_cross(self, parent1, parent2):
+        return super().timed_cross(parent1, parent2)
+
+    def cross(self, parent1, parent2):
+
+        parent1 = parent1.chromosome
+        parent2 = parent2.chromosome
+
+        child1 = parent1.copy()
+        child2 = parent2.copy()
+
+        size = len(parent1)
+        # Step 1: Select crossover range at random
+        start, end = sorted(rnd.sample(range(1, size - 2), 2))  # Avoid the first and last gene (the hive) (Last element of the list is (length - 1). Thus, it is (length - 2) to avoid the last gene)
+
+        child1[start:end] = parent1[start:end]
+        child2[start:end] = parent2[start:end]
+
+        # Step 3: Determine the mapping relationship to legalize offspring
+        mapping1 = {parent2[i]: parent1[i] for i in range(start, end)}
+        mapping2 = {parent1[i]: parent2[i] for i in range(start, end)}
+
+        # Step 4: Legalize children with the mapping relationship
+        for i in list(range(start)) + list(range(end, size)):
+            if child1[i] in mapping1:
+                while child1[i] in mapping1:
+                    child1[i] = mapping1[child1[i]]
+            if child2[i] in mapping2:
+                while child2[i] in mapping2:
+                    child2[i] = mapping2[child2[i]]
+        
+        return np.array(child1), np.array(child2)
+
+    def debugged_cross(self, parent1, parent2):
+        return super().debugged_cross(parent1, parent2)
+    
+    def cross_with_specific_points(self, parent1, parent2, p_1, p_2):
+        return super().cross_with_specific_points(parent1, parent2, p_1, p_2)
 
 ##>>>>>>>>EXPERIMENTAL NO FUNCIONA 
 #Recuperado de https://github.com/Myrrthud/Implementation-of-IPMX-Genetic-Algorithm/blob/main/gaipmx.ipynb

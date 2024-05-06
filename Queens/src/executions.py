@@ -108,6 +108,7 @@ class Metrics:
 		total_avg_offspring_data = []
 		total_best_all_data=[]
 		total_avg_fitness_data=[]
+		total_execution_times = []
 		seeds_per_iteration = []
 		#Total de iteraciones 
 		#Por cada iteracion hay que guardar los datos obtenidos 
@@ -122,6 +123,7 @@ class Metrics:
 			total_avg_offspring_data.append(avg_offspring_ind_data)
 			total_best_all_data.append(best_all_ind_data)
 			total_avg_fitness_data.append(avg_fitness_ind_data)
+			total_execution_times.append(total_execution_time)
 			seeds_per_iteration.append(new_sed)
 
 			#Meter una pausa   (0.1 segundos ) 
@@ -134,7 +136,8 @@ class Metrics:
 		mean_generation_avg_offspring_data = np.mean(total_avg_offspring_data,axis=0)
 		mean_generation_best_all_data = np.mean(total_best_all_data,axis=0)
 		mean_generation_avg_fitness_data = np.mean(total_avg_fitness_data,axis=0)
-
+		
+		
 		#Tenemos que generar los datos ordenados por generacion 
 
 		#Ahora hay que REGISTRARLO
@@ -148,6 +151,8 @@ class Metrics:
 		params_line=[self.genetic_algo.permutation_size, self.genetic_algo.pop_size, self.genetic_algo.cross_prob, self.genetic_algo.mut_prob,self.genetic_algo.max_generations,self.genetic_algo.max_time,selection_operator_line, self.genetic_algo.tournament_size,cross_operator_line, mutation_operator_line,replacement_operator_line,iterations ]   
 		#Escribimos la linea de parametros en el documento 
 		writte_txt_data(file, params_line)
+		#Escribimos la linea de los tiempos en cada ejecucion 
+		writte_txt_data(file,total_execution_times)
 		#Guardamos las semillas 
 		writte_txt_data(file_seeds, seeds_per_iteration)
 		#Procedemos a escribir el promedio de datos POR GENERACION 
@@ -159,6 +164,7 @@ class Metrics:
 			# 	El promedio del mejor individuo (despues de realizar el reemplazo generacional) de las n iteracion en la i-esima generacion
 			# 	El promedio del los n-esimso promedios de la poblacion (despues de realizar el reemplazo generacional) obtenido en la i-esima generacion 
 			line= [generations[i],mean_generation_best_sons_data[i],mean_generation_avg_offspring_data[i],mean_generation_best_all_data[i],mean_generation_avg_fitness_data[i]]
+			#params_line=[self.genetic_algo.permutation_size, self.genetic_algo.pop_size, self.genetic_algo.cross_prob, self.genetic_algo.mut_prob,self.genetic_algo.max_generations,self.genetic_algo.max_time,selection_operator_line, self.genetic_algo.tournament_size,cross_operator_line, mutation_operator_line,replacement_operator_line,best_all[-1], best_sons[-1], avg_offspring[-1], avg_fitness[-1],total_execution_time]
 			avg_data.append(line)
 		#Finalmente procedmos a registrar los datos de las ejecuciones promedio 
 		for line in avg_data:
@@ -186,11 +192,13 @@ class Metrics:
 		file = "output/gaindividualexecutions/"+str(file_name)
 		if os.path.exists(file)	:
 			os.remove(file)
-		#Hay que hacer el formaro de cada linea 
+		#Hay que hacer el formato de cada linea 
 		total_data = []
 		for i in range(len(generations)):
 			line = [generations[i], best_sons[i], avg_offspring[i],best_all[i], avg_fitness[i]]
 			total_data.append(line)
+		
+			#NOTA : No necesariamente el ultimo del arreglo de mejor de todos el el mejor
 		
 		#La primer linea deben ser los parametros 
 		selection_operator_line = str(self.genetic_algo.selection_operator.__class__.__name__)
@@ -292,12 +300,14 @@ def get_data_from_txt_mean_evolution(file_path,output_dir):
 	avg_offspring_data = []
 	best_ind_data=[]
 	avg_fitness_data = []
+
 	with open(file_path,'r') as file : 
 		#Hay que leer la primera linea como los parametro
 
 		#Leemos la primer linea de forma particular 
 		params_Line = file.readline().strip().split(',')
-		
+		times_line = file.readline().strip().split(',')
+		executions_times = [float(time) for time in times_line]	
 		for line in file : 
 			data = line.strip().split(',')
 			# gen = int(data[0])
@@ -310,8 +320,10 @@ def get_data_from_txt_mean_evolution(file_path,output_dir):
 			avg_offspring_data.append(float(data[2]))
 			best_ind_data.append(float(data[3]))
 			avg_fitness_data.append(float(data[4]))
+			
+			#AGREGAR TIEMPO ? 
 
-	return [params_Line,gens_data,best_ind_offspring_data,avg_offspring_data,best_ind_data,avg_fitness_data] 
+	return [params_Line,executions_times,gens_data,best_ind_offspring_data,avg_offspring_data,best_ind_data,avg_fitness_data] 
 
 def generate_avg_data(data):
 	'''
@@ -419,7 +431,7 @@ def get_ind_exe_graph(info,data,data_names,colors,file_path):
 	plt.text(x=.6, y=.95, s=info_3, fontsize=9, ha='left', va='center', transform=plt.gcf().transFigure)
 	plt.savefig(file_path,bbox_inches='tight')
 
-def get_avg_exe_graph(info,data,data_names,colors,file_path):
+def get_avg_exe_graph(info,times,data,data_names,colors,file_path):
 	'''
 	La grafica de ejecuciones individuales, se considera como data[0] las generaciones 
 	'''
@@ -446,15 +458,23 @@ def get_avg_exe_graph(info,data,data_names,colors,file_path):
     'color': 'blue',         # Color del texto
     'verticalalignment': 'bottom',  # Alineación vertical
 	}
-
+	#gens_data,best_ind_offspring_data,avg_offspring_data,best_ind_data,avg_fitness_data
+	#data[1] = best_ind_offsrping
+	#data[2] = avg_offspring_data 
+	#data[3] = best_ind_data
+	#data[4] = avg_fitness_data
+	print("Tiempos recibidos ", times)
 	#info = "Tamaño permutación : {}\nTamaño población : {}\nProb.Crossover : {}\nProb.Mutación : {}\nGeneraciones Max : {}\nTiempo Max {}\nSelección : {}\k-Torneo : {}\nCrossover : {}\nMutación : {}\nReemplazo : {}".format(info[0],info[1],info[2],info[3],info[4],info[5],info[6],info[7],info[8],info[9], info[10])
 	info_1 = "Tamaño permutación : {}\nTamaño población : {}\nProb.Crossover : {}\nProb.Mutación : {}\nGeneraciones Max : {}".format(info[0],info[1],info[2],info[3],info[4])
 	info_2 = "Tiempo Max {}\nSelección : {}\k-Torneo : {}\nCrossover : {}\nMutación : {}\nReemplazo : {}".format(info[5],info[6],info[7],info[8],info[9], info[10])
+	info_3 = "AVG Exe. Time {}\nBest last Offspring {}".format(str(np.mean(times)), float(data[1][-1]))
+	print(data[1])
 	#"Tiempo Max {}\nSelección : {}\k-Torneo : {}\nCrossover : {}\nMutación : {}\nReemplazo : {}".format(info[5],info[6],info[7],info[8],info[9], info[10])
 	title_info = "Evolucion promedio {} con {} iteraciones".format(str(title), str(info[11]))
 	plt.title(title_info,y=1.2)
 	plt.text(x=.15, y=.95, s=info_1, fontsize=9, ha='left', va='center', transform=plt.gcf().transFigure)
 	plt.text(x=.35, y=.95, s=info_2, fontsize=9, ha='left', va='center', transform=plt.gcf().transFigure)
+	plt.text(x=.65, y=.95, s=info_3, fontsize=9, ha='left', va='center', transform=plt.gcf().transFigure)
 	plt.savefig(file_path,bbox_inches='tight')
 
 #plt.savefig(self.get_path_for_file(str('Board'+str(len(self.chromosome)))))
@@ -573,10 +593,11 @@ def generate_avg_txt_and_graphic(file, iterations):
 
 	metrics.register_ga_avg_execution(file_name_txt,iterations)
 
+	#El ultimo indice tiene el arreglo de los tiempos
 	data = get_data_from_txt_mean_evolution(file_name_txt,"executionsforavg")
 
 	file_name_graph = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+file
-	get_avg_exe_graph(data[0],data[1:],["Generations", "Best of Offspring", "Avg Offspring", "Best", "Avg Fitness"],colors, file_name_graph)
+	get_avg_exe_graph(data[0],data[1],data[2:],["Generations", "Best of Offspring", "Avg Offspring", "Best", "Avg Fitness"],colors, file_name_graph)
 	
 
 

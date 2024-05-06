@@ -323,9 +323,12 @@ class GeneticAlg:
 		total_execution_time = 0 
 
 		generations = 0
+
+		best_individual = -1 
 		#CONDICIONES DE TERMINO IMPORTANTES -> Por generacion y por alcanzar el optimo 
 		while True:
-			#if(self.get_the_best(self.current_pop).fitness == self.optimal or generations == self.max_generations):
+			#print(best_individual == self.optimal)
+			#if(best_individual == self.optimal):
 			if(generations == self.max_generations):	
 				#self.get_the_best(self.current_pop).output_plot()
 				#Aqui hay que revisar la condicion de paro (falta la condición por generacion maxima alcanzada)
@@ -341,11 +344,11 @@ class GeneticAlg:
 				best_current_pop_data.append(best_current_pop)
 				current_pop_avg_fitness_data.append(current_pop_avg_fitness)
 				generations_data.append(generations)
+
+				best_individual=best_current_pop
 				#Aqui podemos guardar los datos o regresarselos a alguien 
 				#print(">>>>>>>>>>>>>>>>>>>>>")
 		
-
-		#Ahora regresa el tiempo total 
 		return generations_data, best_son_data, offspring_avg_fitness_data, best_current_pop_data, current_pop_avg_fitness_data, total_execution_time
 		
 	#BORRAR >>>>>
