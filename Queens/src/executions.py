@@ -467,7 +467,7 @@ def get_avg_exe_graph(info,times,data,data_names,colors,file_path):
 	#info = "Tamaño permutación : {}\nTamaño población : {}\nProb.Crossover : {}\nProb.Mutación : {}\nGeneraciones Max : {}\nTiempo Max {}\nSelección : {}\k-Torneo : {}\nCrossover : {}\nMutación : {}\nReemplazo : {}".format(info[0],info[1],info[2],info[3],info[4],info[5],info[6],info[7],info[8],info[9], info[10])
 	info_1 = "Tamaño permutación : {}\nTamaño población : {}\nProb.Crossover : {}\nProb.Mutación : {}\nGeneraciones Max : {}".format(info[0],info[1],info[2],info[3],info[4])
 	info_2 = "Tiempo Max {}\nSelección : {}\k-Torneo : {}\nCrossover : {}\nMutación : {}\nReemplazo : {}".format(info[5],info[6],info[7],info[8],info[9], info[10])
-	info_3 = "AVG Exe. Time {}\nBest last Offspring {}".format(str(np.mean(times)), float(data[1][-1]))
+	info_3 = "AVG Exe. Time {}\nBest last Offspring {}\nBest fitness {}".format(str(np.mean(times)), float(data[1][-1]), float(data[3][-1], ))
 	print(data[1])
 	#"Tiempo Max {}\nSelección : {}\k-Torneo : {}\nCrossover : {}\nMutación : {}\nReemplazo : {}".format(info[5],info[6],info[7],info[8],info[9], info[10])
 	title_info = "Evolucion promedio {} con {} iteraciones".format(str(title), str(info[11]))
@@ -589,14 +589,15 @@ def generate_avg_txt_and_graphic(file, iterations):
 
 	file+="MeanEvolution" 
 
-	file_name_txt = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+str(file)+".txt"
+	#file_name_txt = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+str(file)+".txt"
+	file_name_txt = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"PerSize:"+str(metrics.genetic_algo.permutation_size)+"Repetitions:"+str(iterations)+file	
 
 	metrics.register_ga_avg_execution(file_name_txt,iterations)
 
 	#El ultimo indice tiene el arreglo de los tiempos
 	data = get_data_from_txt_mean_evolution(file_name_txt,"executionsforavg")
 
-	file_name_graph = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+file
+	file_name_graph = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"PerSize:"+str(metrics.genetic_algo.permutation_size)+"Repetitions:"+str(iterations)+file
 	get_avg_exe_graph(data[0],data[1],data[2:],["Generations", "Best of Offspring", "Avg Offspring", "Best", "Avg Fitness"],colors, file_name_graph)
 	
 

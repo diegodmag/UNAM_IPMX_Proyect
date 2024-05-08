@@ -271,11 +271,10 @@ class Uniform(CrossoverOp):
 
         return time_end-time_start
 
-
     def debugged_cross(self, parent1, parent2):
-        pass 
+        return super().debugged_cross(parent1, parent2)
     def cross_with_specific_points(self, parent1, parent2, p_1, p_2):
-        pass
+        return super().cross_with_specific_points(parent1, parent2, p_1, p_2)
 class Ordered(CrossoverOp):
 
 
@@ -532,6 +531,9 @@ class Ordered(CrossoverOp):
         
         return np.array(primitive_offspring_1_chromosome), np.array(primitive_offspring_2_chromosome)
     
+    def cross_with_specific_points(self, parent1, parent2, p_1, p_2):
+        return super().cross_with_specific_points(parent1, parent2, p_1, p_2)
+
 class PMX(CrossoverOp): 
     
 
@@ -1349,15 +1351,19 @@ class PMXCastudil(CrossoverOp):
             if not (visited[parent2.chromosome[i]]):
                 k_2 = i
                 elementToBeCopied = parent2.chromosome[i]
+                V = parent1.chromosome[k_2]
+                for j in range(n):
+                    if(parent2.chromosome[j] == V):
+                        k_2=j
                 #Simulando el do - while 
-                while True:
-                    V = parent1.chromosome[k_2]
-                    for j in range(n):
-                        if(parent2.chromosome[j] == V):
-                            k_2=j
+                # while True:
+                #     V = parent1.chromosome[k_2]
+                #     for j in range(n):
+                #         if(parent2.chromosome[j] == V):
+                #             k_2=j
     
-                    if z[k_2] == -1: 
-                        break
+                #     if z[k_2] == -1: 
+                #         break
                 z[k_2] = elementToBeCopied
                 visited[z[k_2]]=True      
         
@@ -1369,17 +1375,23 @@ class PMXCastudil(CrossoverOp):
         #SEGUNDO HIJO
         for i in range(cp_1,top+1):
             if not (visited_2[parent1.chromosome[i]]):
+                # k_2 = i
+                # elementToBeCopied = parent1.chromosome[i]
+                #Simulando el do - while 
                 k_2 = i
                 elementToBeCopied = parent1.chromosome[i]
-                #Simulando el do - while 
-                while True:
-                    V = parent2.chromosome[k_2]
-                    for j in range(n):
-                        if(parent1.chromosome[j] == V):
-                            k_2=j
+                V = parent2.chromosome[k_2]
+                for j in range(n):
+                    if(parent1.chromosome[j] == V):
+                        k_2=j
+                # while True:
+                #     V = parent2.chromosome[k_2]
+                #     for j in range(n):
+                #         if(parent1.chromosome[j] == V):
+                #             k_2=j
     
-                    if z_2[k_2] == -1: 
-                        break
+                #     if z_2[k_2] == -1: 
+                #         break
                 z_2[k_2] = elementToBeCopied
                 visited_2[z_2[k_2]]=True      
         
@@ -1420,22 +1432,25 @@ class PMXCastudil(CrossoverOp):
             z_2[i] = parent2.chromosome[i]
             visited_2[z_2[i]] = True
 
-        #PRIMER HIJO  
         for i in range(cp_1,top+1):
             if not (visited[parent2.chromosome[i]]):
                 k_2 = i
                 elementToBeCopied = parent2.chromosome[i]
+                V = parent1.chromosome[k_2]
+                for j in range(n):
+                    if(parent2.chromosome[j] == V):
+                        k_2=j
                 #Simulando el do - while 
-                while True:
-                    V = parent1.chromosome[k_2]
-                    for j in range(n):
-                        if(parent2.chromosome[j] == V):
-                            k_2=j
+                # while True:
+                #     V = parent1.chromosome[k_2]
+                #     for j in range(n):
+                #         if(parent2.chromosome[j] == V):
+                #             k_2=j
     
-                    if z[k_2] == -1: 
-                        break
+                #     if z[k_2] == -1: 
+                #         break
                 z[k_2] = elementToBeCopied
-                visited[z[k_2]]=True      
+                visited[z[k_2]]=True   
         
 
         for i in range(n):
@@ -1445,19 +1460,25 @@ class PMXCastudil(CrossoverOp):
         #SEGUNDO HIJO
         for i in range(cp_1,top+1):
             if not (visited_2[parent1.chromosome[i]]):
+                # k_2 = i
+                # elementToBeCopied = parent1.chromosome[i]
+                #Simulando el do - while 
                 k_2 = i
                 elementToBeCopied = parent1.chromosome[i]
-                #Simulando el do - while 
-                while True:
-                    V = parent2.chromosome[k_2]
-                    for j in range(n):
-                        if(parent1.chromosome[j] == V):
-                            k_2=j
+                V = parent2.chromosome[k_2]
+                for j in range(n):
+                    if(parent1.chromosome[j] == V):
+                        k_2=j
+                # while True:
+                #     V = parent2.chromosome[k_2]
+                #     for j in range(n):
+                #         if(parent1.chromosome[j] == V):
+                #             k_2=j
     
-                    if z_2[k_2] == -1: 
-                        break
+                #     if z_2[k_2] == -1: 
+                #         break
                 z_2[k_2] = elementToBeCopied
-                visited_2[z_2[k_2]]=True      
+                visited_2[z_2[k_2]]=True
         
         for i in range(n):
             if(z_2[i]==-1):
