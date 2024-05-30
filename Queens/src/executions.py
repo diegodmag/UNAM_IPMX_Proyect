@@ -163,6 +163,7 @@ class Metrics:
 			# 	El promedio del los n-esimso promedios del offpring obtenido en la i-esima generacion  
 			# 	El promedio del mejor individuo (despues de realizar el reemplazo generacional) de las n iteracion en la i-esima generacion
 			# 	El promedio del los n-esimso promedios de la poblacion (despues de realizar el reemplazo generacional) obtenido en la i-esima generacion 
+			# 0-generaciones, 1-mejores hijos, 2-promedio de fitness de la generacion, 3-mejores de todos, 4-promedio del fitness  
 			line= [generations[i],mean_generation_best_sons_data[i],mean_generation_avg_offspring_data[i],mean_generation_best_all_data[i],mean_generation_avg_fitness_data[i]]
 			#params_line=[self.genetic_algo.permutation_size, self.genetic_algo.pop_size, self.genetic_algo.cross_prob, self.genetic_algo.mut_prob,self.genetic_algo.max_generations,self.genetic_algo.max_time,selection_operator_line, self.genetic_algo.tournament_size,cross_operator_line, mutation_operator_line,replacement_operator_line,best_all[-1], best_sons[-1], avg_offspring[-1], avg_fitness[-1],total_execution_time]
 			avg_data.append(line)
@@ -542,6 +543,8 @@ def graph_vs_generation_for_n(file_names):
 	
 	gen_vs_graph_for_n(avgs_datas, file_path, file_names)
 	
+# Se necesita un metodo para leer varios archivos y solo obtener el arreglo de los mejores a lo largo de las generacions
+# Tal vez un metodo que lea info de los datos de las ejecuciones promedio y regrese alguna de las columnas 
 
 
 #METODOS PARA AUTOMATIZAR EL PROCESO DE GUARDAR LOS DATOS EN UN .TXT Y GENERAR LAS GRAFICAS 
@@ -590,7 +593,7 @@ def generate_avg_txt_and_graphic(file, iterations):
 	file+="MeanEvolution" 
 
 	#file_name_txt = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+str(file)+".txt"
-	file_name_txt = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"PerSize:"+str(metrics.genetic_algo.permutation_size)+"Repetitions:"+str(iterations)+file	
+	file_name_txt = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"PerSize:"+str(metrics.genetic_algo.permutation_size)+"Repetitions:"+str(iterations)+file+".txt"	
 
 	metrics.register_ga_avg_execution(file_name_txt,iterations)
 
@@ -601,7 +604,82 @@ def generate_avg_txt_and_graphic(file, iterations):
 	get_avg_exe_graph(data[0],data[1],data[2:],["Generations", "Best of Offspring", "Avg Offspring", "Best", "Avg Fitness"],colors, file_name_graph)
 	
 
+#>>>>>>>>>>>...EN DESARROLLO 
+def gen_vs_graph_for_n(datas, file_path, data_names):
+    title = file_path
+    file_path = "output/crossovervisuals/"+str(file_path)
+    file_path = get_path_for_file(file_path)
+    plt.figure(figsize=(10, 8))
+    
+    markers = ['o', 's', 'D', '^', 'v', '<', '>', '1', '2', '3', '4', '8', 'p', 'P', '*', 'h', 'H', '+', 'x', 'X', 'D', '|', '_']
+    colors = ['blue', 'orange', 'green', 'red', 'purple', 'brown', 'pink', 'gray', 'olive', 'cyan']
+    
+    for i, data in enumerate(datas):
+        plt.plot(data[0], data[1], label=data_names[i], marker=markers[i % len(markers)], linestyle='--', color=colors[i % len(colors)])
+    
+    plt.xlabel('Tamaño permutacion')
+    plt.ylabel('Tiempo promedio')
+    # plt.xticks(datas[0][0])
+    plt.legend()
+    plt.title('Tiempo Promedio')
+    plt.savefig(file_path, dpi=300)
 
+
+
+def avg_best_fitness_vs_graph(datas, file_path, data_names): 
+
+	output_path = "output/executionsforavggraphics/"+str(file_path)
+	output_path = get_path_for_file(output_path)
+
+	plt.figure(figsize=(10, 8))
+	markers = ['o', 's', 'D', '^', 'v', '<', '>', '1', '2', '3', '4', '8', 'p', 'P', '*', 'h', 'H', '+', 'x', 'X', 'D', '|', '_'] 
+	colors = ['blue', 'orange', 'green', 'red', 'purple', 'brown', 'pink', 'gray', 'olive', 'cyan']
+	
+	data_names=["x" for d in data_names]
+	for i, data in enumerate(datas):
+		# print(data[0])
+		# print(data[1])
+		print(data_names[i])
+		plt.plot(data[0], data[1], label=data_names[i], marker=markers[i % len(markers)], linestyle='--', color=colors[i % len(colors)])
+		
+	plt.xlabel('Generación')
+	plt.ylabel('Mejor fitness promedio')
+	plt.legend("Mejor fitness promedio entre distintos crossovers")
+	plt.title('Mejor fitness promedio entre distintos crossovers')
+	plt.savefig(output_path, dpi=300)
+
+
+
+def compare_best_fitness(crossovers, per_size, rep):
+	
+	# files = []
+
+	# for cross in crossovers : 
+	# 	files.append(f"{cross}PerSize:{permutation_size}Repetitions:{repetitions}MeanEvolution.txt")
+
+	best_info  = []
+	for cross in crossovers: 
+		best_info.append(get_best_all_avg(cross, per_size, rep))
+
+	#Se genera la gráfica. 
+	avg_best_fitness_vs_graph(best_info,str(crossovers),crossovers)
+		
+
+def get_best_all_avg(crossover, permutation_size, repetitions):
+	'''
+	 	Dado un crossover, obtiene las generaciones y al mejor individuo de esa generacion	
+	'''
+	#El ultimo indice tiene el arreglo de los tiempos
+	name = f"{crossover}PerSize:{permutation_size}Repetitions:{repetitions}MeanEvolution.txt"
+	data = get_data_from_txt_mean_evolution(name,"executionsforavg")
+	
+	generations = data[2] #Generaciones 
+	best_off_all = data[5] #Mejores individuos en cada generacion
+	
+	return [generations, best_off_all]; 
+
+
+#>>>>>>>>>>>>>>>>>
 
 #METODOS PARA CONECTAR CONE EL MAKEFILE 
 	
@@ -652,6 +730,11 @@ def get_genetic_algo_mean_evolution(repetitions):
 
 # Necesitamos un metodo para mostrar la ejecucion sobre el ejemplar del articulo , el qe
 
+#Comparacion de los mejores individuos obtenidos en una ejecucion promedio 
+#Qué operadores se van a comparar, con que tamanio de permutacion y cuantas repeticiones 
+
+#1 dónde buscamos los datos -> 
+# Deberiamos buscar en data = get_data_from_txt_individuals(file_name_txt, "gaindividualexecutions")
 
 def specific_case_crossover():
 	metrics = Metrics()
@@ -722,10 +805,12 @@ if __name__ == '__main__':
 	elif(operation==5):
 		print("Ejecució específica de cruza")
 		specific_case_crossover(); 
+	elif(operation==6):
+		print("Prueba de datos")
+		compare_best_fitness(crossovers,metrics.genetic_algo.permutation_size,repetitions)
+		#get_best_all_avg(metrics.genetic_algo.crossover_operator.__class__.__name__,metrics.genetic_algo.permutation_size,repetitions)
 	else:
 		print("Otra seleccion no valida")
-
-
 	# TOMA DE PARAMETROS POR DEFECTO
 	# metrics = Metrics()
 	# metrics.get_params()

@@ -23,7 +23,7 @@ class CrossoverOp(ABC):
         
         Params:
             parent1, parent2 : Object
-                Instancias de una solucion con representacion de permutacion
+                Instancias de una solucion con representacion de permutacionhu
 
         Returns:
             offspring_1, offspring_2 : list[int] 
@@ -1619,7 +1619,107 @@ class IMPXMYR(CrossoverOp):
     def cross_with_specific_points(self, parent1, parent2, p_1, p_2):
         pass
 
+class Cycle(CrossoverOp):
+   
+    # def cross(self, parent1, parent2):
+    #     p1 = parent1.chromosome
+    #     p2 = parent2.chromosome
 
+    #     # Initialize offspring with -1 values
+    #     o1 = np.full_like(p1, -1)
+    #     o2 = np.full_like(p2, -1)
+
+    #     index = 0 
+    #     element = -1 
+    #     original_element=-1
+
+
+
+    #     while True:
+    #         if(original_element==-1):
+    #             original_element=p1[index]
+    #         element = p1[index]
+    #         o1[index] = element 
+
+    #         element = p2[index]
+    #         index = p1[element]
+
+    #         print("Continua el ciclo")
+    #         if element == original_element:
+    #             break; 
+
+    #     print(o1)
+
+    #     for i in range(len(p1)):
+    #         if(o1[i]==-1):
+    #             o1[i] = p2[i]
+
+   
+    #     return o1, o2
+
+    
+    def cross(self,parent1, parent2):
+        # Inicializar el hijo con el mismo tamaño que los padres y llenarlo con -1
+        parent1	= parent1.chromosome
+        parent2	= parent2.chromosome 
+        offspring1 = np.full_like(parent1, -1)
+        offspring2 = np.full_like(parent1, -1)
+        # Seleccionar un punto de inicio aleatorio para el ciclo
+        start_index = np.random.randint(len(parent1))
+        index = start_index
+
+        while True:
+            # Copiar el valor del padre 1 al hijo en la posición actual
+            offspring1[index] = parent1[index]
+            
+            # Obtener el valor del padre 2 en la misma posición
+            value = parent2[index]
+
+            # Obtener la posición del valor en el padre 1
+            index = np.where(parent1 == value)[0][0]
+
+            # Si hemos vuelto al inicio del ciclo, hemos terminado
+            if index == start_index:
+                break
+        # Rellenar el hijo con los valores restantes del padre 2
+        for i in range(len(parent1)):
+            if offspring1[i] == -1:
+                offspring1[i] = parent2[i]
+
+        start_index = np.random.randint(len(parent1))
+        index = start_index
+
+        while True:
+            # Copiar el valor del padre 1 al hijo en la posición actual
+            offspring2[index] = parent2[index]
+            
+            # Obtener el valor del padre 2 en la misma posición
+            value = parent1[index]
+
+            # Obtener la posición del valor en el padre 1
+            index = np.where(parent2 == value)[0][0]
+
+            # Si hemos vuelto al inicio del ciclo, hemos terminado
+            if index == start_index:
+                break
+        # Rellenar el hijo con los valores restantes del padre 2
+        for i in range(len(parent2)):
+            if offspring2[i] == -1:
+                offspring2[i] = parent1[i]
+
+       
+
+        return offspring1, offspring2
+
+    def timed_cross(self, parent1, parent2):
+        return super().timed_cross(parent1, parent2)
+    
+    def debugged_cross(self, parent1, parent2):
+        return super().debugged_cross(parent1, parent2)
+    
+    def cross_with_specific_points(self, parent1, parent2, p_1, p_2):
+        return super().cross_with_specific_points(parent1, parent2, p_1, p_2)
+    
 
 
 
