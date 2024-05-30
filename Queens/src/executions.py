@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import random
 import os 
 import numpy as np 
+import statistics
 class Metrics:
 
 	def __init__(self):
@@ -130,6 +131,19 @@ class Metrics:
 
 		##Meter una pausa 
 
+		#Obtenemos al mejor tiempo entre las ejecuciones  
+		best_time = min(total_execution_times) #El indice de ese tiempo 
+		best_time_index = total_execution_times.index(best_time) #El mejor individuo de esa iteracion 
+		best_ind_of_that_time = best_all_ind_data[best_time_index] #El mejor asociado a ese tiempo
+		print(total_execution_times)
+		mean_time = np.mean(total_execution_times) # El promedio de tiempo
+		#time_standart_deviation = np.std(total_execution_times) # La desviación estandar de los datos del tiempo 
+		print(total_execution_times)
+		time_standart_deviation	= statistics.stdev(total_execution_times)
+		print(f"Standart deviation{time_standart_deviation}")
+		#time_data = [best_time, best_ind_of_that_time, mean_time, time_standart_deviation] 
+
+
 		#Otenemos los arreglos de promedio por cada generacion  
 		generations = [i for i in range(1, self.genetic_algo.max_generations+1)]
 		mean_generation_best_sons_data = np.mean(total_best_sons_data,axis=0)
@@ -138,7 +152,7 @@ class Metrics:
 		mean_generation_avg_fitness_data = np.mean(total_avg_fitness_data,axis=0)
 		
 		
-		#Tenemos que generar los datos ordenados por generacion 
+		
 
 		#Ahora hay que REGISTRARLO
 		#Generamos la primer linea la cual lleva informacion de las x iteraciones 
@@ -147,8 +161,9 @@ class Metrics:
 		mutation_operator_line = str(self.genetic_algo.mutation_operator.__class__.__name__)
 		replacement_operator_line = str(self.genetic_algo.generation_replacement.__class__.__name__)
 		
-		#Tambien guardamos cuantas iteraciones se realizaron  
-		params_line=[self.genetic_algo.permutation_size, self.genetic_algo.pop_size, self.genetic_algo.cross_prob, self.genetic_algo.mut_prob,self.genetic_algo.max_generations,self.genetic_algo.max_time,selection_operator_line, self.genetic_algo.tournament_size,cross_operator_line, mutation_operator_line,replacement_operator_line,iterations ]   
+		#Tambien guardamos cuantas iteraciones se realizaron 
+		#En este arreglo es pertinent guardar el mejor tiempo y el valor fitness asociado a ese tiempo  
+		params_line=[self.genetic_algo.permutation_size, self.genetic_algo.pop_size, self.genetic_algo.cross_prob, self.genetic_algo.mut_prob,self.genetic_algo.max_generations,self.genetic_algo.max_time,selection_operator_line, self.genetic_algo.tournament_size,cross_operator_line, mutation_operator_line,replacement_operator_line,iterations,best_time, best_ind_of_that_time, mean_time, time_standart_deviation ]   
 		#Escribimos la linea de parametros en el documento 
 		writte_txt_data(file, params_line)
 		#Escribimos la linea de los tiempos en cada ejecucion 
@@ -464,18 +479,21 @@ def get_avg_exe_graph(info,times,data,data_names,colors,file_path):
 	#data[2] = avg_offspring_data 
 	#data[3] = best_ind_data
 	#data[4] = avg_fitness_data
-	print("Tiempos recibidos ", times)
+	
 	#info = "Tamaño permutación : {}\nTamaño población : {}\nProb.Crossover : {}\nProb.Mutación : {}\nGeneraciones Max : {}\nTiempo Max {}\nSelección : {}\k-Torneo : {}\nCrossover : {}\nMutación : {}\nReemplazo : {}".format(info[0],info[1],info[2],info[3],info[4],info[5],info[6],info[7],info[8],info[9], info[10])
 	info_1 = "Tamaño permutación : {}\nTamaño población : {}\nProb.Crossover : {}\nProb.Mutación : {}\nGeneraciones Max : {}".format(info[0],info[1],info[2],info[3],info[4])
 	info_2 = "Tiempo Max {}\nSelección : {}\k-Torneo : {}\nCrossover : {}\nMutación : {}\nReemplazo : {}".format(info[5],info[6],info[7],info[8],info[9], info[10])
 	info_3 = "AVG Exe. Time {}\nBest last Offspring {}\nBest fitness {}".format(str(np.mean(times)), float(data[1][-1]), float(data[3][-1], ))
-	print(data[1])
+	info_4 = f"Best Time :{info[12]}\nBest (time) fitness :{info[13]}\nMean time :{info[14]}\nTime STD :{info[15]}"
+	#11,best_time, best_ind_of_that_time, mean_time, time_standart_deviation   
+	
 	#"Tiempo Max {}\nSelección : {}\k-Torneo : {}\nCrossover : {}\nMutación : {}\nReemplazo : {}".format(info[5],info[6],info[7],info[8],info[9], info[10])
 	title_info = "Evolucion promedio {} con {} iteraciones".format(str(title), str(info[11]))
 	plt.title(title_info,y=1.2)
 	plt.text(x=.15, y=.95, s=info_1, fontsize=9, ha='left', va='center', transform=plt.gcf().transFigure)
 	plt.text(x=.35, y=.95, s=info_2, fontsize=9, ha='left', va='center', transform=plt.gcf().transFigure)
 	plt.text(x=.65, y=.95, s=info_3, fontsize=9, ha='left', va='center', transform=plt.gcf().transFigure)
+	plt.text(x=.95, y=.95, s=info_4, fontsize=9, ha='left', va='center', transform=plt.gcf().transFigure)
 	plt.savefig(file_path,bbox_inches='tight')
 
 #plt.savefig(self.get_path_for_file(str('Board'+str(len(self.chromosome)))))
@@ -599,6 +617,17 @@ def generate_avg_txt_and_graphic(file, iterations):
 
 	#El ultimo indice tiene el arreglo de los tiempos
 	data = get_data_from_txt_mean_evolution(file_name_txt,"executionsforavg")
+	
+	#DATOS DE EXPERIMENTO  
+	# execution_times = data[1] # Tiempos de ejecucion 
+	# best_time = min(execution_times) # Mejor tiempo 
+	# best_time_index = execution_times.index(best_time) #`Indice de mejor tiempo
+	# best_inds = data[5] # Mejores individuos de las ejecuciones 
+	# print(f"Best inds :{best_inds}")
+	# best_ind_of_best_time = data[]
+	
+	#El mejor tiempo (es decir el menor) 
+	
 
 	file_name_graph = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"PerSize:"+str(metrics.genetic_algo.permutation_size)+"Repetitions:"+str(iterations)+file
 	get_avg_exe_graph(data[0],data[1],data[2:],["Generations", "Best of Offspring", "Avg Offspring", "Best", "Avg Fitness"],colors, file_name_graph)
@@ -626,25 +655,23 @@ def gen_vs_graph_for_n(datas, file_path, data_names):
 
 
 
-def avg_best_fitness_vs_graph(datas, file_path, data_names): 
+def avg_best_fitness_vs_graph(datas, file_path, data_names, permutations, repetitions): 
 
 	output_path = "output/executionsforavggraphics/"+str(file_path)
-	output_path = get_path_for_file(output_path)
+	output_path = get_path_for_file(output_path)+f"PerSize:{permutations}Repetitions:{repetitions}"
 
 	plt.figure(figsize=(10, 8))
 	markers = ['o', 's', 'D', '^', 'v', '<', '>', '1', '2', '3', '4', '8', 'p', 'P', '*', 'h', 'H', '+', 'x', 'X', 'D', '|', '_'] 
 	colors = ['blue', 'orange', 'green', 'red', 'purple', 'brown', 'pink', 'gray', 'olive', 'cyan']
 	
-	data_names=["x" for d in data_names]
+	#data_names=["x" for d in data_names]
 	for i, data in enumerate(datas):
-		# print(data[0])
-		# print(data[1])
-		print(data_names[i])
 		plt.plot(data[0], data[1], label=data_names[i], marker=markers[i % len(markers)], linestyle='--', color=colors[i % len(colors)])
 		
 	plt.xlabel('Generación')
 	plt.ylabel('Mejor fitness promedio')
-	plt.legend("Mejor fitness promedio entre distintos crossovers")
+	plt.legend()
+	#plt.legend("Mejor fitness promedio entre distintos crossovers")
 	plt.title('Mejor fitness promedio entre distintos crossovers')
 	plt.savefig(output_path, dpi=300)
 
@@ -662,7 +689,7 @@ def compare_best_fitness(crossovers, per_size, rep):
 		best_info.append(get_best_all_avg(cross, per_size, rep))
 
 	#Se genera la gráfica. 
-	avg_best_fitness_vs_graph(best_info,str(crossovers),crossovers)
+	avg_best_fitness_vs_graph(best_info,str(crossovers),crossovers,per_size, rep)
 		
 
 def get_best_all_avg(crossover, permutation_size, repetitions):
