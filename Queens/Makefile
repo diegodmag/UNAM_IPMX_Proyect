@@ -63,7 +63,18 @@ crossover_specific:
 	python3 src/executions.py 13 $(POPULATIONSIZE) $(CROSSPROBA) $(MUTATIONPROBA) $(GENERATIONS) 5 1 3 $(CROSSNUM) 0 0 0 5 0 0 0
 testing_avg_data_recolection:
 	python3 src/executions.py $(PERMUTATIONSIZE) $(POPULATIONSIZE) $(CROSSPROBA) $(MUTATIONPROBA) $(GENERATIONS) 5 1 3 $(CROSSNUM) 0 0 0 6 $(REPETITIONS) 0 0
+avg_data_specific_times:
+	python3 src/executions.py $(PERMUTATIONSIZE) $(POPULATIONSIZE) $(CROSSPROBA) $(MUTATIONPROBA) $(GENERATIONS) 5 1 3 $(CROSSNUM) 0 0 0 7 $(REPETITIONS) 0 0
+times_boxplot:
+	python3 src/executions.py $(PERMUTATIONSIZE) $(POPULATIONSIZE) $(CROSSPROBA) $(MUTATIONPROBA) $(GENERATIONS) 5 1 3 $(CROSSNUM) 0 0 0 8 $(REPETITIONS) 0 0
 #Para hacer pruebas dejar corriendo esto 
+
+mean_evolution_executions:
+	@for PERMUTATIONSIZE in 300 400 500 600 700 800 900 1000 1500 2000 3000; do \
+		for CROSSOVER in PMX IPMX Ordered PMXCastudil; do \
+			make mean_evolution PERMUTATIONSIZE=$$PERMUTATIONSIZE CROSSOVER=$$CROSSOVER REPETITIONS=30; \
+		done; \
+	done
 
 individual_execution_samples:
 	@for PERMUTATIONSIZE in 600 700 800 900; do \

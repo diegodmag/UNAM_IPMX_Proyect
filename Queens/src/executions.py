@@ -135,12 +135,12 @@ class Metrics:
 		best_time = min(total_execution_times) #El indice de ese tiempo 
 		best_time_index = total_execution_times.index(best_time) #El mejor individuo de esa iteracion 
 		best_ind_of_that_time = best_all_ind_data[best_time_index] #El mejor asociado a ese tiempo
-		print(total_execution_times)
+		
 		mean_time = np.mean(total_execution_times) # El promedio de tiempo
 		#time_standart_deviation = np.std(total_execution_times) # La desviación estandar de los datos del tiempo 
-		print(total_execution_times)
+		
 		time_standart_deviation	= statistics.stdev(total_execution_times)
-		print(f"Standart deviation{time_standart_deviation}")
+		
 		#time_data = [best_time, best_ind_of_that_time, mean_time, time_standart_deviation] 
 
 
@@ -631,7 +631,78 @@ def generate_avg_txt_and_graphic(file, iterations):
 
 	file_name_graph = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"PerSize:"+str(metrics.genetic_algo.permutation_size)+"Repetitions:"+str(iterations)+file
 	get_avg_exe_graph(data[0],data[1],data[2:],["Generations", "Best of Offspring", "Avg Offspring", "Best", "Avg Fitness"],colors, file_name_graph)
+
+
+def get_specific_times_data_from_avg(repetitions):
+	'''
+		Funcion para obtener datos especificos de los tiempos en la evolucion promedio
+	'''
+	file_name_txt = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"PerSize:"+str(metrics.genetic_algo.permutation_size)+"Repetitions:"+str(repetitions)+"MeanEvolution.txt"	
 	
+	data = get_data_from_txt_mean_evolution(file_name_txt,"executionsforavg")
+	print("Crossover :"+str(metrics.genetic_algo.crossover_operator.__class__.__name__))
+	##Mostrar los datos de data 
+	print(f"Best time {data[0][12]}")
+	print(f"Best fitness (time) {data[0][13]}")
+	print(f"Mean time {data[0][14]}")
+	print(f"Time STD {data[0][15]}") 
+
+def get_times_from_avg(repetitions):
+	'''
+		Funcion para obtener el arreglo especifico de tiempos dado un operador de cruza 
+	'''
+	file_name_txt = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"PerSize:"+str(metrics.genetic_algo.permutation_size)+"Repetitions:"+str(repetitions)+"MeanEvolution.txt"	
+	
+	data = get_data_from_txt_mean_evolution(file_name_txt,"executionsforavg")
+	return data[1] #Regresa los tiempos
+	##Mostrar los datos de data 
+
+def get_times_boxplot(repetitions): 
+
+	times = get_times_from_avg(repetitions)
+	output_file = "output/avgboxplot/"+str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"PerSize:"+str(metrics.genetic_algo.permutation_size)+"Repetitions:"+str(repetitions)+"TimesBoxplot"	
+	file_path = get_path_for_file(output_file)
+
+	plt.boxplot(times)
+	plt.title("Boxplot tiempos "+str(metrics.genetic_algo.crossover_operator.__class__.__name__))
+	plt.savefig(file_path,bbox_inches='tight')
+
+
+# # >>> Lectura de datos especificos para tablas 
+# def generate_avg_txt_and_graphic_TESTING(file, iterations):
+# 	'''
+# 		Metodo para generar un .txt de datos de una evolucion promedio y despues leer los datos
+# 		y generar una grafica 
+	
+# 	'''
+# 	#A este se le tiene que cambiar la semilla aleatoria
+# 	colors = ['black', 'red', 'blue', 'green','purple']
+
+# 	file+="MeanEvolution" 
+
+# 	#file_name_txt = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+str(file)+".txt"
+# 	file_name_txt = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"PerSize:"+str(metrics.genetic_algo.permutation_size)+"Repetitions:"+str(iterations)+file+".txt"	
+
+# 	metrics.register_ga_avg_execution(file_name_txt,iterations)
+
+# 	#El ultimo indice tiene el arreglo de los tiempos
+# 	data = get_data_from_txt_mean_evolution(file_name_txt,"executionsforavg")
+	
+# 	#DATOS DE EXPERIMENTO  
+# 	# execution_times = data[1] # Tiempos de ejecucion 
+# 	# best_time = min(execution_times) # Mejor tiempo 
+# 	# best_time_index = execution_times.index(best_time) #`Indice de mejor tiempo
+# 	# best_inds = data[5] # Mejores individuos de las ejecuciones 
+# 	# print(f"Best inds :{best_inds}")
+# 	# best_ind_of_best_time = data[]
+	
+# 	#El mejor tiempo (es decir el menor) 
+	
+
+# 	file_name_graph = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"PerSize:"+str(metrics.genetic_algo.permutation_size)+"Repetitions:"+str(iterations)+file
+# 	get_avg_exe_graph(data[0],data[1],data[2:],["Generations", "Best of Offspring", "Avg Offspring", "Best", "Avg Fitness"],colors, file_name_graph)
+
+
 
 #>>>>>>>>>>>...EN DESARROLLO 
 def gen_vs_graph_for_n(datas, file_path, data_names):
@@ -836,6 +907,12 @@ if __name__ == '__main__':
 		print("Prueba de datos")
 		compare_best_fitness(crossovers,metrics.genetic_algo.permutation_size,repetitions)
 		#get_best_all_avg(metrics.genetic_algo.crossover_operator.__class__.__name__,metrics.genetic_algo.permutation_size,repetitions)
+	elif(operation==7):
+		print("Datos especificos de tiempos")
+		get_specific_times_data_from_avg(repetitions)
+	elif(operation==8):
+		print("Datos especificos de tiempos")
+		get_times_boxplot(repetitions)
 	else:
 		print("Otra seleccion no valida")
 	# TOMA DE PARAMETROS POR DEFECTO
