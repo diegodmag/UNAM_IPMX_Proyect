@@ -326,7 +326,13 @@ class GeneticAlg:
 
 		generations = 0
 
-		best_individual = -1 
+		#Para llevar un registro del mejor fitness y el tiempo en el que se obtuvo 
+		#Mejor individuo de la ejecucion 
+		best_individual = 1234555 #Definimos un entero muy grande solo para comparar la primera vez 
+		#Mejor tiempo de ese individuo 
+		best_time_best_individual = -1
+
+
 		#CONDICIONES DE TERMINO IMPORTANTES -> Por generacion y por alcanzar el optimo 
 		while True:
 			#print(best_individual == self.optimal)
@@ -341,17 +347,21 @@ class GeneticAlg:
 				best_son, offspring_avg_fitness, best_current_pop, current_pop_avg_fitness, time_elpased =  self.individual_execution()
 				total_execution_time+=time_elpased
 				generations+=1
+
+				#Aqui actualizamos al mejor individuo junto con el tiempo en el que fue encontrado 
+				if(best_current_pop < best_individual):
+					best_individual = best_current_pop
+					best_time_best_individual =  total_execution_time 
+
 				best_son_data.append(best_son)
 				offspring_avg_fitness_data.append(offspring_avg_fitness)
 				best_current_pop_data.append(best_current_pop)
 				current_pop_avg_fitness_data.append(current_pop_avg_fitness)
 				generations_data.append(generations)
-
-				best_individual=best_current_pop
-				#Aqui podemos guardar los datos o regresarselos a alguien 
-				#print(">>>>>>>>>>>>>>>>>>>>>")
 		
-		return generations_data, best_son_data, offspring_avg_fitness_data, best_current_pop_data, current_pop_avg_fitness_data, total_execution_time
+		best_individual_data = [best_individual,best_time_best_individual]
+
+		return generations_data, best_son_data, offspring_avg_fitness_data, best_current_pop_data, current_pop_avg_fitness_data, total_execution_time, best_individual_data
 		
 	#BORRAR >>>>>
 	def simple_execution(self):

@@ -108,6 +108,11 @@ class Metrics:
 		total_best_sons_data = []
 		total_avg_offspring_data = []
 		total_best_all_data=[]
+		best_individual_by_execution =[] #Importante
+
+		#Esta es la data del mejor individuo 
+		best_individual_datas = []
+
 		total_avg_fitness_data=[]
 		total_execution_times = []
 		seeds_per_iteration = []
@@ -119,22 +124,29 @@ class Metrics:
 			np.random.seed(new_sed)
 			# Realizamos una ejecucion 
 			# Podemos guardar tambien el tiempo promedio que nos regresa 
-			generations, best_sons_ind_data, avg_offspring_ind_data, best_all_ind_data,avg_fitness_ind_data, total_execution_time = self.genetic_algo.execution()
+			generations, best_sons_ind_data, avg_offspring_ind_data, best_all_ind_data,avg_fitness_ind_data, total_execution_time, best_individual_data = self.genetic_algo.execution()
 			total_best_sons_data.append(best_sons_ind_data)
 			total_avg_offspring_data.append(avg_offspring_ind_data)
 			total_best_all_data.append(best_all_ind_data)
+			
+			#Aqui guardamos al mejor de la ejecución 
+			best_individual_by_execution.append(best_all_ind_data[-1])#En prueba
+			best_individual_datas.append(best_individual_data)
+
 			total_avg_fitness_data.append(avg_fitness_ind_data)
 			total_execution_times.append(total_execution_time)
 			seeds_per_iteration.append(new_sed)
 
 			#Meter una pausa   (0.1 segundos ) 
 
-		##Meter una pausa 
-
+		
+		#>>IMPORTANTE 
+	
 		#Obtenemos al mejor tiempo entre las ejecuciones  
 		best_time = min(total_execution_times) #El indice de ese tiempo 
 		best_time_index = total_execution_times.index(best_time) #El mejor individuo de esa iteracion 
-		best_ind_of_that_time = best_all_ind_data[best_time_index] #El mejor asociado a ese tiempo
+		
+		best_ind_of_that_time = best_individual_datas[best_time_index] #El mejor asociado a ese tiempo
 		
 		mean_time = np.mean(total_execution_times) # El promedio de tiempo
 		#time_standart_deviation = np.std(total_execution_times) # La desviación estandar de los datos del tiempo 
@@ -161,6 +173,7 @@ class Metrics:
 		mutation_operator_line = str(self.genetic_algo.mutation_operator.__class__.__name__)
 		replacement_operator_line = str(self.genetic_algo.generation_replacement.__class__.__name__)
 		
+		##info_4 = f"Best Time :{info[12]}\nBest (time) fitness :{info[13]}\nMean time :{info[14]}\nTime STD :{info[15]}"#ELIMINAR
 		#Tambien guardamos cuantas iteraciones se realizaron 
 		#En este arreglo es pertinent guardar el mejor tiempo y el valor fitness asociado a ese tiempo  
 		params_line=[self.genetic_algo.permutation_size, self.genetic_algo.pop_size, self.genetic_algo.cross_prob, self.genetic_algo.mut_prob,self.genetic_algo.max_generations,self.genetic_algo.max_time,selection_operator_line, self.genetic_algo.tournament_size,cross_operator_line, mutation_operator_line,replacement_operator_line,iterations,best_time, best_ind_of_that_time, mean_time, time_standart_deviation ]   
@@ -168,6 +181,13 @@ class Metrics:
 		writte_txt_data(file, params_line)
 		#Escribimos la linea de los tiempos en cada ejecucion 
 		writte_txt_data(file,total_execution_times)
+		#Escribimos a los mejores individuos de cada ejecucion 
+		best_individuals = [x[0] for x in best_individual_datas]
+		writte_txt_data(file,best_individuals)
+		#Escribimos los tiempos de cada mejor individuo 
+		best_individuals_times = [x[1] for x in best_individual_datas]
+		writte_txt_data(file,best_individuals_times)
+
 		#Guardamos las semillas 
 		writte_txt_data(file_seeds, seeds_per_iteration)
 		#Procedemos a escribir el promedio de datos POR GENERACION 
@@ -182,9 +202,10 @@ class Metrics:
 			line= [generations[i],mean_generation_best_sons_data[i],mean_generation_avg_offspring_data[i],mean_generation_best_all_data[i],mean_generation_avg_fitness_data[i]]
 			#params_line=[self.genetic_algo.permutation_size, self.genetic_algo.pop_size, self.genetic_algo.cross_prob, self.genetic_algo.mut_prob,self.genetic_algo.max_generations,self.genetic_algo.max_time,selection_operator_line, self.genetic_algo.tournament_size,cross_operator_line, mutation_operator_line,replacement_operator_line,best_all[-1], best_sons[-1], avg_offspring[-1], avg_fitness[-1],total_execution_time]
 			avg_data.append(line)
-		#Finalmente procedmos a registrar los datos de las ejecuciones promedio 
 		for line in avg_data:
 			writte_txt_data(file,line)
+			
+			
 
 
 	def register_ga_individual_execution(self,file_name):
@@ -202,7 +223,7 @@ class Metrics:
 		#Aqui sólo hay que guardar el tiempo que nos regresa la ejecucion 
 
 		#time_start = time.time()
-		generations,best_sons,avg_offspring,best_all,avg_fitness,total_execution_time = self.genetic_algo.execution()
+		generations,best_sons,avg_offspring,best_all,avg_fitness,total_execution_time, bes_individual_data = self.genetic_algo.execution()
 		# time_end = time.time()
 		# total_time = time_end-time_start
 		file = "output/gaindividualexecutions/"+str(file_name)
@@ -211,6 +232,7 @@ class Metrics:
 		#Hay que hacer el formato de cada linea 
 		total_data = []
 		for i in range(len(generations)):
+			
 			line = [generations[i], best_sons[i], avg_offspring[i],best_all[i], avg_fitness[i]]
 			total_data.append(line)
 		
@@ -225,6 +247,7 @@ class Metrics:
 		writte_txt_data(file,params_line)
 		for line in total_data:
 			writte_txt_data(file,line)
+
 		
 #Este hay que moverlo a uno de puras metricas 
 def boxplot(sample_1):
@@ -324,6 +347,11 @@ def get_data_from_txt_mean_evolution(file_path,output_dir):
 		params_Line = file.readline().strip().split(',')
 		times_line = file.readline().strip().split(',')
 		executions_times = [float(time) for time in times_line]	
+		best_individuals_line = file.readline().strip().split(',')
+		best_individuals = [int(fitness) for fitness in best_individuals_line]
+		best_individuals_times_line = file.readline().strip().split(',')
+		best_individuals_times = [float(time) for time in best_individuals_times_line]
+		
 		for line in file : 
 			data = line.strip().split(',')
 			# gen = int(data[0])
@@ -336,10 +364,9 @@ def get_data_from_txt_mean_evolution(file_path,output_dir):
 			avg_offspring_data.append(float(data[2]))
 			best_ind_data.append(float(data[3]))
 			avg_fitness_data.append(float(data[4]))
-			
 			#AGREGAR TIEMPO ? 
-
-	return [params_Line,executions_times,gens_data,best_ind_offspring_data,avg_offspring_data,best_ind_data,avg_fitness_data] 
+	
+	return [params_Line,executions_times,best_individuals,best_individuals_times,gens_data,best_ind_offspring_data,avg_offspring_data,best_ind_data,avg_fitness_data] 
 
 def generate_avg_data(data):
 	'''
@@ -441,17 +468,18 @@ def get_ind_exe_graph(info,data,data_names,colors,file_path):
 	info_1 = "Tamaño permutación : {}\nTamaño población : {}\nProb.Crossover : {}\nProb.Mutación : {}\nGeneraciones Max : {}".format(info[0],info[1],info[2],info[3],info[4])
 	info_2 = "Tiempo Max {}\nSelección : {}\nk-Torneo : {}\nCrossover : {}\nMutación : {}\nReemplazo : {}".format(info[5],info[6],info[7],info[8],info[9], info[10])
 	info_3 = "Best Fitness {}\nBest Sons : {}\nLast AVG offspring : {}\nLast AVG Fitness : {}\nTime elapsed :{}".format(info[11],info[12],info[13],info[14],info[15])
+	
 	plt.title('Evolucion del valor fitness de una ejecucion individual '+str(title),y=1.2)
 	plt.text(x=.15, y=.95, s=info_1, fontsize=9, ha='left', va='center', transform=plt.gcf().transFigure)
 	plt.text(x=.35, y=.95, s=info_2, fontsize=9, ha='left', va='center', transform=plt.gcf().transFigure)
 	plt.text(x=.6, y=.95, s=info_3, fontsize=9, ha='left', va='center', transform=plt.gcf().transFigure)
 	plt.savefig(file_path,bbox_inches='tight')
 
-def get_avg_exe_graph(info,times,data,data_names,colors,file_path):
+def get_avg_exe_graph(info,times,data,data_names,colors,file_path,best_individuals_data):
 	'''
 	La grafica de ejecuciones individuales, se considera como data[0] las generaciones 
 	'''
-	
+	#Los datos de los fitness pueden ir al lado de times ? 
 	title = file_path
 	file_path = "output/executionsforavggraphics/"+str(file_path)
 	file_path = get_path_for_file(file_path)
@@ -480,10 +508,29 @@ def get_avg_exe_graph(info,times,data,data_names,colors,file_path):
 	#data[3] = best_ind_data
 	#data[4] = avg_fitness_data
 	
+	best_individuals = best_individuals_data[0] #Mejores individuos de cada ejecucion 
+	best_individuals_times = best_individuals_data[1] #Mejores tiempos de los mejores individuos 
+	
+	
+	print(str(best_individuals))
+	print(str(best_individuals_times))
+
+	#Encontramos
+	best_individual_from_all_executions = min(best_individuals) #Mejor individuo de todos
+	index_best = best_individuals.index(best_individual_from_all_executions)
+	best_individual_from_all_executions_time = best_individuals_times[index_best] #Tiempo en el que se encontró el mejor individuo
+	best_individuals_mean = np.mean(best_individuals) #Promedio de los mejores encontrados 
+	best_individuals_std = statistics.stdev(best_individuals) 
+	
+
 	#info = "Tamaño permutación : {}\nTamaño población : {}\nProb.Crossover : {}\nProb.Mutación : {}\nGeneraciones Max : {}\nTiempo Max {}\nSelección : {}\k-Torneo : {}\nCrossover : {}\nMutación : {}\nReemplazo : {}".format(info[0],info[1],info[2],info[3],info[4],info[5],info[6],info[7],info[8],info[9], info[10])
 	info_1 = "Tamaño permutación : {}\nTamaño población : {}\nProb.Crossover : {}\nProb.Mutación : {}\nGeneraciones Max : {}".format(info[0],info[1],info[2],info[3],info[4])
 	info_2 = "Tiempo Max {}\nSelección : {}\k-Torneo : {}\nCrossover : {}\nMutación : {}\nReemplazo : {}".format(info[5],info[6],info[7],info[8],info[9], info[10])
-	info_3 = "AVG Exe. Time {}\nBest last Offspring {}\nBest fitness {}".format(str(np.mean(times)), float(data[1][-1]), float(data[3][-1], ))
+	
+	#info_3 = "AVG Exe. Time {}\nBest last Offspring {}\nBest fitness {}".format(str(np.mean(times)), float(data[1][-1]), float(data[5][-1] ))
+	info_3 = f"Best Fitness :{best_individual_from_all_executions}\nBest Fitness Time :{best_individual_from_all_executions_time}\nBest Fitness Mean :{best_individuals_mean}\nBest Fitness STD :{best_individuals_std}" 
+	
+	"Best Fitness {}".format(str(np.mean(times)))
 	info_4 = f"Best Time :{info[12]}\nBest (time) fitness :{info[13]}\nMean time :{info[14]}\nTime STD :{info[15]}"
 	#11,best_time, best_ind_of_that_time, mean_time, time_standart_deviation   
 	
@@ -525,13 +572,8 @@ def rep_iter(total_rep, genetic_al):
 	avg_time = sum(times)/len(times)
 	avg_genes = sum(gens)/len(gens)
 	avg_fitness = sum(data)/len(data)
-	#print("AVG Tiempo : " + str(avg_time))
-	print("AVG Geeneraciones: "+str(avg_genes))
-	#print(data)
-	print("AVG Fitness: "+str(avg_fitness))
-	print("Best possible fitness: "+str(genetic_al.get_the_best(genetic_al.current_pop).max_conflics))
 		
-	#boxplot(data)
+	
 
 def graph_generation(file_name):
 	raw_data = get_data_from_txt(file_name+".txt","crossoverdata")
@@ -572,8 +614,7 @@ def generate_croossover_time_and_graphic(file, iterations,min_per_size,max_per_s
 	#A este se le tiene que cambiar la semilla aleatoria  
 	file_basic = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"CrossTime"+"iter:"+str(iterations)+"per:"+str(min_per_size)+"-"+str(max_per_size)
 	file_name_txt = file_basic+".txt"
-	print(file_basic)
-	print(file_name_txt)
+	
 	metrics.register_crossover_time(min_per_size,max_per_size,iterations,file_name_txt)
 
 	graph_generation(file_basic)
@@ -626,11 +667,21 @@ def generate_avg_txt_and_graphic(file, iterations):
 	# print(f"Best inds :{best_inds}")
 	# best_ind_of_best_time = data[]
 	
-	#El mejor tiempo (es decir el menor) 
-	
 
+
+	#IMPORTANTE
+	#Mejores individuos -> El menor es el mejor 
+	best_individuals = data[2]
+	#print(f"Mejores individuos por ejecucion leidos en generate_avg_txt_and_graphic {best_individuals}")
+	#Los tiempos de los mejores individuos  
+	best_individuals_times = data[3]
+	#print(f"Tiempos de los mejores individuos por ejecucion {best_individuals_times}")
+
+
+	
 	file_name_graph = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"PerSize:"+str(metrics.genetic_algo.permutation_size)+"Repetitions:"+str(iterations)+file
-	get_avg_exe_graph(data[0],data[1],data[2:],["Generations", "Best of Offspring", "Avg Offspring", "Best", "Avg Fitness"],colors, file_name_graph)
+	
+	get_avg_exe_graph(data[0],data[1],data[4:],["Generations", "Best of Offspring", "Avg Offspring", "Best", "Avg Fitness"],colors, file_name_graph, [best_individuals,best_individuals_times])
 
 
 def get_specific_times_data_from_avg(repetitions):
@@ -640,6 +691,7 @@ def get_specific_times_data_from_avg(repetitions):
 	file_name_txt = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"PerSize:"+str(metrics.genetic_algo.permutation_size)+"Repetitions:"+str(repetitions)+"MeanEvolution.txt"	
 	
 	data = get_data_from_txt_mean_evolution(file_name_txt,"executionsforavg")
+	
 	print("Crossover :"+str(metrics.genetic_algo.crossover_operator.__class__.__name__))
 	##Mostrar los datos de data 
 	print(f"Best time {data[0][12]}")
@@ -656,6 +708,17 @@ def get_times_from_avg(repetitions):
 	data = get_data_from_txt_mean_evolution(file_name_txt,"executionsforavg")
 	return data[1] #Regresa los tiempos
 	##Mostrar los datos de data 
+
+def get_best_fitness_from_avg(repetitions):
+	'''
+		Funcion para obtener el arreglo especifico de mejores tiempos dado un operador de cruza 
+	'''
+	file_name_txt = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"PerSize:"+str(metrics.genetic_algo.permutation_size)+"Repetitions:"+str(repetitions)+"MeanEvolution.txt"	
+	
+	data = get_data_from_txt_mean_evolution(file_name_txt,"executionsforavg")
+	print(data[2])
+	return data[2] #Regresa los fitness 
+	
 
 def get_times_boxplot(repetitions): 
 
@@ -771,8 +834,8 @@ def get_best_all_avg(crossover, permutation_size, repetitions):
 	name = f"{crossover}PerSize:{permutation_size}Repetitions:{repetitions}MeanEvolution.txt"
 	data = get_data_from_txt_mean_evolution(name,"executionsforavg")
 	
-	generations = data[2] #Generaciones 
-	best_off_all = data[5] #Mejores individuos en cada generacion
+	generations = data[4] #Generaciones 
+	best_off_all = data[7] #Mejores individuos en cada generacion
 	
 	return [generations, best_off_all]; 
 
@@ -912,7 +975,8 @@ if __name__ == '__main__':
 		get_specific_times_data_from_avg(repetitions)
 	elif(operation==8):
 		print("Datos especificos de tiempos")
-		get_times_boxplot(repetitions)
+		#get_times_boxplot(repetitions) <------ TRABAJANDO
+		#get_best_fitness_from_avg(repetitions) <------ TRABAJANDO
 	else:
 		print("Otra seleccion no valida")
 	# TOMA DE PARAMETROS POR DEFECTO

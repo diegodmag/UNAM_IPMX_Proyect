@@ -69,10 +69,17 @@ times_boxplot:
 	python3 src/executions.py $(PERMUTATIONSIZE) $(POPULATIONSIZE) $(CROSSPROBA) $(MUTATIONPROBA) $(GENERATIONS) 5 1 3 $(CROSSNUM) 0 0 0 8 $(REPETITIONS) 0 0
 #Para hacer pruebas dejar corriendo esto 
 
+# mean_evolution_executions:
+# 	@for PERMUTATIONSIZE in 300 400 500 600 700 800 900 1000 1500 2000 3000; do \
+# 		for CROSSOVER in PMX IPMX Ordered PMXCastudil; do \
+# 			make mean_evolution PERMUTATIONSIZE=$$PERMUTATIONSIZE CROSSOVER=$$CROSSOVER REPETITIONS=30; \
+# 		done; \
+# 	done
+
 mean_evolution_executions:
-	@for PERMUTATIONSIZE in 300 400 500 600 700 800 900 1000 1500 2000 3000; do \
-		for CROSSOVER in PMX IPMX Ordered PMXCastudil; do \
-			make mean_evolution PERMUTATIONSIZE=$$PERMUTATIONSIZE CROSSOVER=$$CROSSOVER REPETITIONS=30; \
+	@for PERMUTATIONSIZE in 50; do \
+		for CROSSOVER in PMX; do \
+			make mean_evolution PERMUTATIONSIZE=$$PERMUTATIONSIZE CROSSOVER=$$CROSSOVER REPETITIONS=5; \
 		done; \
 	done
 

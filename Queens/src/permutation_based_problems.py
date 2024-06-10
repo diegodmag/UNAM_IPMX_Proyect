@@ -97,6 +97,7 @@ class NQueens(PermutationBasedProblem):
 
         self.fitness = conflicts
 
+
     def get_instance(self,chromosome):
         return NQueens(chromosome)
          
