@@ -348,6 +348,7 @@ def get_data_from_txt_mean_evolution(file_path,output_dir):
 		times_line = file.readline().strip().split(',')
 		executions_times = [float(time) for time in times_line]	
 		best_individuals_line = file.readline().strip().split(',')
+		print(best_individuals_line)
 		best_individuals = [int(fitness) for fitness in best_individuals_line]
 		best_individuals_times_line = file.readline().strip().split(',')
 		best_individuals_times = [float(time) for time in best_individuals_times_line]
@@ -819,6 +820,7 @@ def compare_best_fitness(crossovers, per_size, rep):
 	# 	files.append(f"{cross}PerSize:{permutation_size}Repetitions:{repetitions}MeanEvolution.txt")
 
 	best_info  = []
+	
 	for cross in crossovers: 
 		best_info.append(get_best_all_avg(cross, per_size, rep))
 
@@ -833,8 +835,8 @@ def get_best_all_avg(crossover, permutation_size, repetitions):
 	#El ultimo indice tiene el arreglo de los tiempos
 	name = f"{crossover}PerSize:{permutation_size}Repetitions:{repetitions}MeanEvolution.txt"
 	data = get_data_from_txt_mean_evolution(name,"executionsforavg")
-	
 	generations = data[4] #Generaciones 
+	
 	best_off_all = data[7] #Mejores individuos en cada generacion
 	
 	return [generations, best_off_all]; 
