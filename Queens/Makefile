@@ -16,7 +16,7 @@ MUTATIONPROBA ?=0
 # Parametros de la generacion y visualizacion de los datos 
 
 # Nombres de crossovers 
-CROSSOVERSNAMES = PMX IPMX PMXCastudil
+CROSSOVERSNAMES = PMX IPMX PMXCastudil Ordered
 
 export CROSSOVERSNAMES
 
@@ -65,9 +65,13 @@ compare_best_fitness_mean_between_crossovers:
 	python3 src/executions.py $(PERMUTATIONSIZE) $(POPULATIONSIZE) $(CROSSPROBA) $(MUTATIONPROBA) $(GENERATIONS) 5 1 3 $(CROSSNUM) 0 0 0 6 $(REPETITIONS) 0 0
 avg_data_specific_times:
 	python3 src/executions.py $(PERMUTATIONSIZE) $(POPULATIONSIZE) $(CROSSPROBA) $(MUTATIONPROBA) $(GENERATIONS) 5 1 3 $(CROSSNUM) 0 0 0 7 $(REPETITIONS) 0 0
-times_boxplot:
+boxplot_times_information:
 	python3 src/executions.py $(PERMUTATIONSIZE) $(POPULATIONSIZE) $(CROSSPROBA) $(MUTATIONPROBA) $(GENERATIONS) 5 1 3 $(CROSSNUM) 0 0 0 8 $(REPETITIONS) 0 0
 #Para hacer pruebas dejar corriendo esto 
+fitness_information:
+	python3 src/executions.py $(PERMUTATIONSIZE) $(POPULATIONSIZE) $(CROSSPROBA) $(MUTATIONPROBA) $(GENERATIONS) 5 1 3 $(CROSSNUM) 0 0 0 9 $(REPETITIONS) 0 0
+get_pdf_avg_graph : 
+	python3 src/executions.py $(PERMUTATIONSIZE) $(POPULATIONSIZE) $(CROSSPROBA) $(MUTATIONPROBA) $(GENERATIONS) 5 1 3 $(CROSSNUM) 0 0 0 10 $(REPETITIONS) 0 0
 
 # mean_evolution_executions:
 # 	@for PERMUTATIONSIZE in 300 400 500 600 700 800 900 1000 1500 2000 3000; do \
@@ -76,9 +80,29 @@ times_boxplot:
 # 		done; \
 # 	done
 
-mean_evolution_executions:
-	@for PERMUTATIONSIZE in 20 50 70 100 200 300 400 500 600 700 800 900 1000 1500; do \
-		for CROSSOVER in PMX IPMX PMXCastudil Ordered; do \
+all_times_information : 
+	@for PERMUTATIONSIZE in 200; do \
+		for CROSSOVER in Ordered; do \
+			make times_information PERMUTATIONSIZE=$$PERMUTATIONSIZE CROSSOVER=$$CROSSOVER REPETITIONS=30; \
+		done; \
+	done
+
+all_fitness_information:
+	@for PERMUTATIONSIZE in 1000; do \
+		for CROSSOVER in PMX IPMX; do \
+			make fitness_information PERMUTATIONSIZE=$$PERMUTATIONSIZE CROSSOVER=$$CROSSOVER REPETITIONS=30; \
+		done; \
+	done
+
+mean_evolution_executions_rest:
+	@for PERMUTATIONSIZE in 1000; do \
+		for CROSSOVER in PMXCastudil Ordered; do \
+			make mean_evolution PERMUTATIONSIZE=$$PERMUTATIONSIZE CROSSOVER=$$CROSSOVER REPETITIONS=30; \
+		done; \
+	done
+
+	@for PERMUTATIONSIZE in 1500; do \
+		for CROSSOVER in PMX IPMX Ordered PMXCastudil; do \
 			make mean_evolution PERMUTATIONSIZE=$$PERMUTATIONSIZE CROSSOVER=$$CROSSOVER REPETITIONS=30; \
 		done; \
 	done
