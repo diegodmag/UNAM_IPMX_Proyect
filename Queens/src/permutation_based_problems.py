@@ -124,46 +124,44 @@ class NQueens(PermutationBasedProblem):
     def output_plot(self):
         self.plot_queens()
         
-    #Generado con GPT-3.5 >>
     def plot_queens(self):
         n = len(self.chromosome)
         chessboard = np.zeros((n, n), dtype=int)
 
-        # Llenar el tablero con 1s en las posiciones de las reinas
+        # Place queens on the chessboard
         for row, col in enumerate(self.chromosome):
             chessboard[row][col] = 1
 
         fig, ax = plt.subplots(figsize=(8, 8))
 
-        # Dibujar el tablero de ajedrez
+        # Draw the chessboard and place queens
         for i in range(n):
             for j in range(n):
                 is_white = (i + j) % 2 == 0
                 color = 'white' if is_white else 'black'
                 ax.add_patch(plt.Rectangle((j, i), 1, 1, color=color))
-                queen_color = 'black' if is_white else 'white'  # Color opuesto al fondo
+                queen_color = 'black' if is_white else 'white'  # Opposite color for the queen
                 if chessboard[i][j] == 1:
-                    queen_symbol = u'\u265B'  # Símbolo Unicode para la reina de ajedrez (♛)
+                    queen_symbol = u'\u265B'  # Unicode symbol for the queen (♛)
                     ax.text(j + 0.5, i + 0.5, queen_symbol, fontsize=24, ha='center', va='center', color=queen_color)
 
-                    # Dibujar líneas diagonales desde la reina hacia las esquinas
-                    self.draw_recursive_diagonals(ax, j, i, 1, 1, n)
-                    self.draw_recursive_diagonals(ax, j, i, -1, -1, n)
-                    self.draw_recursive_diagonals(ax, j, i, 1, -1, n)
-                    self.draw_recursive_diagonals(ax, j, i, -1, 1, n)
+        # Check for diagonal conflicts and draw lines between conflicting queens
+        for i in range(n):
+            row_i = i
+            col_i = self.chromosome[i]
+            for j in range(i + 1, n):
+                row_j = j
+                col_j = self.chromosome[j]
+                if abs(row_i - row_j) == abs(col_i - col_j):
+                    # Queens are on the same diagonal; draw a red line between them
+                    ax.plot([col_i + 0.5, col_j + 0.5], [row_i + 0.5, row_j + 0.5], color='red', linewidth=2)
 
         ax.set_xlim(0, n)
         ax.set_ylim(0, n)
         ax.set_aspect('equal')
         ax.invert_yaxis()
         ax.axis('off')
-        
-        plt.savefig(self.get_path_for_output(str('Board'+str(len(self.chromosome)))))
-        #plt.savefig(get_path_for_output('Test'))
 
-    #Generado con GPT-3.5 >> 
-    def draw_recursive_diagonals(self,ax, x, y, direction_x, direction_y, n):
-        if x < 0 or x >= n or y < 0 or y >= n:
-            return
-        ax.plot([x, x + direction_x], [y, y + direction_y], color='red', linewidth=2)
-        self.draw_recursive_diagonals(ax, x + direction_x, y + direction_y, direction_x, direction_y, n)
+        plt.savefig(self.get_path_for_output(f'Board{n}'))
+        plt.close()
+        #plt.show()  # Uncomment if you want to display the plot

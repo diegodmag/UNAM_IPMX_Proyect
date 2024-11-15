@@ -72,6 +72,8 @@ fitness_information:
 	python3 src/executions.py $(PERMUTATIONSIZE) $(POPULATIONSIZE) $(CROSSPROBA) $(MUTATIONPROBA) $(GENERATIONS) 5 1 3 $(CROSSNUM) 0 0 0 9 $(REPETITIONS) 0 0
 get_pdf_avg_graph : 
 	python3 src/executions.py $(PERMUTATIONSIZE) $(POPULATIONSIZE) $(CROSSPROBA) $(MUTATIONPROBA) $(GENERATIONS) 5 1 3 $(CROSSNUM) 0 0 0 10 $(REPETITIONS) 0 0
+boxplot_fitness_comparation:
+	python3 src/executions.py $(PERMUTATIONSIZE) $(POPULATIONSIZE) $(CROSSPROBA) $(MUTATIONPROBA) $(GENERATIONS) 5 1 3 $(CROSSNUM) 0 0 0 11 $(REPETITIONS) 0 0
 
 # mean_evolution_executions:
 # 	@for PERMUTATIONSIZE in 300 400 500 600 700 800 900 1000 1500 2000 3000; do \

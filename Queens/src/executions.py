@@ -230,6 +230,11 @@ class Metrics:
 
 		#time_start = time.time()
 		generations,best_sons,avg_offspring,best_all,avg_fitness,total_execution_time, bes_individual_data = self.genetic_algo.execution()
+		
+		#VISUALIZACION
+		self.genetic_algo.get_the_best(self.genetic_algo.current_pop).output_plot()
+		
+		
 		# time_end = time.time()
 		# total_time = time_end-time_start
 		file = "output/gaindividualexecutions/"+str(file_name)
@@ -253,6 +258,7 @@ class Metrics:
 		writte_txt_data(file,params_line)
 		for line in total_data:
 			writte_txt_data(file,line)
+
 
 		
 #Este hay que moverlo a uno de puras metricas 
@@ -480,6 +486,8 @@ def get_ind_exe_graph(info,data,data_names,colors,file_path):
 	plt.text(x=.15, y=.95, s=info_1, fontsize=9, ha='left', va='center', transform=plt.gcf().transFigure)
 	plt.text(x=.35, y=.95, s=info_2, fontsize=9, ha='left', va='center', transform=plt.gcf().transFigure)
 	plt.text(x=.6, y=.95, s=info_3, fontsize=9, ha='left', va='center', transform=plt.gcf().transFigure)
+	file_path=file_path+str('.png')
+	print("DEBERIA HABER SALVADO EL ARCHIVO EN :"+str(file_path))
 	plt.savefig(file_path,bbox_inches='tight')
 
 def get_avg_exe_graph(info,times,data,data_names,colors,file_path,best_individuals_data):
@@ -770,26 +778,41 @@ def get_times_from_avg(repetitions,crossover):
 	return data[1] #Regresa los tiempos
 	##Mostrar los datos de data 
 
-def get_best_fitness_from_avg(repetitions):
-	'''
-		Funcion para obtener el arreglo especifico de mejores tiempos dado un operador de cruza 
-	'''
-	file_name_txt = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"PerSize:"+str(metrics.genetic_algo.permutation_size)+"Repetitions:"+str(repetitions)+"MeanEvolution.txt"	
+# def get_best_fitness_from_avg(repetitions):
+# 	'''
+# 		Funcion para obtener el arreglo especifico de mejores tiempos dado un operador de cruza 
+# 	'''
+# 	file_name_txt = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"PerSize:"+str(metrics.genetic_algo.permutation_size)+"Repetitions:"+str(repetitions)+"MeanEvolution.txt"	
 	
-	data = get_data_from_txt_mean_evolution(file_name_txt,"executionsforavg")
-	print(data[2])
-	return data[2] #Regresa los fitness 
-
-def get_best_fitness_from_avg(repetitions):
+# 	data = get_data_from_txt_mean_evolution(file_name_txt,"executionsforavg")
+# 	print(data[2])
+# 	return data[2] #Regresa los fitness 
+def get_best_fitness_from_crossover(repetitions, cross):
 	'''
 		Funcion para obtener el arreglo especifico de mejores tiempos dado un operador de cruza 
 	'''
-	file_name_txt = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"PerSize:"+str(metrics.genetic_algo.permutation_size)+"Repetitions:"+str(repetitions)+"MeanEvolution.txt"	
+	#file_name_txt = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"PerSize:"+str(metrics.genetic_algo.permutation_size)+"Repetitions:"+str(repetitions)+"MeanEvolution.txt"	
+	file_name_txt = str(cross)+"PerSize:"+str(metrics.genetic_algo.permutation_size)+"Repetitions:"+str(repetitions)+"MeanEvolution.txt"	
+	#print(file_name_txt)
 	
 	data = get_data_from_txt_mean_evolution(file_name_txt,"executionsforavg")
 	fitness = data[2] 
-	print("Promedio : "+str(np.mean(fitness)))
-	print("STD : "+str(statistics.stdev(fitness))) 
+	return fitness
+
+def get_best_fitness_from_avg(repetitions, cross):
+	'''
+		Funcion para obtener el arreglo especifico de mejores tiempos dado un operador de cruza 
+	'''
+	#file_name_txt = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"PerSize:"+str(metrics.genetic_algo.permutation_size)+"Repetitions:"+str(repetitions)+"MeanEvolution.txt"	
+	file_name_txt = str(cross)+"PerSize:"+str(metrics.genetic_algo.permutation_size)+"Repetitions:"+str(repetitions)+"MeanEvolution.txt"	
+	#print(file_name_txt)
+	
+	data = get_data_from_txt_mean_evolution(file_name_txt,"executionsforavg")
+	fitness = data[2] 
+	print(file_name_txt)
+	print(fitness)
+	# print("Promedio : "+str(np.mean(fitness)))
+	# print("STD : "+str(statistics.stdev(fitness))) 
 
 def get_time_information_from_avg(repetitions):
 	file_name_txt = str(metrics.genetic_algo.crossover_operator.__class__.__name__)+"PerSize:"+str(metrics.genetic_algo.permutation_size)+"Repetitions:"+str(repetitions)+"MeanEvolution.txt"	
@@ -818,14 +841,19 @@ def get_times_boxplot(crossovers, repetitions):
 	values = []
 
 	for time, crossover in zip(times,crossovers):
-		labels.extend([crossover]*len(time))
+		if(crossover=='Ordered'):
+			labels.extend(['OX']*len(time))
+			# labels.extend(['OX']*len(time))
+		elif(crossover=='PMX'):
+			labels.extend(['PMX2']*len(time))
+			# labels.extend(['OX']*len(time))
+		elif(crossover=='PMXCastudil'):#temp
+			labels.extend(['PMX']*len(time))
+		else:
+			labels.extend([crossover]*len(time))
+		# labels.extend([crossover]*len(time))
 		values.extend(time)
-		# if(crossover is None):
-		# 	print("Algo se rompio")	
-		# else:
-		# 	print("Deberia funcionar")
-		# 	labels.extend([crossover]*len(time))
-		# 	values.extend(time)
+
 
 	data = {
 		'Group':labels,
@@ -837,14 +865,67 @@ def get_times_boxplot(crossovers, repetitions):
 	plt.figure(figsize=(10,6))
 	sns.boxplot(x='Group', y='Value', data=df)
 	#times = get_times_from_avg(repetitions)
-	output_file = "output/avgboxplot/"+str(crossovers)+"PerSize:"+str(metrics.genetic_algo.permutation_size)+"Repetitions:"+str(repetitions)+"TimesBoxplot.pdf"	
+	output_file = "output/avgboxplot/"+str(crossovers)+"PerSize:"+str(metrics.genetic_algo.permutation_size)+"Repetitions:"+str(repetitions)+"TimesBoxplot.png"	
 	file_path = get_path_for_file(output_file)
 
 	# plt.boxplot(times)
-	plt.title(f"Tiempos con permutación de tamaño {metrics.genetic_algo.permutation_size}")
+	plt.title(f"Tiempos para permutación de tamaño {metrics.genetic_algo.permutation_size}")
 	plt.xlabel("Operador")
 	plt.ylabel("Tiempo")
-	plt.savefig(file_path,format='pdf',bbox_inches='tight')
+	#plt.savefig(file_path,format='pdf',bbox_inches='tight')
+	print(file_path)
+	plt.savefig(file_path,format='png',bbox_inches='tight')
+
+
+def get_fitness_boxplot(crossovers, repetitions, per_size): 
+
+	#compare_best_fitness(crossovers,metrics.genetic_algo.permutation_size,repetitions)
+
+	best_info  = []
+	#format='pdf'
+	for cross in crossovers: 
+		best_info.append(get_best_fitness_from_crossover(repetitions,cross))
+		#best_info.append(get_best_fitness_from_avg(repetitions, cross))
+		#get_best_fitness_from_avg(repetitions, cross)
+		#print(get_best_fitness_from_crossover(repetitions,cross))
+		#print(get_best_fitness_from_avg(repetitions, cross))
+
+	labels= []
+	values = []
+
+		# labels.extend(['OX']*len(time))
+	for fitness, crossover in zip(best_info,crossovers):
+		if(crossover=='Ordered'):
+			labels.extend(['OX']*len(fitness))
+		elif(crossover=='PMX'):
+			labels.extend(['PMX2']*len(fitness))
+		elif(crossover=='PMXCastudil'):#temp
+			labels.extend(['PMX']*len(fitness))	
+		else:
+			labels.extend([crossover]*len(fitness))
+		# labels.extend([crossover]*len(time))
+		values.extend(fitness)
+
+
+	data = {
+		'Group':labels,
+		'Value':values
+	}
+
+	df = pd.DataFrame(data) 
+
+	plt.figure(figsize=(10,6))
+	
+	sns.boxplot(x='Group', y='Value', data=df)
+	#times = get_times_from_avg(repetitions)
+	output_file = "output/avgboxplot/"+str(crossovers)+"PerSize:"+str(metrics.genetic_algo.permutation_size)+"Repetitions:"+str(repetitions)+"FtinessBoxplot.png"	
+	file_path = get_path_for_file(output_file)
+
+	# plt.boxplot(times)
+	plt.title(f"Valor de aptitud para permutación de tamaño {metrics.genetic_algo.permutation_size}")
+	plt.xlabel("Operador")
+	plt.ylabel("Fitness")
+	plt.savefig(file_path,format='png',bbox_inches='tight')
 
 
 # # >>> Lectura de datos especificos para tablas 
@@ -908,23 +989,41 @@ def gen_vs_graph_for_n(datas, file_path, data_names):
 def avg_best_fitness_vs_graph(datas, file_path, data_names, permutations, repetitions): 
 
 	output_path = "output/executionsforavggraphics/"+str(file_path)
-	output_path = get_path_for_file(output_path)+f"PerSize:{permutations}Repetitions:{repetitions}.pdf"
+	#output_path = get_path_for_file(output_path)+f"PerSize:{permutations}Repetitions:{repetitions}.pdf"
+	output_path = get_path_for_file(output_path)+f"PerSize:{permutations}Repetitions:{repetitions}.png"
 
 	plt.figure(figsize=(10, 8))
 	markers = ['o', 's', 'D', '^', 'v', '<', '>', '1', '2', '3', '4', '8', 'p', 'P', '*', 'h', 'H', '+', 'x', 'X', 'D', '|', '_'] 
 	colors = ['blue', 'orange', 'green', 'red', 'purple', 'brown', 'pink', 'gray', 'olive', 'cyan']
 	
 	#data_names=["x" for d in data_names]
+	new_names = [d for d in data_names]
+	for i in range(len(new_names)):
+		if new_names[i] == 'Ordered' :
+			new_names[i] = 'OX'
+		elif new_names[i] == 'PMXCastudil' :
+			new_names[i] = 'PMX'
+		elif new_names[i] == 'PMX' :
+			new_names[i] = 'PMX2'
+
+	# for name in new_names:
+	# 	if name == 'Ordered':
+	# 		name = 'OX'
+	# 	elif name == 'PMXCastudil':
+	# 		name = 'PMX'
+	# 	elif name == 'PMX':
+	# 		name = 'PMX2'
+	print(new_names)
 	for i, data in enumerate(datas):
 		#plt.plot(data[0], data[1], label=data_names[i], marker=markers[i % len(markers)], linestyle='--', color=colors[i % len(colors)])
-		plt.plot(data[0], data[1], label=data_names[i],linestyle='--', color=colors[i % len(colors)])
+		plt.plot(data[0], data[1], label=new_names[i],linestyle='--', color=colors[i % len(colors)])
 		
 	plt.xlabel('Generación')
 	plt.ylabel('Fitness')
 	plt.legend()
 	#plt.legend("Mejor fitness promedio entre distintos crossovers")
 	plt.title('Comparación de mejor individuo promedio entre operadores')
-	plt.savefig(output_path, format='pdf', dpi=300)
+	plt.savefig(output_path, format='png', dpi=300)
 
 
 
@@ -1103,6 +1202,8 @@ if __name__ == '__main__':
 		print("Obtiene grafica en pdf")
 		print(f"REPETITIONS : {repetitions}")
 		get_pdf_avg_graph(repetitions)
+	elif(operation==11):
+		get_fitness_boxplot(crossovers,repetitions,metrics.genetic_algo.permutation_size)
 	else:
 		print("Otra seleccion no valida")
 	# TOMA DE PARAMETROS POR DEFECTO

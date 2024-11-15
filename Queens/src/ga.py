@@ -353,6 +353,10 @@ class GeneticAlg:
 					best_individual = best_current_pop
 					best_time_best_individual =  total_execution_time 
 
+
+				# ANIMACION 
+				# self.get_the_best(self.current_pop).output_plot()
+				
 				best_son_data.append(best_son)
 				offspring_avg_fitness_data.append(offspring_avg_fitness)
 				best_current_pop_data.append(best_current_pop)
