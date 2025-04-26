@@ -2,6 +2,11 @@
 
 [Análisis de operadores de recombinación del algoritmo genético aplicado al problema de las n-reinas](https://tesiunam.dgb.unam.mx/F/HHAD8YK5H37YSC97KJQ3MJA27C1EI7164T47ID2EJSLGJ8AYHI-08491?func=full-set-set&set_number=068622&set_entry=000001&format=999)
 
+El objetivo del proyecto fue analizar cuatro operadores de cruce que utilizan representación basada en permutaciones dentro de un algoritmo genético genérico.
+El análisis se centró tanto en el tiempo de ejecución computacional como en la calidad de la solución (fitness) alcanzada por el algoritmo genético utilizando cada uno de los cuatro operadores.
+Para lograr esto, la metodología incluyó un análisis de la complejidad temporal de la implementación en Python, seguido de una comparación de los resultados promedio de cada operador a lo largo de treinta ejecuciones en diferentes tamaños de instancia.
+Un resultado importante fue la conclusión de que IPMX superó a PMX, así como a mi propuesta de implementación llamada PMX2, la cual mostró tiempos de ejecución competitivos.
+
 The objective of the project was to analyze four crossover operators that use permutation-based representation within a generic genetic algorithm. The analysis focused on both the computational execution time and the solution quality (fitness) achieved by the GA using each of the four operators. To achieve this, the methodology included a time complexity analysis of the Python implementation, followed by a comparison of the average results of each operator across thirty executions on different instance sizes. An important result was the conclusion that IPMX outperformed PMX, as well as my proposed implementation called PMX2, which showed competitive execution times.
 
 [IPMX](https://www.sciencedirect.com/science/article/pii/S0957417420302050?casa_token=CG6i4BQlFOQAAAAA:nLkUWj7xPbZy06ALiW8eOyXG5avLBMGfrYqnqrsj-ybv8ktjiCFkjiAe80HYU_uX1H0P4HKsdtU6)
