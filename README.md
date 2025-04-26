@@ -1,4 +1,4 @@
-# Thesis Proyect Implementation for Bachelor Degree: 
+# Proyecto de tesis para la obtención del grado de Licenciatura en Ciencias de la computación - Thesis Proyect Implementation for Computer Scientist Bachelor Degree: 
 
 [Análisis de operadores de recombinación del algoritmo genético aplicado al problema de las n-reinas](https://tesiunam.dgb.unam.mx/F/HHAD8YK5H37YSC97KJQ3MJA27C1EI7164T47ID2EJSLGJ8AYHI-08491?func=full-set-set&set_number=068622&set_entry=000001&format=999)
 
