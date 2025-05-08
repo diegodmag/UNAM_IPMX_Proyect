@@ -1,6 +1,6 @@
 # Proyecto de tesis para la obtención del grado de Licenciatura en Ciencias de la computación - Thesis Proyect Implementation for Computer Scientist Bachelor Degree: 
 
-[Análisis de operadores de recombinación del algoritmo genético aplicado al problema de las n-reinas]([https://tesiunam.dgb.unam.mx/F/HHAD8YK5H37YSC97KJQ3MJA27C1EI7164T47ID2EJSLGJ8AYHI-08491?func=full-set-set&set_number=068622&set_entry=000001&format=999](https://tesiunam.dgb.unam.mx/F/CNN2ECBARKB76I99LYMP7P7FM7LU39JIGD1CFBE79A9XFFTLFL-23587?func=full-set-set&set_number=082300&set_entry=000001&format=999))
+[Análisis de operadores de recombinación del algoritmo genético aplicado al problema de las n-reinas](https://tesiunam.dgb.unam.mx/F/CNN2ECBARKB76I99LYMP7P7FM7LU39JIGD1CFBE79A9XFFTLFL-23587?func=full-set-set&set_number=082300&set_entry=000001&format=999)
 
 El objetivo del proyecto fue analizar cuatro operadores de cruce que utilizan representación basada en permutaciones dentro de un algoritmo genético genérico.
 El análisis se centró tanto en el tiempo de ejecución computacional como en la calidad de la solución (fitness) alcanzada por el algoritmo genético utilizando cada uno de los cuatro operadores.
